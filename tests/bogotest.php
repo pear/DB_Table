@@ -120,8 +120,10 @@ $values = $form->exportValues();
 $example->recast($values['mydata']);
 Var_Dump::display($values['mydata']);
 
-$result = $example->validInsert($values['mydata']);
-Var_Dump::display($result);
+if ($_POST) {
+	$result = $example->validInsert($values['mydata']);
+	Var_Dump::display($result);
+}
 
 require_once 'DB/Table/Valid.php';
 

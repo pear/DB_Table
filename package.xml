@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.12 2004-07-12 15:22:16 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.13 2004-10-27 21:45:29 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -14,30 +14,12 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>0.21.2</version>
-        <date>2004-07-12</date>
+        <version>0.22</version>
+        <date>2004-10-27</date>
         <license>LGPL</license>
-        <state>alpha</state>
+        <state>beta</state>
         <notes>
-            * 0.21.2:
-                * fixed bug 1855 (incorrect checking of QuickForm type), thanks Hero Wanders
-                * reformatted change notes, keeping the whole 0.21.x series in place because of quick release cycle
-            * 0.21.1:
-                * Removed "CVS" file from package.xml (stupid oversight from a copy-and-paste)
-            * 0.21:
-                * Skipped 0.19 and 0.20 version numbers, internal releases only
-                * Fixed bug 1671 (missing dependency): package.xml now includes deps on Date and HTML_QuickForm (thanks, ja at morrdusk dot net)
-                * Fixed bug 1794 (checkbox creation): now sets element name properly (thanks, wiesemann at php dot net, herojoker [AT] nexgo [DOT] de, and alex [AT] hoebart [DOT] info)
-                * Fixed bug 1797 (missing QF rules): now supports rules for uploadedfile, maxfilesize, mimetype, and filename (thanks, wiesemann at php dot net)
-                * buildSQL() method no longer adds the key to JOIN snippets (thanks Mark Wiesemann)
-                * added autoRecast() method to turn on/off automatic recasting of data at insert() and update() time (suggested by Mark Wiesemann)
-                * Manager.php create() method checks for indexes on CLOB columns, which are disallowed
-                * can now specify additional QuickForm client-side rule validation, on a per-column basis, with the column 'qf_client' element
-                * getForm() and addRules() method have additional $clientValidate parameter to add or remove client-side rule validation on all elements regardless of column definition (suggested by Mark Wiesemann)
-                * QuickForm 'checkbox' elements now always map to 'advcheckbox' elements
-                * boolean columns now default to 'checkbox' with values of 0 and 1 (vice 'select')
-                * added bogus test script and reserved-word documents
-                * recast() now properly formats timestamp strings (thanks Mark Wiesemann)
+        	* Applied patch from Ian Eure to allow creation of a blank form
         </notes>
         <filelist>
         
