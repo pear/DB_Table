@@ -1,5 +1,21 @@
 <?php
+/**
+* 
+* DB_Table_QuickForm creates HTML_QuickForm objects from DB_Table properties.
+* 
+* @category DB
+* 
+* @package DB_Table
+*
+* @author Paul M. Jones <pmjones@php.net>
+* 
+* @version $Id$
+*
+*/
 
+/**
+* Needed to build forms.
+*/
 require_once 'HTML/QuickForm.php';
 
 /**
@@ -22,11 +38,11 @@ if (! isset($GLOBALS['_DB_TABLE']['qf_rules'])) {
 * DB_Table_QuickForm provides HTML form creation facilities based on
 * DB_Table column definitions transformed into HTML_QuickForm elements.
 * 
-* $Id$
+* @category DB
 * 
-* @author Paul M. Jones <pmjones@ciaweb.net>
-*
 * @package DB_Table
+*
+* @author Paul M. Jones <pmjones@ciaweb.net>
 *
 */
 

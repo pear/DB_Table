@@ -1,6 +1,26 @@
 <?php
 
 /**
+* 
+* DB_Table is a database API and data type SQL abstraction class.
+* 
+* DB_Table provides database API abstraction, data type abstraction,
+* automated SELECT, INSERT, and UPDATE queries, automated table
+* creation, automated validation of inserted/updated column values,
+* and automated creation of QuickForm elemnts based on the column
+* definitions.
+* 
+* @category DB
+* 
+* @package DB_Table
+*
+* @author Paul M. Jones <pmjones@php.net>
+* 
+* @version $Id$
+*
+*/
+
+/**
 * Error code at instantiation time when the first parameter to the
 * constructor is not a PEAR DB object.
 */
@@ -299,14 +319,14 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 * and automated creation of QuickForm elemnts based on the column
 * definitions.
 * 
-* $Id$
-*
-* @author Paul M. Jones <pmjones@ciaweb.net>
+* @category DB
+* 
+* @package DB_Table
+* 
+* @author Paul M. Jones <pmjones@php.net>
 * 
 * @version 0.22 beta
 *
-* @package DB_Table
-* 
 */
 
 class DB_Table {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.21 2005-02-22 16:44:11 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.22 2005-02-23 17:10:10 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -9,17 +9,18 @@
         <maintainer>
             <user>pmjones</user>
             <name>Paul M. Jones</name>
-            <email>pmjones@ciaweb.net</email>
+            <email>pmjones@php.net</email>
             <role>lead</role>
         </maintainer>
     </maintainers>
     <release>
-        <version>??</version>
-        <date>??</date>
+        <version>2005-02-23</version>
+        <date>1.0</date>
         <license>LGPL</license>
-        <state>beta</state>
+        <state>RC</state>
         <notes>
-            * Added dependency on DB (thanks Lukas)
+            * First release candidate
+            * Fixed bug 3360 (add dependency on DB)
             * Added request 3407 (add "name" for static QF elements)
             * Added request 3018 (allow custom formats for date, time, 
               timestamp in QuickForms). WARNING:  The automatic casting
@@ -32,8 +33,11 @@
         </notes>
         <filelist>
         
-            <file role="php" name="DB/Table.php" />
-            <file role="php" name="DB/Table/Manager.php" />
+            <file role="php" name="DB/Table.php">
+				<replace from="@package_version@" to="version" type="package-info" />
+			</file>
+			
+			<file role="php" name="DB/Table/Manager.php" />
             <file role="php" name="DB/Table/QuickForm.php" />
             <file role="php" name="DB/Table/Valid.php" />
             

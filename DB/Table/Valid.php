@@ -1,6 +1,20 @@
 <?php
 
 /**
+* 
+* DB_Table_Valid validates values against DB_Table column types.
+* 
+* @category DB
+* 
+* @package DB_Table
+*
+* @author Paul M. Jones <pmjones@php.net>
+* 
+* @version $Id$
+*
+*/
+
+/**
 * DB_Table class for constants and other globals.
 */
 require_once 'DB/Table.php';
@@ -22,12 +36,12 @@ if (! isset($GLOBALS['_DB_TABLE']['valid'])) {
 * 
 * DB_Table_Valid validates values against DB_Table column types.
 * 
-* $Id$
+* @category DB
 * 
-* @author Paul M. Jones <pmjones@ciaweb.net>
-*
 * @package DB_Table
 * 
+* @author Paul M. Jones <pmjones@php.net>
+*
 */
 
 class DB_Table_Valid {

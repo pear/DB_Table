@@ -1,5 +1,22 @@
 <?php
 
+/**
+* 
+* Creates tables from DB_Table definitions.
+* 
+* DB_Table_Manager provides database automated table creation
+* facilities.
+* 
+* @category DB
+* 
+* @package DB_Table
+*
+* @author Paul M. Jones <pmjones@php.net>
+* 
+* @version $Id$
+*
+*/
+
 require_once 'DB/Table.php';
 
 
@@ -8,14 +25,14 @@ require_once 'DB/Table.php';
 * Creates tables from DB_Table definitions.
 * 
 * DB_Table_Manager provides database automated table creation
-* facilities (and eventually table alteration as well).
+* facilities.
 * 
-* $Id$
-* 
-* @author Paul M. Jones <pmjones@ciaweb.net>
+* @category DB
 * 
 * @package DB_Table
-* 
+*
+* @author Paul M. Jones <pmjones@php.net>
+*
 */
 
 class DB_Table_Manager {
