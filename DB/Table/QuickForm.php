@@ -435,7 +435,7 @@ class DB_Table_QuickForm {
         case 'static':
             $element =& HTML_QuickForm::createElement(
                 $col['qf_type'],
-                null,
+                $elemname,
                 $col['qf_label'],
                 (isset($setval) ? $setval : '')
             );
