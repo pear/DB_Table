@@ -479,6 +479,13 @@ class DB_Table_QuickForm {
             	}
             }
             
+            // **always** override these rules to make them 
+            // server-side only.  suggested by Mark Wiesemann.
+            $tmp = array('filename', 'maxfilesize', 'mimetype', 'uploadedfile');
+            if (in_array($type, $tmp)) {
+            	$validate = 'server';
+            }
+            
             // loop through the rules and add them
             foreach ($col['qf_rules'] as $type => $opts) {
                 
