@@ -10,12 +10,14 @@ error_reporting(E_ALL);
 class example extends DB_Table {
 	
 	var $col = array(
+	/*
 	//   012345678901234567890123456789
 		'a_name_longer_than_thirty_characters' => array(
 			'type' => 'varchar',
 			'size' => '64'
 		),
-		
+	*/
+	
 		'xvarchar' => array(
 			'type'    => 'varchar',
 			'size'    => 128,
@@ -126,8 +128,10 @@ if ($opts['example']['fetch']) {
 	Var_Dump::display($result);
 }
 
-$form =& $example->getForm(null, 'mydata', null, false);
+$form =& $example->getForm(null, 'mydata', null);
 $form->addElement('submit', 'op', 'Submit');
+
+//Var_dump::display($form);
 
 echo "<html><head><title>bogotest</title></head><body>\n";
 
@@ -146,7 +150,7 @@ $form->display();
 echo "\n<hr />\n";
 $example->fetchmode = DB_FETCHMODE_ASSOC;
 $list = $example->select('list');
-Var_Dump($list);
+Var_Dump::display($list);
 
 echo "\n</body></html>";
 
