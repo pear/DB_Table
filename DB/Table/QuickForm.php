@@ -280,7 +280,7 @@ class DB_Table_QuickForm {
 				
 				$element[] =& HTML_QuickForm::createElement(
 					$col['qf_type'],
-					null,
+					null, // elename not added because this is a group
 					null,
 					$btnlabel . '<br />',
 					$btnvalue,
