@@ -181,7 +181,7 @@ class DB_Table_QuickForm {
 			
 			$element =& HTML_QuickForm::createElement(
 				$col['qf_type'],
-				null,
+				$elemname,
 				$col['qf_label'],
 				null,
 				$col['qf_attrs'],
