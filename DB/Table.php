@@ -889,7 +889,8 @@ class DB_Table {
             $count_sql = $this->sql[$sqlkey];
             
             // is a count-field set for the query?
-            if (empty(trim($count_sql['count']))) {
+            if (! isset($count_sql['count']) ||
+            	trim($count_sql['count']) == '') {
                 $count_sql['count'] = '*';
             }
             
