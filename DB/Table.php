@@ -128,7 +128,19 @@ define('DB_TABLE_ERR_DECLARE_STRLEN',   -21);
 * Error code at create() time when the index name ends up being more
 * than 30 chars long (an Oracle restriction).
 */
-define('DB_TABLE_ERR_IDX_STRLEN',   -21);
+define('DB_TABLE_ERR_IDX_STRLEN',       -22);
+
+/**
+* Error code at create() time when the table name is more than 30 chars
+* long (an Oracle restriction).
+*/
+define('DB_TABLE_ERR_TABLE_STRLEN',     -23);
+
+/**
+* Error code at nextID() time when the sequence name is more than 30
+* chars long (an Oracle restriction).
+*/
+define('DB_TABLE_ERR_SEQ_STRLEN',       -24);
 
 
 /**
@@ -270,7 +282,9 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
         DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
         DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index',
         DB_TABLE_ERR_DECLARE_STRLEN      => 'Column name too long, 30 char max',
-        DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max'
+        DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max',
+        DB_TABLE_ERR_TABLE_STRLEN        => 'Table name too long, 30 char max',
+        DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max'
     );
 }
 
@@ -1261,6 +1275,13 @@ class DB_Table {
             $seq_name = "{$this->table}_{$seq_name}";
         }
         
+        if (strlen($seq_name) > 30) {
+			return DB_Table::throwError(
+				DB_TABLE_ERR_SEQ_STRLEN,
+				" ('$seq_name')"
+			);
+        	
+        }
         return $this->db->nextId($seq_name);
     }
     

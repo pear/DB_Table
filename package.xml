@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.14 2004-11-08 03:29:50 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.15 2004-11-19 18:03:25 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -19,18 +19,64 @@
         <license>LGPL</license>
         <state>beta</state>
         <notes>
-            * BC BREAK:  Oracle will not allow a sequence to start with 
-              "_". Default for DB_Table was to name sequences starting 
-              with "_", but no longer.  Users of DB_Table should rename
-              their sequences and sequence tables to remove the initial 
-              underscore; if you do not, the upgrade to DB_Table 0.23.0 
-              will create a new sequence restarting at 1 with the new 
-              non-underscored name.  Sorry, folks.  This bug report was
-              from Alex Hobart, who has been very patient in waiting 
-              for me to pay attention to it.
-            
+            * MULTIPLE BC BREAKS related to naming conventions, mostly
+              because of Oracle.  Read and heed the following two notes
+              before you upgrade.
+              
+			* BC BREAK on name lengths:
+			
+				Table, column, index, and sequence names are now limited
+				to 30 characters at table-creation time via the create()
+				method in Manager.php.  This means that column names and
+				must be no longer than 30 characters.
+				
+				More confusingly, this means that generated index names
+				can be no longer than 30 characters total. DB_Table
+				generates index names using the table name, an
+				underscore, the index name, and a '_idx' suffix. This
+				combination of rules is to soothe PostgreSQL (which does
+				not allow identical index names even if they are on
+				different tables) and Oracle (which has a 30-char limit
+				on index names).  This means that the table name
+				combined with the index name cannot be longer than 25
+				characters (becuase of the separating underscore and the
+				'_idx' suffix).  Yes, this sucks.  Well, Oracle sucks. 
+				:-(
+				
+				Error codes and messages have been added to notify of
+				the new rules. effect.  This should only affect users
+				who are starting new tables with DB_Table and should not
+				affect existing tables and indexes.
+                
+			* BC BREAK on sequences:
+			
+				If no sequence name is defined in a call to nextID(),
+				DB_Table used to default to '_table_id' as the name of
+				the sequence, and DB would take that to create a
+				'_table_id_seq' sequence name. However, Oracle will not
+				allow a sequence name to start with '_'.
+				
+				For Oracle compliance, and in the interest of
+				consistency between DB and DB_Table, as well as keeping
+				names under 30 chars, DB_Table now uses only the table
+				name as the default, which means that DB translates this
+				into 'tablename_seq'.
+				
+				Users of DB_Table should rename their sequences to
+				remove the initial underscore and change the trailing
+				'_id_seq' to just '_seq' for any automatically-generated
+				sequence names.  If you do not, the upgrade to DB_Table
+				0.23.0 will create a new sequence restarting at 1 with
+				the new non-underscored different-suffix name on the
+				first call to nextID().
+              
             * Added 'autocomplete' as a supported element, per Alex
               Hobart.
+            
+            * Added new keys to the $sql property to support per-query
+              'fetchmode' and 'fetchmode_object_class' settings.  Patch
+              provided by Ian Eure.
+              
             
         </notes>
         <filelist>

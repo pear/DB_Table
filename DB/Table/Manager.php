@@ -51,6 +51,14 @@ class DB_Table_Manager {
         // indexes to be created
         $index = array();
         
+        // is the table name too long?
+        if (strlen($table) > 30) {
+			return DB_Table::throwError(
+				DB_TABLE_ERR_TABLE_STRLEN,
+				" ('$table')"
+			);
+        }
+        
         
         // -------------------------------------------------------------
         // 
@@ -169,10 +177,11 @@ class DB_Table_Manager {
             // string of column names
             $colstring = implode(', ', $cols);
             
-            // we prefix all index names with the table name. this
+            // we prefix all index names with the table name,
+            // and suffix all index names with '_idx'.  this
             // is to soothe PostgreSQL, which demands that index
-            // names not collide, even when the indexes are on
-            // different tables.  always suffix with '_idx'.
+            // names not collide, even when they indexes are on
+            // different tables.
             $newIdxName = $table . '_' . $idxname . '_idx';
             
             // now check the length; must be under 30 chars to

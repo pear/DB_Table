@@ -10,6 +10,12 @@ error_reporting(E_ALL);
 class example extends DB_Table {
 	
 	var $col = array(
+	//   012345678901234567890123456789
+		'a_name_longer_than_thirty_characters' => array(
+			'type' => 'varchar',
+			'size' => '64'
+		),
+		
 		'xvarchar' => array(
 			'type'    => 'varchar',
 			'size'    => 128,
