@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.1 2004-04-25 16:12:09 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.2 2004-05-02 13:10:23 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -14,24 +14,15 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>0.17</version>
-        <date>2004-04-21</date>
+        <version>0.18</version>
+        <date>2004-04-23</date>
         <license>LGPL</license>
         <state>alpha</state>
         <notes>
-        	* BREAKS BACKWARD COMPATIBILITY: You will need to edit and update your existing classes extended from DB_Table
-        	* BC break: no longer uses a factory method; instantiate using "$obj =&amp; new DB_Table();" and then check the error property ("if ($obj->error)...")
-        	* BC break: all constants other than error codes are now string literals (e.g., DB_TABLE_COL_TYPE is now just 'type')
-        	* BC break: method setup() no longer exists; you now define $this->col, $this->idx, and $this->sql as class properties (or in your extended constructor)
-        	* BC break: DATETIME datatype is now named TIMESTAMP
-        	* These should be the last major breaks in backwards compatibility; sorry for the trouble :-(
-        	* Added 'char' native datatype and an emulated 'boolean' datatype
-        	* Converted 'date', 'time', 'timestamp' emulated datatypes now created as fixed-length (not variable-length) character fields
-        	* Added automatic check for reserved keywords under all supported databases at create() time (see the end of Manager.php)
-        	* Improved auto-validation of 'decimal' data types
-        	* Improved HTML_QuickForm element mapping and automation
-        	* Improved fetchmode switching in select() and selectResult()
-        	* Improved inline comments
+        	* Index names are now prefixes with the table name and underscore, and are suffixed with '_index'; this is to soothe PostgreSQL, which does not like index names to be the same, even if they are on different tables.
+        	* Default rule messages for 'required', 'maxlength', and 'numeric' are now globals and can be internationalized just like the error messages (thanks, Moritz Heidkamp)
+        	* DB_Table_QuickForm now has better default support for unrecognized rules (thanks Moritz Heidkamp)
+        	* Fixed 'static' element in DB_Table_QuickForm, now correctly displays label and value
         </notes>
         <filelist>
             <file role="php" name="DB/Table.php" />
