@@ -63,8 +63,7 @@ class example extends DB_Table {
 			'require' => false
 		),
 		'xtimestamp' => array(
-			'type'    => 'timestamp',
-			'require' => false
+			'type'    => 'timestamp'
 		)
 	);
 	
