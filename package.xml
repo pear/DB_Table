@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.6 2004-07-10 14:59:07 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.7 2004-07-10 15:10:59 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -14,11 +14,12 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>0.19</version>
+        <version>0.20</version>
         <date>2004-07-10</date>
         <license>LGPL</license>
         <state>alpha</state>
         <notes>
+        	* Skipped 0.19 version number, realized it was borked before I released it but after I tagged it in CVS
             * Fixed bug 1671 (missing dependency): package.xml now includes deps on Date and HTML_QuickForm (thanks, ja at morrdusk dot net)
             * Fixed bug 1794 (checkbox creation): now sets element name properly (thanks, wiesemann at php dot net, erojoker [AT] nexgo [DOT] de, and alex [AT] hoebart [DOT] info)
             * Fixed bug 1797 (missing QF rules): now supports rules for uploadedfile, maxfilesize, mimetype, and filename (thanks, wiesemann at php dot net)
