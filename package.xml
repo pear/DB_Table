@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.25 2005-03-07 23:15:53 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.26 2005-03-07 23:17:36 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
     <description>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</description>
+    <license>LGPL</license>
     <maintainers>
         <maintainer>
             <user>pmjones</user>
@@ -16,6 +17,7 @@
     <release>
         <version>1.0.0</version>
         <date>2005-03-07</date>
+        <state>stable</state>
         <notes>
         	* First stable release.
         </notes>
