@@ -136,96 +136,96 @@ require_once 'Date.php';
 * initial array key tells us what databases are supported.
 */
 $GLOBALS['_DB_TABLE']['type'] = array(
-	'fbsql' => array(
-		'boolean'   => 'DECIMAL(1,0)',
-		'char'      => 'CHAR',
-		'varchar'   => 'VARCHAR',
-		'smallint'  => 'SMALLINT',
-		'integer'   => 'INTEGER',
-		'bigint'    => 'LONGINT',
-		'decimal'   => 'DECIMAL',
-		'single'    => 'REAL',
-		'double'    => 'DOUBLE PRECISION',
-		'clob'      => 'CLOB',
-		'date'      => 'CHAR(10)',
-		'time'      => 'CHAR(8)',
-		'timestamp' => 'CHAR(19)'
-	),
-	'mssql' => array(
-		'boolean'   => 'DECIMAL(1,0)',
-		'char'      => 'CHAR',
-		'varchar'   => 'VARCHAR',
-		'smallint'  => 'SMALLINT',
-		'integer'   => 'INTEGER',
-		'bigint'    => 'BIGINT',
-		'decimal'   => 'DECIMAL',
-		'single'    => 'REAL',
-		'double'    => 'FLOAT',
-		'clob'      => 'TEXT',
-		'date'      => 'CHAR(10)',
-		'time'      => 'CHAR(8)',
-		'timestamp' => 'CHAR(19)'
-	),
-	'mysql' => array(
-		'boolean'   => 'DECIMAL(1,0)',
-		'char'      => 'CHAR',
-		'varchar'   => 'VARCHAR',
-		'smallint'  => 'SMALLINT',
-		'integer'   => 'INTEGER',
-		'bigint'    => 'BIGINT',
-		'decimal'   => 'DECIMAL',
-		'single'    => 'FLOAT',
-		'double'    => 'DOUBLE',
-		'clob'      => 'LONGTEXT',
-		'date'      => 'CHAR(10)',
-		'time'      => 'CHAR(8)',
-		'timestamp' => 'CHAR(19)'
-	),
-	'oci8' => array(
-		'boolean'   => 'NUMBER(1)',
-		'char'      => 'CHAR',
-		'varchar'   => 'VARCHAR2',
-		'smallint'  => 'NUMBER(6)',
-		'integer'   => 'NUMBER(11)',
-		'bigint'    => 'NUMBER(19)',
-		'decimal'   => 'NUMBER',
-		'single'    => 'REAL',
-		'double'    => 'DOUBLE PRECISION',
-		'clob'      => 'CLOB',
-		'date'      => 'CHAR(10)',
-		'time'      => 'CHAR(8)',
-		'timestamp' => 'CHAR(19)'
-	),
-	'pgsql' => array(
-		'boolean'   => 'DECIMAL(1,0)',
-		'char'      => 'CHAR',
-		'varchar'   => 'VARCHAR',
-		'smallint'  => 'SMALLINT',
-		'integer'   => 'INTEGER',
-		'bigint'    => 'BIGINT',
-		'decimal'   => 'DECIMAL',
-		'single'    => 'REAL',
-		'double'    => 'DOUBLE PRECISION',
-		'clob'      => 'TEXT',
-		'date'      => 'CHAR(10)',
-		'time'      => 'CHAR(8)',
-		'timestamp' => 'CHAR(19)'
-	),
-	'sqlite' => array(
-		'boolean'   => 'BOOLEAN',
-		'char'      => 'CHAR',
-		'varchar'   => 'VARCHAR',
-		'smallint'  => 'SMALLINT',
-		'integer'   => 'INTEGER',
-		'bigint'    => 'BIGINT',
-		'decimal'   => 'NUMERIC',
-		'single'    => 'FLOAT',
-		'double'    => 'DOUBLE',
-		'clob'      => 'CLOB',
-		'date'      => 'DATE',
-		'time'      => 'TIME',
-		'timestamp' => 'TIMESTAMP'
-	)
+    'fbsql' => array(
+        'boolean'   => 'DECIMAL(1,0)',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR',
+        'smallint'  => 'SMALLINT',
+        'integer'   => 'INTEGER',
+        'bigint'    => 'LONGINT',
+        'decimal'   => 'DECIMAL',
+        'single'    => 'REAL',
+        'double'    => 'DOUBLE PRECISION',
+        'clob'      => 'CLOB',
+        'date'      => 'CHAR(10)',
+        'time'      => 'CHAR(8)',
+        'timestamp' => 'CHAR(19)'
+    ),
+    'mssql' => array(
+        'boolean'   => 'DECIMAL(1,0)',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR',
+        'smallint'  => 'SMALLINT',
+        'integer'   => 'INTEGER',
+        'bigint'    => 'BIGINT',
+        'decimal'   => 'DECIMAL',
+        'single'    => 'REAL',
+        'double'    => 'FLOAT',
+        'clob'      => 'TEXT',
+        'date'      => 'CHAR(10)',
+        'time'      => 'CHAR(8)',
+        'timestamp' => 'CHAR(19)'
+    ),
+    'mysql' => array(
+        'boolean'   => 'DECIMAL(1,0)',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR',
+        'smallint'  => 'SMALLINT',
+        'integer'   => 'INTEGER',
+        'bigint'    => 'BIGINT',
+        'decimal'   => 'DECIMAL',
+        'single'    => 'FLOAT',
+        'double'    => 'DOUBLE',
+        'clob'      => 'LONGTEXT',
+        'date'      => 'CHAR(10)',
+        'time'      => 'CHAR(8)',
+        'timestamp' => 'CHAR(19)'
+    ),
+    'oci8' => array(
+        'boolean'   => 'NUMBER(1)',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR2',
+        'smallint'  => 'NUMBER(6)',
+        'integer'   => 'NUMBER(11)',
+        'bigint'    => 'NUMBER(19)',
+        'decimal'   => 'NUMBER',
+        'single'    => 'REAL',
+        'double'    => 'DOUBLE PRECISION',
+        'clob'      => 'CLOB',
+        'date'      => 'CHAR(10)',
+        'time'      => 'CHAR(8)',
+        'timestamp' => 'CHAR(19)'
+    ),
+    'pgsql' => array(
+        'boolean'   => 'DECIMAL(1,0)',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR',
+        'smallint'  => 'SMALLINT',
+        'integer'   => 'INTEGER',
+        'bigint'    => 'BIGINT',
+        'decimal'   => 'DECIMAL',
+        'single'    => 'REAL',
+        'double'    => 'DOUBLE PRECISION',
+        'clob'      => 'TEXT',
+        'date'      => 'CHAR(10)',
+        'time'      => 'CHAR(8)',
+        'timestamp' => 'CHAR(19)'
+    ),
+    'sqlite' => array(
+        'boolean'   => 'BOOLEAN',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR',
+        'smallint'  => 'SMALLINT',
+        'integer'   => 'INTEGER',
+        'bigint'    => 'BIGINT',
+        'decimal'   => 'NUMERIC',
+        'single'    => 'FLOAT',
+        'double'    => 'DOUBLE',
+        'clob'      => 'CLOB',
+        'date'      => 'DATE',
+        'time'      => 'TIME',
+        'timestamp' => 'TIMESTAMP'
+    )
 );
 
 
@@ -235,29 +235,29 @@ $GLOBALS['_DB_TABLE']['type'] = array(
 * language; just set them before or after including DB_Table.
 */
 if (! isset($GLOBALS['_DB_TABLE']['error'])) {
-	$GLOBALS['_DB_TABLE']['error'] = array(
-		DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB object',
-		DB_TABLE_ERR_PHPTYPE             => 'DB phptype not supported',
-		DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
-		DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
-		DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
-		DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
-		DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
-		DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
-		DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
-		DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
-		DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
-		DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
-		DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
-		DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
-		DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
-		DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-		DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
-		DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
-		DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
-		DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-		DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index'
-	);
+    $GLOBALS['_DB_TABLE']['error'] = array(
+        DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB object',
+        DB_TABLE_ERR_PHPTYPE             => 'DB phptype not supported',
+        DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
+        DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
+        DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
+        DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
+        DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
+        DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
+        DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
+        DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
+        DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
+        DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
+        DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
+        DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
+        DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
+        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+        DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
+        DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
+        DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
+        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+        DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index'
+    );
 }
 
 
@@ -392,8 +392,8 @@ class DB_Table {
     
     /**
     * 
-	* When fetchmode is DB_FETCHMODE_OBJECT, use this class for each
-	* returned row.  If null, uses whatever is set in the $db
+    * When fetchmode is DB_FETCHMODE_OBJECT, use this class for each
+    * returned row.  If null, uses whatever is set in the $db
     * PEAR DB object.
     * 
     * @access public
@@ -406,21 +406,21 @@ class DB_Table {
     
     
     /**
-	* 
-	* If there is an error on instantiation, this captures that error.
-	*
-	* This property is used only for errors encountered in the constructor
-	* at instantiation time.  To check if there was an instantiation error...
-	*
-	* <code>
-	* $obj =& new DB_Table();
-	* if ($obj->error) {
-	*     // ... error handling code here ...
-	* }
-	* </code>
-	* 
-	* @var object PEAR_Error
-	* 
+    * 
+    * If there is an error on instantiation, this captures that error.
+    *
+    * This property is used only for errors encountered in the constructor
+    * at instantiation time.  To check if there was an instantiation error...
+    *
+    * <code>
+    * $obj =& new DB_Table();
+    * if ($obj->error) {
+    *     // ... error handling code here ...
+    * }
+    * </code>
+    * 
+    * @var object PEAR_Error
+    * 
     */
     
     var $error = null;
@@ -461,7 +461,7 @@ class DB_Table {
     
     function &throwError($code, $extra = null)
     {
-    	// get the error message text based on the error code
+        // get the error message text based on the error code
         $text = $GLOBALS['_DB_TABLE']['error'][$code];
         
         // add any additional error text
@@ -483,17 +483,17 @@ class DB_Table {
     * 
     * @access public
     * 
-	* @param object &$db A PEAR DB object.
-	* 
-	* @param string $table The table name to connect to in the database.
-	* 
-	* @param mixed $create The automatic table creation mode to pursue:
-	* boolean false to not attempt creation, 'safe' to
-	* create the table only if it does not exist, or
-	* 'drop' to drop any existing table with the same name
-	* and re-create it.
-	* 
-	* @return object DB_Table
+    * @param object &$db A PEAR DB object.
+    * 
+    * @param string $table The table name to connect to in the database.
+    * 
+    * @param mixed $create The automatic table creation mode to pursue:
+    * boolean false to not attempt creation, 'safe' to
+    * create the table only if it does not exist, or
+    * 'drop' to drop any existing table with the same name
+    * and re-create it.
+    * 
+    * @return object DB_Table
     * 
     */
     
@@ -572,7 +572,7 @@ class DB_Table {
     
     function getColumns($col = null)
     {
-    	// by default, return all column definitions
+        // by default, return all column definitions
         if (is_null($col)) {
             return $this->col;
         }
@@ -596,10 +596,10 @@ class DB_Table {
             }
             
             if (count($set) == 0) {
-            	return false;
+                return false;
             } else {
-	            return $set;
-	        }
+                return $set;
+            }
         }
         
         // param was not null, string, or array
@@ -622,7 +622,7 @@ class DB_Table {
     
     function getIndexes($idx = null)
     {
-    	// by default, return all index definitions
+        // by default, return all index definitions
         if (is_null($idx)) {
             return $this->idx;
         }
@@ -646,10 +646,10 @@ class DB_Table {
             }
             
             if (count($set) == 0) {
-            	return false;
+                return false;
             } else {
-	            return $set;
-	        }
+                return $set;
+            }
         }
         
         // param was not null, string, or array
@@ -677,8 +677,8 @@ class DB_Table {
     * 
     * @param int $count The number of rows to list in the result set.
     * 
-	* @return mixed An array of records from the table (if anything but
-	* 'getOne'), a single value (if 'getOne'), or a PEAR_Error object.
+    * @return mixed An array of records from the table (if anything but
+    * 'getOne'), a single value (if 'getOne'), or a PEAR_Error object.
     *
     * @see DB::getAll()
     *
@@ -702,7 +702,7 @@ class DB_Table {
         
         // set the get*() method name
         if (isset($this->sql[$sqlkey]['get'])) {
-        	$method = ucwords(strtolower(trim($this->sql[$sqlkey]['get'])));
+            $method = ucwords(strtolower(trim($this->sql[$sqlkey]['get'])));
             $method = "get$method";
         } else {
             $method = 'getAll';
@@ -719,11 +719,11 @@ class DB_Table {
         // swap modes
         $this->_swapModes($this->fetchmode, $this->fetchmode_object_class);
         
-		// get the result
-		$result = $this->db->$method($sql);
-			
-		// swap modes back
-		$this->_swapModes($restore_mode, $restore_class);
+        // get the result
+        $result = $this->db->$method($sql);
+            
+        // swap modes back
+        $this->_swapModes($restore_mode, $restore_class);
         
         // return the result
         return $result;
@@ -773,66 +773,66 @@ class DB_Table {
         
         // swap modes
         $this->_swapModes($this->fetchmode, $this->fetchmode_object_class);
-		
-		// get the result
+        
+        // get the result
         $result =& $this->db->query($sql);
         
-		// swap modes back
-		$this->_swapModes($restore_mode, $restore_class);
+        // swap modes back
+        $this->_swapModes($restore_mode, $restore_class);
         
         // return the result
         return $result;
     }
     
     
-	/**
-	* 
-	* Changes the $this->db PEAR DB object fetchmode and
-	* fetchmode_object_class.
-	* 
-	* Becase DB_Table objects tend to use the same PEAR DB object, it
-	* may sometimes be useful to have one object return results in one
-	* mode, and have another object return results in a different mode. 
-	* This method allows us to switch DB fetch modes on the fly.
-	* 
-	* @access private
-	* 
-	* @param string $new_mode A DB_FETCHMODE_* constant.  If null,
-	* defaults to whatever the DB object is currently using.
-	* 
-	* @param string $new_class The object class to use for results when
-	* the $db object is in DB_FETCHMODE_OBJECT fetch mode.  If null,
-	* defaults to whatever the the DB object is currently using.
-	* 
-	* @return void
-	* 
-	*/
-	
+    /**
+    * 
+    * Changes the $this->db PEAR DB object fetchmode and
+    * fetchmode_object_class.
+    * 
+    * Becase DB_Table objects tend to use the same PEAR DB object, it
+    * may sometimes be useful to have one object return results in one
+    * mode, and have another object return results in a different mode. 
+    * This method allows us to switch DB fetch modes on the fly.
+    * 
+    * @access private
+    * 
+    * @param string $new_mode A DB_FETCHMODE_* constant.  If null,
+    * defaults to whatever the DB object is currently using.
+    * 
+    * @param string $new_class The object class to use for results when
+    * the $db object is in DB_FETCHMODE_OBJECT fetch mode.  If null,
+    * defaults to whatever the the DB object is currently using.
+    * 
+    * @return void
+    * 
+    */
+    
     function _swapModes($new_mode, $new_class)
     {
-    	// get the old (current) mode and class
-    	$old_mode = $this->db->fetchmode;
-    	$old_class = $this->db->fetchmode_object_class;
-    	
-		// don't need to swap anything if the new modes are both
-		// null or if the old and new modes already match.
-    	if ((is_null($new_mode) && is_null($new_class)) ||
-    		($old_mode == $new_mode && $old_class == $new_class)) {
-    		return;
-    	}
-    	
-    	// set the default new mode
-    	if (is_null($new_mode)) {
-    		$new_mode = $old_mode;
-    	}
-    	
-    	// set the default new class
-    	if (is_null($new_class)) {
-    		$new_class = $old_class;
-    	}
-    	
-    	// swap modes
-    	$this->db->setFetchMode($new_mode, $new_class);
+        // get the old (current) mode and class
+        $old_mode = $this->db->fetchmode;
+        $old_class = $this->db->fetchmode_object_class;
+        
+        // don't need to swap anything if the new modes are both
+        // null or if the old and new modes already match.
+        if ((is_null($new_mode) && is_null($new_class)) ||
+            ($old_mode == $new_mode && $old_class == $new_class)) {
+            return;
+        }
+        
+        // set the default new mode
+        if (is_null($new_mode)) {
+            $new_mode = $old_mode;
+        }
+        
+        // set the default new class
+        if (is_null($new_class)) {
+            $new_class = $old_class;
+        }
+        
+        // swap modes
+        $this->db->setFetchMode($new_mode, $new_class);
     }
     
     
@@ -965,11 +965,11 @@ class DB_Table {
         
     function insert($data)
     {
-    	// forcibly recast the data elements to their proper types?
-    	if ($this->_auto_recast) {
-	    	$this->recast($data);
-    	}
-    	
+        // forcibly recast the data elements to their proper types?
+        if ($this->_auto_recast) {
+            $this->recast($data);
+        }
+        
         // validate the data if auto-validation is turned on
         if ($this->_valid_insert) {
             $result = $this->validInsert($data);
@@ -1092,11 +1092,11 @@ class DB_Table {
     
     function update($data, $where)
     {
-    	// forcibly recast the data elements to their proper types?
-    	if ($this->_auto_recast) {
-	    	$this->recast($data);
-    	}
-    	
+        // forcibly recast the data elements to their proper types?
+        if ($this->_auto_recast) {
+            $this->recast($data);
+        }
+        
         // validate the data if auto-validation is turned on
         if ($this->_valid_update) {
             $result = $this->validUpdate($data);
@@ -1315,12 +1315,12 @@ class DB_Table {
     * 
     * Forces array elements to the proper types for their columns.
     * 
-	* This will not valiate the data, and will forcibly change the data
-	* to match the recast-type.
-	* 
-	* The date, time, and timestamp recasting has special logic for
-	* arrays coming from an HTML_QuickForm object so that the arrays
-	* are converted into properly-formatted strings.
+    * This will not valiate the data, and will forcibly change the data
+    * to match the recast-type.
+    * 
+    * The date, time, and timestamp recasting has special logic for
+    * arrays coming from an HTML_QuickForm object so that the arrays
+    * are converted into properly-formatted strings.
     * 
     * @todo If a column key holds an array of values (say from a multiple
     * select) then this method will not work properly; it will recast the
@@ -1341,132 +1341,132 @@ class DB_Table {
         foreach ($keys as $key) {
         
             if (! isset($this->col[$key])) {
-            	continue;
+                continue;
             }
-			
-			unset($val);
-			$val =& $data[$key];
-			
-			switch ($this->col[$key]['type']) {
-			
-			case 'boolean':
-				$val = ($val) ? 1 : 0;
-				break;
-				
-			case 'char':
-			case 'varchar':
-			case 'clob':
-				settype($val, 'string');
-				break;
-				
-			case 'date':
-			
-				if (is_array($val) &&
-					isset($val['Y']) &&
-					isset($val['m']) &&
-					isset($val['d'])) {
-					
-					// the date is in HTML_QuickForm format,
-					// convert into a string
-					$y = $val['Y'];
-					
-					$m = ($val['m'] < 10)
-						? '0'.$val['m'] : $val['m'];
-						
-					$d = ($val['d'] < 10)
-						? '0'.$val['d'] : $val['d'];
-						
-					$val = "$y-$m-$d";
-					
-				} else {
-				
-					// convert using the Date class
-					$tmp =& new Date($val);
-					$val = $tmp->format('%Y-%m-%d');
-					
-				}
-				
-				break;
-			
-			case 'time':
-			
-				if (is_array($val) &&
-					isset($val['H']) &&
-					isset($val['i']) &&
-					isset($val['s'])) {
-					
-					// the time is in HTML_QuickForm format,
-					// convert into a string
-					$h = ($val['H'] < 10)
-						? '0' . $val['H'] : $val['H'];
-					
-					$i = ($val['i'] < 10)
-						? '0' . $val['i'] : $val['i'];
-						
-					$s = ($val['s'] < 10)
-						? '0' . $val['s'] : $val['s'];
-						
-					$val = "$h:$i:$s";
-					
-				} else {
-					// date does not matter in this case, so
-					// pre 1970 and post 2040 are not an issue.
-					$tmp = strtotime(date('Y-m-d') . " $val");
-					$val = date('H:i:s', $tmp);
-				}
-				
-				break;
-				
-			case 'timestamp':
-				if (is_array($val) &&
-					isset($val['Y']) &&
-					isset($val['m']) &&
-					isset($val['d']) &&
-					isset($val['H']) &&
-					isset($val['i']) &&
-					isset($val['s'])) {
-					
-					// timestamp is in HTML_QuickForm format,
-					// convert to a string
-					$y = $val['Y'];
-					
-					$m = ($val['m'] < 10)
-						? '0'.$val['m'] : $val['m'];
-						
-					$d = ($val['d'] < 10)
-						? '0'.$val['d'] : $val['d'];
-						
-					$h = ($val['H'] < 10)
-						? '0' . $val['H'] : $val['H'];
-					
-					$i = ($val['i'] < 10)
-						? '0' . $val['i'] : $val['i'];
-						
-					$s = ($val['s'] < 10)
-						? '0' . $val['s'] : $val['s'];
-						
-					$val = "$y-$m-$d $h:$i:$s";
-					
-				} else {
-					// convert using the Date class
-					$tmp =& new Date($val);
-					$val = $tmp->format('%Y-%m-%d %H:&i:&s');
-				}
-				
-				break;
-			
-			case 'smallint':
-			case 'integer':
-			case 'bigint':
-				settype($val, 'integer');
-				break;
-			
-			case 'decimal':
-			case 'single':
-			case 'double':
-				settype($val, 'float');
-				break;
-			}
+            
+            unset($val);
+            $val =& $data[$key];
+            
+            switch ($this->col[$key]['type']) {
+            
+            case 'boolean':
+                $val = ($val) ? 1 : 0;
+                break;
+                
+            case 'char':
+            case 'varchar':
+            case 'clob':
+                settype($val, 'string');
+                break;
+                
+            case 'date':
+            
+                if (is_array($val) &&
+                    isset($val['Y']) &&
+                    isset($val['m']) &&
+                    isset($val['d'])) {
+                    
+                    // the date is in HTML_QuickForm format,
+                    // convert into a string
+                    $y = $val['Y'];
+                    
+                    $m = ($val['m'] < 10)
+                        ? '0'.$val['m'] : $val['m'];
+                        
+                    $d = ($val['d'] < 10)
+                        ? '0'.$val['d'] : $val['d'];
+                        
+                    $val = "$y-$m-$d";
+                    
+                } else {
+                
+                    // convert using the Date class
+                    $tmp =& new Date($val);
+                    $val = $tmp->format('%Y-%m-%d');
+                    
+                }
+                
+                break;
+            
+            case 'time':
+            
+                if (is_array($val) &&
+                    isset($val['H']) &&
+                    isset($val['i']) &&
+                    isset($val['s'])) {
+                    
+                    // the time is in HTML_QuickForm format,
+                    // convert into a string
+                    $h = ($val['H'] < 10)
+                        ? '0' . $val['H'] : $val['H'];
+                    
+                    $i = ($val['i'] < 10)
+                        ? '0' . $val['i'] : $val['i'];
+                        
+                    $s = ($val['s'] < 10)
+                        ? '0' . $val['s'] : $val['s'];
+                        
+                    $val = "$h:$i:$s";
+                    
+                } else {
+                    // date does not matter in this case, so
+                    // pre 1970 and post 2040 are not an issue.
+                    $tmp = strtotime(date('Y-m-d') . " $val");
+                    $val = date('H:i:s', $tmp);
+                }
+                
+                break;
+                
+            case 'timestamp':
+                if (is_array($val) &&
+                    isset($val['Y']) &&
+                    isset($val['m']) &&
+                    isset($val['d']) &&
+                    isset($val['H']) &&
+                    isset($val['i']) &&
+                    isset($val['s'])) {
+                    
+                    // timestamp is in HTML_QuickForm format,
+                    // convert to a string
+                    $y = $val['Y'];
+                    
+                    $m = ($val['m'] < 10)
+                        ? '0'.$val['m'] : $val['m'];
+                        
+                    $d = ($val['d'] < 10)
+                        ? '0'.$val['d'] : $val['d'];
+                        
+                    $h = ($val['H'] < 10)
+                        ? '0' . $val['H'] : $val['H'];
+                    
+                    $i = ($val['i'] < 10)
+                        ? '0' . $val['i'] : $val['i'];
+                        
+                    $s = ($val['s'] < 10)
+                        ? '0' . $val['s'] : $val['s'];
+                        
+                    $val = "$y-$m-$d $h:$i:$s";
+                    
+                } else {
+                    // convert using the Date class
+                    $tmp =& new Date($val);
+                    $val = $tmp->format('%Y-%m-%d %H:&i:&s');
+                }
+                
+                break;
+            
+            case 'smallint':
+            case 'integer':
+            case 'bigint':
+                settype($val, 'integer');
+                break;
+            
+            case 'decimal':
+            case 'single':
+            case 'double':
+                settype($val, 'float');
+                break;
+            }
         }
     }
     
@@ -1573,7 +1573,7 @@ class DB_Table {
         
         // is the column type on the map?
         if (! in_array($this->col[$col]['type'], $map)) {
-        	return $this->throwError(
+            return $this->throwError(
                 DB_TABLE_ERR_VALIDATE_TYPE,
                 "'$col' ('{$this->col[$col]['type']}')"
             );
@@ -1599,23 +1599,23 @@ class DB_Table {
             break;
             
         default:
-        	$result = call_user_func(
-        		array(
-        			'DB_Table_Valid',
-        			'is' . ucwords($this->col[$col]['type'])
-        		),
-        		$val
-        	);
-        	break;
+            $result = call_user_func(
+                array(
+                    'DB_Table_Valid',
+                    'is' . ucwords($this->col[$col]['type'])
+                ),
+                $val
+            );
+            break;
         }
         
         // have we passed the check so far, and should we
         // also check for allowed values?
         if ($result && isset($this->col[$col]['qf_vals'])) {
-        	$result = in_array(
-        		$val,
-        		array_keys($this->col[$col]['qf_vals'])
-        	);
+            $result = in_array(
+                $val,
+                array_keys($this->col[$col]['qf_vals'])
+            );
         }
         
         return $result;
@@ -1659,25 +1659,25 @@ class DB_Table {
     * $array_name, the column names will become keys in an array named
     * for this parameter.
     * 
-	* @param array $args An associative array of optional arguments to
-	* pass to the QuickForm object.  The keys are...
+    * @param array $args An associative array of optional arguments to
+    * pass to the QuickForm object.  The keys are...
     *
-	* 'formName' : String, name of the form; defaults to the name of this
-	* table.
-	* 
-	* 'method' : String, form method; defaults to 'post'.
-	* 
-	* 'action' : String, form action; defaults to
-	* $_SERVER['REQUEST_URI'].
-	* 
-	* 'target' : String, form target target; defaults to '_self'
-	* 
-	* 'attributes' : Associative array, extra attributes for <form>
-	* tag; the key is the attribute name and the value is attribute
-	* value.
-	* 
-	* 'trackSubmit' : Boolean, whether to track if the form was
-	* submitted by adding a special hidden field
+    * 'formName' : String, name of the form; defaults to the name of this
+    * table.
+    * 
+    * 'method' : String, form method; defaults to 'post'.
+    * 
+    * 'action' : String, form action; defaults to
+    * $_SERVER['REQUEST_URI'].
+    * 
+    * 'target' : String, form target target; defaults to '_self'
+    * 
+    * 'attributes' : Associative array, extra attributes for <form>
+    * tag; the key is the attribute name and the value is attribute
+    * value.
+    * 
+    * 'trackSubmit' : Boolean, whether to track if the form was
+    * submitted by adding a special hidden field
     * 
     * @return object HTML_QuickForm
     * 
@@ -1787,63 +1787,61 @@ class DB_Table {
     }
     
     
-	/**
-	* 
-	* Creates a column definition array suitable for DB_Table_QuickForm.
-	* 
-	* @access public
-	* 
-	* @param string|array $column_set A string column name, a sequential
-	* array of columns names, or an associative array where the key is a
-	* column name and the value is the default value for the generated
-	* form element.  If null, uses all columns for this class.
-	* 
-	* @return array An array of columne defintions suitable for passing
-	* to DB_Table_QuickForm.
-	* 
-	*/
+    /**
+    * 
+    * Creates a column definition array suitable for DB_Table_QuickForm.
+    * 
+    * @access public
+    * 
+    * @param string|array $column_set A string column name, a sequential
+    * array of columns names, or an associative array where the key is a
+    * column name and the value is the default value for the generated
+    * form element.  If null, uses all columns for this class.
+    * 
+    * @return array An array of columne defintions suitable for passing
+    * to DB_Table_QuickForm.
+    * 
+    */
     
     function _getFormColDefs($column_set = null)
     {
-    	if (is_null($column_set)) {
-	    	// no columns or columns+values; just return the $this->col
-	    	// array.
-    		return $this->getColumns($column_set);
-    	}
-    	
-    	// check to see if the keys are sequential integers.  if so,
-    	// the $column_set is just a list of columns.
-    	settype($column_set, 'array');
-		$keys = array_keys($column_set);
-		$all_integer = true;
-		foreach ($keys as $val) {
-			if (! is_integer($val)) {
-				$all_integer = false;
-				break;
-			}
-		}
-		
-		if ($all_integer) {
-		
-			// the column_set is just a list of columns; get back the $this->col
-			// array elements matching this list.
-			$coldefs = $this->getColumns($column_set);
-			
-		} else {
-			
-			// the columns_set is an associative array where the key is a
-			// column name and the value is the form element value.
-			$coldefs = $this->getColumns($keys);
-			foreach ($coldefs as $key => $val) {
-				$coldefs[$key]['qf_setvalue'] = $column_set[$key];
-			}
-			
-		}
-		
-		return $coldefs;
-	}
-	
+        if (is_null($column_set)) {
+            // no columns or columns+values; just return the $this->col
+            // array.
+            return $this->getColumns($column_set);
+        }
+        
+        // check to see if the keys are sequential integers.  if so,
+        // the $column_set is just a list of columns.
+        settype($column_set, 'array');
+        $keys = array_keys($column_set);
+        $all_integer = true;
+        foreach ($keys as $val) {
+            if (! is_integer($val)) {
+                $all_integer = false;
+                break;
+            }
+        }
+        
+        if ($all_integer) {
+        
+            // the column_set is just a list of columns; get back the $this->col
+            // array elements matching this list.
+            $coldefs = $this->getColumns($column_set);
+            
+        } else {
+            
+            // the columns_set is an associative array where the key is a
+            // column name and the value is the form element value.
+            $coldefs = $this->getColumns($keys);
+            foreach ($coldefs as $key => $val) {
+                $coldefs[$key]['qf_setvalue'] = $column_set[$key];
+            }
+            
+        }
+        
+        return $coldefs;
+    }
 
 }
-
 ?>
