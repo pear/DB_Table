@@ -161,6 +161,8 @@ class DB_Table_QuickForm {
     * 
     * Adds DB_Table columns to a pre-existing HTML_QuickForm object.
     * 
+    * @author Ian Eure <ieure@php.net>
+    * 
     * @static
     * 
     * @access public
@@ -181,6 +183,45 @@ class DB_Table_QuickForm {
     
     function addElements(&$form, $cols, $arrayName = null)
     {
+        $elements =& DB_Table_QuickForm::getElements($cols, $arrayName);
+        foreach (array_keys($elements) as $k) {
+            $element =& $elements[$k];
+            if (is_array($element)) {
+                $form->addGroup($element, $element->getName(), $col['qf_label']);
+            } else if (is_object($element)) {
+                $form->addElement($element);
+            }
+        }
+    }
+
+    /**
+    * 
+    * Gets controls for a list of columns
+    * 
+    * @author Ian Eure <ieure@php.net>
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param object &$form An HTML_QuickForm object.
+    * 
+    * @param array $cols A sequential array of DB_Table column definitions
+    * from which to create form elements.
+    * 
+    * @param string $arrayName By default, the form will use the names
+    * of the columns as the names of the form elements.  If you pass
+    * $arrayName, the column names will become keys in an array named
+    * for this parameter.
+    * 
+    * @return void
+    * 
+    */
+    
+    function &getElements($cols, $arrayName = null)
+    {
+        $elements = array();
+        
         foreach ($cols as $name => $col) {
             
             if ($arrayName) {
@@ -191,16 +232,9 @@ class DB_Table_QuickForm {
             
             DB_Table_QuickForm::fixColDef($col, $elemname);
 
-            $tmp =& DB_Table_QuickForm::getElement($col, $elemname);
-            
-            if (is_array($tmp)) {
-                $form->addGroup($tmp, $elemname, $col['qf_label']);
-            }
-            
-            if (is_object($tmp)) {
-                $form->addElement($tmp);
-            }
+            $elements[] =& DB_Table_QuickForm::getElement($col, $elemname);
         }
+        return $elements;
     }
     
     
@@ -588,10 +622,10 @@ class DB_Table_QuickForm {
 					if (in_array($type,$form->getRegisteredRules())) {
 						if (is_array($opts)) {
 							// $opts[0] is the message, $opts[1] is the size or regex
-							$form->addRule($elemname, $opts[0], $type, $opts[1]);
+							$form->addRule($elemname, $opts[0], $type, $opts[1], $validate);
 						} else {
 							// $opts is the error message
-							$form->addRule($elemname, $opts, $type);
+							$form->addRule($elemname, $opts, $type, $validate);
 						}
 					}
                     break;

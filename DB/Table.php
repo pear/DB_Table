@@ -1853,6 +1853,33 @@ class DB_Table {
         $coldef = $this->_getFormColDefs($column);
         return DB_Table_QuickForm::getElement($coldef[$column], $elemname);
     }
+
+    /**
+    * 
+    * Creates and returns an array of QuickForm elements based on a DB_Table
+    * column name.
+    * 
+    * @author Ian Eure <ieure@php.net>
+    * 
+    * @access public
+    * 
+    * @param string $cols Array of DB_Table column names
+    * 
+    * @param string $array_name The name to use for the generated QuickForm
+    * elements.
+    * 
+    * @return object HTML_QuickForm_Element
+    * 
+    * @see HTML_QuickForm
+    * 
+    * @see DB_Table_QuickForm
+    * 
+    */
+    function &getFormElements($cols, $array_name = null)
+    {
+        include_once 'DB/Table/QuickForm.php';
+        return DB_Table_QuickForm::getElements($cols, $array_name);
+    }
     
     
     /**
