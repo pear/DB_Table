@@ -464,30 +464,35 @@ class DB_Table_QuickForm {
             // if clientValidate is specified, override the column
             // definition.  otherwise use the col def as it is.
             if (! is_null($clientValidate)) {
-            	// override
-            	if ($clientValidate) {
-                	$validate = 'client';
+                // override
+                if ($clientValidate) {
+                    $validate = 'client';
                 } else {
-                	$validate = 'server';
+                    $validate = 'server';
                 }
             } else {
-            	// use as-is
-            	if ($col['qf_client']) {
-                	$validate = 'client';
-            	} else {
-            		$validate = 'server';
-            	}
+                // use as-is
+                if ($col['qf_client']) {
+                    $validate = 'client';
+                } else {
+                    $validate = 'server';
+                }
             }
             
             // **always** override these rules to make them 
-            // server-side only.  suggested by Mark Wiesemann.
-            $tmp = array('filename', 'maxfilesize', 'mimetype', 'uploadedfile');
-            if (in_array($type, $tmp)) {
-            	$validate = 'server';
-            }
+            // server-side only.  suggested by Mark Wiesemann,
+            // debugged by Hero Wanders.
+            $onlyServer = array('filename', 'maxfilesize', 'mimetype',
+                'uploadedfile');
             
             // loop through the rules and add them
             foreach ($col['qf_rules'] as $type => $opts) {
+                
+                // override the onlyServer types so that we don't attempt
+                // client-side validation at all.
+                if (in_array($type, $onlyServer)) {
+                    $validate = 'server';
+                }
                 
                 switch ($type) {
                     
