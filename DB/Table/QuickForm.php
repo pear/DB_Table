@@ -451,21 +451,26 @@ class DB_Table_QuickForm {
 				
 				switch ($type) {
 					
-				case 'required':
+				case 'alphanumeric':
 				case 'email':
 				case 'lettersonly':
-				case 'alphanumeric':
-				case 'numeric':
-				case 'nopunctuation':
 				case 'nonzero':
+				case 'nopunctuation':
+				case 'numeric':
+				case 'required':
+				case 'uploadedfile':
 					// $opts is the error message
 					$form->addRule($elemname, $opts, $type);
 					break;
 				
-				case 'minlength':
+				case 'filename':
+				case 'maxfilesize':
 				case 'maxlength':
+				case 'mimetype':
+				case 'minlength':
 				case 'regex':
-					// $opts[0] is the message, $opts[1] is the size or regex
+					// $opts[0] is the message
+					// $opts[1] is the size, mimetype, or regex
 					$form->addRule($elemname, $opts[0], $type, $opts[1]);
 					break;
 				
