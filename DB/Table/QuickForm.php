@@ -3,6 +3,19 @@
 require_once 'HTML/QuickForm.php';
 
 /**
+* US-English messages for some QuickForm rules.  Moritz Heidkamp
+* suggested this approach for easier i18n.
+*/
+if (! isset($GLOBALS['_DB_TABLE']['qf_rules'])) {
+	$GLOBALS['_DB_TABLE']['qf_rules'] = array(
+	  'required'  => 'This element is required.',
+	  'numeric'   => 'This element must be numbers only.',
+	  'maxlength' => 'This element can be no longer than %d characters.'
+	);
+}
+
+
+/**
 * 
 * DB_Table_QuickForm creates HTML_QuickForm objects from DB_Table properties.
 * 
@@ -318,6 +331,7 @@ class DB_Table_QuickForm {
 		case 'static':
 			$element =& HTML_QuickForm::createElement(
 				$col['qf_type'],
+				null,
 				$col['qf_label'],
 				(isset($setval) ? $setval : '')
 			);
@@ -571,7 +585,7 @@ class DB_Table_QuickForm {
 			$col['require']) {
 			
 			$col['qf_rules']['required'] =
-				'This element is required.';
+				$GLOBALS['_DB_TABLE']['qf_rules']['required'];
 			
 		}
 		
@@ -587,7 +601,7 @@ class DB_Table_QuickForm {
 			
 			if (! isset($col['qf_rules']['numeric'])) {
 				$col['qf_rules']['numeric'] =
-					'This element must be numbers only.';
+					$GLOBALS['_DB_TABLE']['qf_rules']['numeric'];
 			}
 		}
 		
@@ -597,10 +611,11 @@ class DB_Table_QuickForm {
 		
 			$max = $col['size'];
 			
-			$col['qf_rules']['maxlength'] = array(
-				"This element can be no longer than $max characters.",
-				$max
+			$msg = sprintf(
+				$GLOBALS['_DB_TABLE']['qf_rules']['maxlength'], $max
 			);
+			
+			$col['qf_rules']['maxlength'] = array($msg, $max);
 		}
 	}
 }
