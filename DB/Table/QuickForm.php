@@ -458,13 +458,13 @@ class DB_Table_QuickForm {
                 $elemname = $name;
             }
             
+            DB_Table_QuickForm::fixColDef($col, $elemname);
+            
             if ($forceValidate) {
                 $validate = $forceValidate;
             } else {
                 $validate = $col['qf_validate'];
             }
-            
-            DB_Table_QuickForm::fixColDef($col, $elemname);
             
             foreach ($col['qf_rules'] as $type => $opts) {
                 
@@ -535,6 +535,12 @@ class DB_Table_QuickForm {
             $col['qf_vals'] = null;
         }
         
+        // where does form rule validation happen?  by default at the
+        // 'server' but could be at 'client' instead.
+        if (! isset($col['qf_validate'])) {
+            $col['qf_validate'] = 'server';
+        }
+        
         // the element type; if not set,
         // assigns an element type based on the column type.
         // by default, the type is 'text' (unless there are
@@ -595,12 +601,6 @@ class DB_Table_QuickForm {
         // array of QuickForm validation rules to apply
         if (! isset($col['qf_rules'])) {
             $col['qf_rules'] = array();
-        }
-        
-        // where does form rule validation happen?  by default at the
-        // 'server' but could be at 'client' instead.
-        if (! isset($col['qf_validate'])) {
-            $col['qf_validate'] = 'server';
         }
         
         // if the element is hidden, then we're done
