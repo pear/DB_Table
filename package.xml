@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.13 2004-10-27 21:45:29 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.14 2004-11-08 03:29:50 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -14,12 +14,24 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>0.22</version>
-        <date>2004-10-27</date>
+        <version>0.23.0</version>
+        <date>2004-??-??</date>
         <license>LGPL</license>
         <state>beta</state>
         <notes>
-        	* Applied patch from Ian Eure to allow creation of a blank form
+            * BC BREAK:  Oracle will not allow a sequence to start with 
+              "_". Default for DB_Table was to name sequences starting 
+              with "_", but no longer.  Users of DB_Table should rename
+              their sequences and sequence tables to remove the initial 
+              underscore; if you do not, the upgrade to DB_Table 0.23.0 
+              will create a new sequence restarting at 1 with the new 
+              non-underscored name.  Sorry, folks.  This bug report was
+              from Alex Hobart, who has been very patient in waiting 
+              for me to pay attention to it.
+            
+            * Added 'autocomplete' as a supported element, per Alex
+              Hobart.
+            
         </notes>
         <filelist>
         
