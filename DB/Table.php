@@ -119,6 +119,12 @@ define('DB_TABLE_ERR_DECLARE_IDXNAME',  -19);
 define('DB_TABLE_ERR_IDX_COL_CLOB',     -20);
 
 
+define('DB_TABLE_ERR_DECLARE_STRLEN',   -21);
+
+define('DB_TABLE_ERR_IDX_STRLEN',   -21);
+
+
+
 /**
 * The PEAR class for errors
 */
@@ -256,7 +262,9 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
         DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
         DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
         DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-        DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index'
+        DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index',
+        DB_TABLE_ERR_DECLARE_STRLEN      => 'Column name too long, 30 char max',
+        DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max'
     );
 }
 

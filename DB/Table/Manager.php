@@ -75,6 +75,15 @@ class DB_Table_Manager {
                 );
             }
             
+            // column must be no longer than 30 chars
+            if (strlen($colname) > 30) {
+				return DB_Table::throwError(
+					DB_TABLE_ERR_DECLARE_STRLEN,
+					"('$colname')"
+				);
+            }
+            
+            
             // prepare variables
             $type    = (isset($val['type']))    ? $val['type']    : null;
             $size    = (isset($val['size']))    ? $val['size']    : null;
@@ -160,12 +169,20 @@ class DB_Table_Manager {
             // string of column names
             $colstring = implode(', ', $cols);
             
-            // we prefix all index names with the table name,
-            // and suffix all index names with '_index'.  this
+            // we prefix all index names with the table name. this
             // is to soothe PostgreSQL, which demands that index
-            // names not collide, even when they indexes are on
-            // different tables.
-            $newIdxName = $table . '_' . $idxname . '_index';
+            // names not collide, even when the indexes are on
+            // different tables.  always suffix with '_idx'.
+            $newIdxName = $table . '_' . $idxname . '_idx';
+            
+            // now check the length; must be under 30 chars to
+            // soothe Oracle.
+            if (strlen($newIdxName) > 30) {
+				return DB_Table::throwError(
+					DB_TABLE_ERR_IDX_STRLEN,
+					"'$idxname' ('$newIdxName')"
+				);
+            }
             
             // create index entry
             if ($type == 'unique') {
