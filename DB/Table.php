@@ -366,7 +366,7 @@ class DB_Table {
     
     /**
     * 
-    * Baseline SQL SELECT mappings for select() and selectResult().
+    * Baseline SELECT maps for select(), selectResult(), selectCount().
     * 
     * @access public
     * 
@@ -830,6 +830,85 @@ class DB_Table {
     
     
     /**
+    *
+    * Counts the number of rows which will be returned by a query.
+    *
+    * This function works identically to {@link select()}, but it
+    * returns the number of rows returned by a query instead of the
+    * query results themselves.
+    *
+    * This makes using DB_Table with Pager easier, since you can pass the
+    * return value of this to Pager as totalItems, then select only the
+    * rows you need to display on a page.
+    *
+    * @author Ian Eure <ian@php.net>
+    * 
+    * @access public
+    * 
+    * @param string $sqlkey The name of the SQL SELECT to use from the
+    * $this->sql property array.
+    * 
+    * @param string $filter Ad-hoc SQL snippet to AND with the default
+    * SELECT WHERE clause.
+    * 
+    * @param string $order Ad-hoc SQL snippet to override the default
+    * SELECT ORDER BY clause.
+    * 
+    * @param int $start The row number to start listing from in the
+    * result set.
+    * 
+    * @param int $count The number of rows to list in the result set.
+    * 
+    * @return mixed An integer number of records from the table, or a
+    * PEAR_Error object.
+    *
+    * @see DB_Table::select()
+    *
+    */
+    
+    function selectCount($sqlkey, $filter = null, $order = null,
+        $start = null, $count = null)
+    {
+        // does the SQL SELECT key exist?
+        $tmp = array_keys($this->sql);
+        if (! in_array($sqlkey, $tmp)) {
+            return $this->throwError(
+                DB_TABLE_ERR_SQL_UNDEF,
+                "('$sqlkey')"
+            );
+        }
+        
+        // create a SQL key name for this count-query
+        $count_key = '__count_' . $sqlkey;
+        
+        // has a count-query for the SQL key already been created?
+        if (! isset($this->sql[$count_key])) {
+            
+            // we've not asked for a count on this query yet.
+            // get the elements of the query ...
+            $count_sql = $this->sql[$sqlkey];
+            
+            // is a count-field set for the query?
+            if (empty(trim($count_sql['count']))) {
+                $count_sql['count'] = '*';
+            }
+            
+            // replace the SELECT fields with a COUNT() command
+            $count_sql['select'] = "COUNT({$count_sql['count']})";
+            
+            // replace the 'get' key so we only get the one result item
+            $count_sql['get'] = 'one';
+            
+            // create the new count-query in the $sql array
+            $this->sql[$count_key] = $count_sql;
+        }
+        
+        // retrieve the count results
+        return $this->select($count_key, $filter, $order, $start, $count);
+    }
+    
+    
+    /**
     * 
     * Changes the $this->db PEAR DB object fetchmode and
     * fetchmode_object_class.
@@ -1275,16 +1354,16 @@ class DB_Table {
             $seq_name = "{$this->table}_{$seq_name}";
         }
         
-		// the maximum length is 30, but PEAR DB will add "_seq" to the
-		// name, so the max length here is less 4 chars. we have to
-		// check here because the sequence will be created automatically
-		// by PEAR DB, which will not check for length on its own.
+        // the maximum length is 30, but PEAR DB will add "_seq" to the
+        // name, so the max length here is less 4 chars. we have to
+        // check here because the sequence will be created automatically
+        // by PEAR DB, which will not check for length on its own.
         if (strlen($seq_name) > 26) {
-			return DB_Table::throwError(
-				DB_TABLE_ERR_SEQ_STRLEN,
-				" ('$seq_name')"
-			);
-        	
+            return DB_Table::throwError(
+                DB_TABLE_ERR_SEQ_STRLEN,
+                " ('$seq_name')"
+            );
+            
         }
         return $this->db->nextId($seq_name);
     }
@@ -1398,7 +1477,7 @@ class DB_Table {
             
             // skip explicit NULL values
             if (is_null($val)) {
-            	continue;
+                continue;
             }
             
             // otherwise, recast to the column type
@@ -1424,8 +1503,8 @@ class DB_Table {
                     // the date is in HTML_QuickForm format,
                     // convert into a string
                     $y = (strlen($val['Y']) < 4)
-                    	? str_pad($val['Y'], 4, '0', STR_PAD_LEFT)
-                    	: $val['Y'];
+                        ? str_pad($val['Y'], 4, '0', STR_PAD_LEFT)
+                        : $val['Y'];
                     
                     $m = (strlen($val['m']) < 2)
                         ? '0'.$val['m'] : $val['m'];
@@ -1489,8 +1568,8 @@ class DB_Table {
                     // with zeroes as needed.
                 
                     $y = (strlen($val['Y']) < 4)
-                    	? str_pad($val['Y'], 4, '0', STR_PAD_LEFT)
-                    	: $val['Y'];
+                        ? str_pad($val['Y'], 4, '0', STR_PAD_LEFT)
+                        : $val['Y'];
                     
                     $m = (strlen($val['m']) < 2)
                         ? '0'.$val['m'] : $val['m'];
@@ -1674,8 +1753,8 @@ class DB_Table {
         // have we passed the check so far, and should we
         // also check for allowed values?
         if ($result && isset($this->col[$col]['qf_vals'])) {
-        	$keys = array_keys($this->col[$col]['qf_vals']);
-        	
+            $keys = array_keys($this->col[$col]['qf_vals']);
+            
             $result = in_array(
                 $val,
                 array_keys($this->col[$col]['qf_vals'])
@@ -1752,12 +1831,12 @@ class DB_Table {
     */
     
     function &getForm($columns = null, $array_name = null, $args = array(),
-    	$clientValidate = null)
+        $clientValidate = null)
     {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
         return DB_Table_QuickForm::getForm($coldefs, $array_name, $args,
-        	$clientValidate);
+            $clientValidate);
     }
     
     
@@ -1786,13 +1865,13 @@ class DB_Table {
     */
     
     function addFormElements(&$form, $columns = null, $array_name = null,
-    	$clientValidate = null)
+        $clientValidate = null)
     {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
         DB_Table_QuickForm::addElements($form, $coldefs, $array_name);
         DB_Table_QuickForm::addRules($form, $coldefs, $array_name,
-        	$clientValidate);
+            $clientValidate);
     }
     
     
