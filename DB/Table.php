@@ -1450,7 +1450,7 @@ class DB_Table {
                 } else {
                     // convert using the Date class
                     $tmp =& new Date($val);
-                    $val = $tmp->format('%Y-%m-%d %H:&i:&s');
+                    $val = $tmp->format('%Y-%m-%d %H:%i:%s');
                 }
                 
                 break;
