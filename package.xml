@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.24 2005-02-23 17:41:25 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.25 2005-03-07 23:15:53 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -14,22 +14,10 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>1.0.0RC1</version>
-        <date>2005-02-23</date>
-        <license>LGPL</license>
-        <state>beta</state>
+        <version>1.0.0</version>
+        <date>2005-03-07</date>
         <notes>
-            * first 1.0.0 release candidate
-            * Fixed bug 3360 (add dependency on DB)
-            * Added request 3407 (add "name" for static QF elements)
-            * Added request 3018 (allow custom formats for date, time, 
-              timestamp in QuickForms). WARNING:  The automatic casting
-              of date/time values may not work when specifying custom
-              formats for QF elements. The user who changes these
-              format values has to manually modify the string returned
-              from a QF form to a format acceptable by DB_Table (i.e.,
-              "yyyy-mm-dd" or "hh:ii:ss") before attempting to insert or
-              update; otherwise, data-level validation will fail.
+        	* First stable release.
         </notes>
         <filelist>
         
