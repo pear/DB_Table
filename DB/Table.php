@@ -1423,12 +1423,14 @@ class DB_Table {
                     
                     // the date is in HTML_QuickForm format,
                     // convert into a string
-                    $y = $val['Y'];
+                    $y = (strlen($val['Y']) < 4)
+                    	? str_pad($val['Y'], 4, '0', STR_PAD_LEFT)
+                    	: $val['Y'];
                     
-                    $m = ($val['m'] < 10)
+                    $m = (strlen($val['m']) < 2)
                         ? '0'.$val['m'] : $val['m'];
                         
-                    $d = ($val['d'] < 10)
+                    $d = (strlen($val['d']) < 2)
                         ? '0'.$val['d'] : $val['d'];
                         
                     $val = "$y-$m-$d";
@@ -1452,14 +1454,15 @@ class DB_Table {
                     
                     // the time is in HTML_QuickForm format,
                     // convert into a string
-                    $h = ($val['H'] < 10)
+                    $h = (strlen($val['H']) < 2)
                         ? '0' . $val['H'] : $val['H'];
                     
-                    $i = ($val['i'] < 10)
+                    $i = (strlen($val['i']) < 2)
                         ? '0' . $val['i'] : $val['i'];
                         
-                    $s = ($val['s'] < 10)
+                    $s = (strlen($val['s']) < 2)
                         ? '0' . $val['s'] : $val['s'];
+                        
                         
                     $val = "$h:$i:$s";
                     
@@ -1482,22 +1485,26 @@ class DB_Table {
                     isset($val['s'])) {
                     
                     // timestamp is in HTML_QuickForm format,
-                    // convert to a string
-                    $y = $val['Y'];
+                    // convert each element to a string. pad
+                    // with zeroes as needed.
+                
+                    $y = (strlen($val['Y']) < 4)
+                    	? str_pad($val['Y'], 4, '0', STR_PAD_LEFT)
+                    	: $val['Y'];
                     
-                    $m = ($val['m'] < 10)
+                    $m = (strlen($val['m']) < 2)
                         ? '0'.$val['m'] : $val['m'];
                         
-                    $d = ($val['d'] < 10)
+                    $d = (strlen($val['d']) < 2)
                         ? '0'.$val['d'] : $val['d'];
                         
-                    $h = ($val['H'] < 10)
+                    $h = (strlen($val['H']) < 2)
                         ? '0' . $val['H'] : $val['H'];
                     
-                    $i = ($val['i'] < 10)
+                    $i = (strlen($val['i']) < 2)
                         ? '0' . $val['i'] : $val['i'];
                         
-                    $s = ($val['s'] < 10)
+                    $s = (strlen($val['s']) < 2)
                         ? '0' . $val['s'] : $val['s'];
                         
                     $val = "$y-$m-$d $h:$i:$s";
