@@ -10,7 +10,7 @@ if (! isset($GLOBALS['_DB_TABLE']['qf_rules'])) {
 	$GLOBALS['_DB_TABLE']['qf_rules'] = array(
 	  'required'  => 'This element is required.',
 	  'numeric'   => 'This element must be numbers only.',
-	  'maxlength' => 'This element can be no longer than %d characters.'
+	  'maxlength' => 'This element can have no more than %d characters.'
 	);
 }
 
@@ -43,9 +43,9 @@ class DB_Table_QuickForm {
 	* @param array $cols A sequential array of DB_Table column definitions
 	* from which to create form elements.
 	* 
-	* @param string $array_name By default, the form will use the names
+	* @param string $arrayName By default, the form will use the names
 	* of the columns as the names of the form elements.  If you pass
-	* $array_name, the column names will become keys in an array named
+	* $arrayName, the column names will become keys in an array named
 	* for this parameter.
 	* 
 	* @param array $args An associative array of optional arguments to
@@ -68,13 +68,19 @@ class DB_Table_QuickForm {
 	* 'trackSubmit' : Boolean, whether to track if the form was
 	* submitted by adding a special hidden field
 	* 
+	* @param string $forceValidate By default, validation will match
+	* the 'qf_validate' value from the column definition.  However,
+	* if you set $forceValidate to 'client' or 'server', this will
+	* override the value from the column definition.
+	* 
 	* @return object HTML_QuickForm
 	* 
 	* @see HTML_QuickForm
 	* 
 	*/
 	
-	function &getForm($cols, $array_name = null, $args = array())
+	function &getForm($cols, $arrayName = null, $args = array(),
+		$forceValidate = false)
 	{
 		$formName = isset($args['formName'])
 			? $args['formName'] : $this->table;
@@ -97,8 +103,8 @@ class DB_Table_QuickForm {
 		$form =& new HTML_QuickForm($formName, $method, $action, $target, 
 			$attributes, $trackSubmit);
 			
-		DB_Table_QuickForm::addElements($form, $cols, $array_name);
-		DB_Table_QuickForm::addRules($form, $cols, $array_name);
+		DB_Table_QuickForm::addElements($form, $cols, $arrayName);
+		DB_Table_QuickForm::addRules($form, $cols, $arrayName, $forceValidate);
 		
 		return $form;
 	}
@@ -117,21 +123,21 @@ class DB_Table_QuickForm {
 	* @param array $cols A sequential array of DB_Table column definitions
 	* from which to create form elements.
 	* 
-	* @param string $array_name By default, the form will use the names
+	* @param string $arrayName By default, the form will use the names
 	* of the columns as the names of the form elements.  If you pass
-	* $array_name, the column names will become keys in an array named
+	* $arrayName, the column names will become keys in an array named
 	* for this parameter.
 	* 
 	* @return void
 	* 
 	*/
 	
-	function addElements(&$form, $cols, $array_name = null)
+	function addElements(&$form, $cols, $arrayName = null)
 	{
 		foreach ($cols as $name => $col) {
 			
-			if ($array_name) {
-				$elemname = $array_name . "[$name]";
+			if ($arrayName) {
+				$elemname = $arrayName . "[$name]";
 			} else {
 				$elemname = $name;
 			}
@@ -180,7 +186,7 @@ class DB_Table_QuickForm {
 		case 'checkbox':
 			
 			$element =& HTML_QuickForm::createElement(
-				$col['qf_type'],
+				'advcheckbox',
 				$elemname,
 				$col['qf_label'],
 				null,
@@ -190,7 +196,8 @@ class DB_Table_QuickForm {
 			
 			// WARNING: advcheckbox elements in HTML_QuickForm v3.2.2
 			// and earlier do not honor setChecked(); they will always
-			// be un-checked, unless a POST value sets them.
+			// be un-checked, unless a POST value sets them.  Upgrade
+			// to QF 3.2.3 or later.
 			if (isset($setval) && $setval == true) {
 				$element->setChecked(true);
 			} else {
@@ -280,7 +287,7 @@ class DB_Table_QuickForm {
 				
 				$element[] =& HTML_QuickForm::createElement(
 					$col['qf_type'],
-					null, // elename not added because this is a group
+					null, // elemname not added because this is a group
 					null,
 					$btnlabel . '<br />',
 					$btnvalue,
@@ -383,23 +390,23 @@ class DB_Table_QuickForm {
 	* @param array $cols A sequential array of DB_Table column
 	* definitions from which to create form elements.
 	* 
-	* @param string $array_name By default, the form will use the names
+	* @param string $arrayName By default, the form will use the names
 	* of the columns as the names of the form elements.  If you pass
-	* $array_name, the column names will become keys in an array named
+	* $arrayName, the column names will become keys in an array named
 	* for this parameter.
 	* 
 	* @return array An array of HTML_QuickForm_Element objects.
 	* 
 	*/
 	
-	function &getGroup($cols, $array_name = null)
+	function &getGroup($cols, $arrayName = null)
 	{
 		$group = array();
 		
 		foreach ($cols as $name => $col) {
 			
-			if ($array_name) {
-				$elemname = $array_name . "[$name]";
+			if ($arrayName) {
+				$elemname = $arrayName . "[$name]";
 			} else {
 				$elemname = $name;
 			}
@@ -426,23 +433,35 @@ class DB_Table_QuickForm {
 	* @param array $cols A sequential array of DB_Table column definitions
 	* from which to create form elements.
 	* 
-	* @param string $array_name By default, the form will use the names
+	* @param string $arrayName By default, the form will use the names
 	* of the columns as the names of the form elements.  If you pass
-	* $array_name, the column names will become keys in an array named
+	* $arrayName, the column names will become keys in an array named
 	* for this parameter.
+	* 
+	* @param string $forceValidate By default, validation will match
+	* the 'qf_validate' value from the column definition.  However,
+	* if you set $forceValidate to 'client' or 'server', this will
+	* override the value from the column definition.
 	* 
 	* @return void
 	* 
 	*/
 	
-	function addRules(&$form, $cols, $array_name = null)
+	function addRules(&$form, $cols, $arrayName = null,
+		$forceValidate = false)
 	{
 		foreach ($cols as $name => $col) {
 			
-			if ($array_name) {
-				$elemname = $array_name . "[$name]";
+			if ($arrayName) {
+				$elemname = $arrayName . "[$name]";
 			} else {
 				$elemname = $name;
+			}
+			
+			if ($forceValidate) {
+				$validate = $forceValidate;
+			} else {
+				$validate = $col['qf_validate'];
 			}
 			
 			DB_Table_QuickForm::fixColDef($col, $elemname);
@@ -460,7 +479,7 @@ class DB_Table_QuickForm {
 				case 'required':
 				case 'uploadedfile':
 					// $opts is the error message
-					$form->addRule($elemname, $opts, $type);
+					$form->addRule($elemname, $opts, $type, null, $validate);
 					break;
 				
 				case 'filename':
@@ -471,7 +490,8 @@ class DB_Table_QuickForm {
 				case 'regex':
 					// $opts[0] is the message
 					// $opts[1] is the size, mimetype, or regex
-					$form->addRule($elemname, $opts[0], $type, $opts[1]);
+					$form->addRule($elemname, $opts[0], $type, $opts[1],
+						$validate);
 					break;
 				
 				default:
@@ -524,10 +544,8 @@ class DB_Table_QuickForm {
 			switch ($col['type']) {
 			
 			case 'boolean':
-				$col['qf_type'] = 'select';
-				if (! isset($col['qf_vals'])) {
-					$col['qf_vals'] = array(0 => 'No', 1 => 'Yes');
-				}
+				$col['qf_type'] = 'checkbox';
+				$col['qf_vals'] = array(0,1);
 				break;
 			
 			case 'date':
@@ -579,35 +597,36 @@ class DB_Table_QuickForm {
 			$col['qf_rules'] = array();
 		}
 		
+		// where does form rule validation happen?  by default at the
+		// 'server' but could be at 'client' instead.
+		if (! isset($col['qf_validate'])) {
+			$col['qf_validate'] = 'server';
+		}
+		
 		// if the element is hidden, then we're done
 		// (adding rules to hidden elements is mostly useless)
 		if ($col['qf_type'] == 'hidden') {
 			return;
 		}
 		
-		// the element is required and not hidden
-		if (! isset($col['qf_rules']['required']) &&
-			$col['require']) {
+		// the element is required
+		if (! isset($col['qf_rules']['required']) && $col['require']) {
 			
 			$col['qf_rules']['required'] =
 				$GLOBALS['_DB_TABLE']['qf_rules']['required'];
 			
 		}
 		
-		// the element must be a number
-		if (! isset($col['qf_rules']['numeric']) && (
-				$col['type'] == 'smallint' ||
-				$col['type'] == 'integer' ||
-				$col['type'] == 'bigint' ||
-				$col['type'] == 'decimal'||
-				$col['type'] == 'single' ||
-				$col['type'] == 'double'
-			) ) {
+		$numeric = array('smallint', 'integer', 'bigint', 'decimal', 
+			'single', 'double');
+		
+		// the element is numeric
+		if (! isset($col['qf_rules']['numeric']) &&
+			in_array($col['type'], $numeric)) {
 			
-			if (! isset($col['qf_rules']['numeric'])) {
-				$col['qf_rules']['numeric'] =
-					$GLOBALS['_DB_TABLE']['qf_rules']['numeric'];
-			}
+			$col['qf_rules']['numeric'] =
+				$GLOBALS['_DB_TABLE']['qf_rules']['numeric'];
+			
 		}
 		
 		// the element has a maximum length
