@@ -226,30 +226,32 @@ $GLOBALS['_DB_TABLE']['type'] = array(
 /**
 * US-English error messages.  DB_Table has no other embedded strings, so
 * if you want to internationalize, you can modify these for your
-* language.
+* language; just set them before or after including DB_Table.
 */
-$GLOBALS['_DB_TABLE']['error'] = array(
-	DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB object',
-	DB_TABLE_ERR_PHPTYPE             => 'DB phptype not supported',
-	DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
-	DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
-	DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
-	DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
-	DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
-	DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
-	DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
-	DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
-	DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
-	DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
-	DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
-	DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
-	DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
-	DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-	DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
-	DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
-	DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
-	DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid'
-);
+if (! isset($GLOBALS['_DB_TABLE']['error'])) {
+	$GLOBALS['_DB_TABLE']['error'] = array(
+		DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB object',
+		DB_TABLE_ERR_PHPTYPE             => 'DB phptype not supported',
+		DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
+		DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
+		DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
+		DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
+		DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
+		DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
+		DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
+		DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
+		DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
+		DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
+		DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
+		DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
+		DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
+		DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+		DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
+		DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
+		DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
+		DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid'
+	);
+}
 
 
 /**
@@ -266,7 +268,7 @@ $GLOBALS['_DB_TABLE']['error'] = array(
 *
 * @author Paul M. Jones <pmjones@ciaweb.net>
 * 
-* @version 0.17 alpha
+* @version 0.18 alpha
 *
 * @package DB_Table
 * 
