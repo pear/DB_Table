@@ -253,6 +253,22 @@ class DB_Table_QuickForm {
             
             break;
             
+        case 'autocomplete':
+        
+            $element =& HTML_QuickForm::createElement(
+                $col['qf_type'],
+                $elemname,
+                $col['qf_label'],
+                $col['qf_vals'],
+                $col['qf_attrs']
+            );
+            
+            if (isset($setval)) {
+                $element->setValue($setval);
+            }
+            
+            break;
+            
         case 'date':
         
             $col['qf_opts']['format'] = 'Y-m-d';
@@ -345,7 +361,7 @@ class DB_Table_QuickForm {
             break;
             
         case 'select':
-        
+        	
             $element =& HTML_QuickForm::createElement(
                 $col['qf_type'],
                 $elemname,
