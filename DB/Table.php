@@ -997,9 +997,7 @@ class DB_Table {
     
     function autoValidInsert($flag = true)
     {
-        if ($flag === true || $flag === false) {
-            $this->_valid_insert = $flag;
-        } elseif ($flag) {
+        if ($flag) {
             $this->_valid_insert = true;
         } else {
             $this->_valid_insert = false;
@@ -1124,9 +1122,7 @@ class DB_Table {
     
     function autoValidUpdate($flag = true)
     {
-        if ($flag === true || $flag === false) {
-            $this->_valid_update = $flag;
-        } elseif ($flag) {
+        if ($flag) {
             $this->_valid_update = true;
         } else {
             $this->_valid_update = false;
@@ -1230,9 +1226,9 @@ class DB_Table {
     function nextID($seq_name = null)
     {
         if (is_null($seq_name)) {
-            $seq_name = "_{$this->table}_id";
+            $seq_name = "{$this->table}_id";
         } else {
-            $seq_name = "_{$this->table}_{$seq_name}";
+            $seq_name = "{$this->table}_{$seq_name}";
         }
         
         return $this->db->nextId($seq_name);
@@ -1301,9 +1297,7 @@ class DB_Table {
     
     function autoRecast($flag = true)
     {
-        if ($flag === true || $flag === false) {
-            $this->_auto_recast = $flag;
-        } elseif ($flag) {
+        if ($flag) {
             $this->_auto_recast = true;
         } else {
             $this->_auto_recast = false;
@@ -1612,10 +1606,16 @@ class DB_Table {
         // have we passed the check so far, and should we
         // also check for allowed values?
         if ($result && isset($this->col[$col]['qf_vals'])) {
+        	echo "checking vals for $col";
+        	$keys = array_keys($this->col[$col]['qf_vals']);
+        	print_r($keys);
+        	
             $result = in_array(
                 $val,
                 array_keys($this->col[$col]['qf_vals'])
             );
+            
+            echo "result was '$result'";
         }
         
         return $result;
