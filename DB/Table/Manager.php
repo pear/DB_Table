@@ -135,16 +135,26 @@ class DB_Table_Manager {
                 );
             }
             
-            // are there any columns not in the schema?
+			// are there any CLOB columns, or any columns that are not
+			// in the schema?
             settype($cols, 'array');
             $valid_cols = array_keys($column_set);
             foreach ($cols as $colname) {
+            
                 if (! in_array($colname, $valid_cols)) {
                     return DB_Table::throwError(
                         DB_TABLE_ERR_IDX_COL_UNDEF,
                         "'$idxname' ('$colname')"
                     );
                 }
+                
+                if ($column_set[$colname]['type'] == 'clob') {
+                    return DB_Table::throwError(
+                        DB_TABLE_ERR_IDX_COL_CLOB,
+                        "'$idxname' ('$colname')"
+                    );
+                }
+                
             }
             
             // string of column names
