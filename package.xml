@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
+<!-- $Id: package.xml,v 1.1 2004-04-25 16:12:09 pmjones Exp $ -->
+<package version="1.0">
+    <name>DB_Table</name>
+    <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
+    <description>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</description>
+    <maintainers>
+        <maintainer>
+            <user>pmjones</user>
+            <name>Paul M. Jones</name>
+            <email>pmjones@ciaweb.net</email>
+            <role>lead</role>
+        </maintainer>
+    </maintainers>
+    <release>
+        <version>0.17</version>
+        <date>2004-04-21</date>
+        <license>LGPL</license>
+        <state>alpha</state>
+        <notes>
+        	* BREAKS BACKWARD COMPATIBILITY: You will need to edit and update your existing classes extended from DB_Table
+        	* BC break: no longer uses a factory method; instantiate using "$obj =&amp; new DB_Table();" and then check the error property ("if ($obj->error)...")
+        	* BC break: all constants other than error codes are now string literals (e.g., DB_TABLE_COL_TYPE is now just 'type')
+        	* BC break: method setup() no longer exists; you now define $this->col, $this->idx, and $this->sql as class properties (or in your extended constructor)
+        	* BC break: DATETIME datatype is now named TIMESTAMP
+        	* These should be the last major breaks in backwards compatibility; sorry for the trouble :-(
+        	* Added 'char' native datatype and an emulated 'boolean' datatype
+        	* Converted 'date', 'time', 'timestamp' emulated datatypes now created as fixed-length (not variable-length) character fields
+        	* Added automatic check for reserved keywords under all supported databases at create() time (see the end of Manager.php)
+        	* Improved auto-validation of 'decimal' data types
+        	* Improved HTML_QuickForm element mapping and automation
+        	* Improved fetchmode switching in select() and selectResult()
+        	* Improved inline comments
+        </notes>
+        <filelist>
+            <file role="php" name="DB/Table.php" />
+            <file role="php" name="DB/Table/Manager.php" />
+            <file role="php" name="DB/Table/QuickForm.php" />
+            <file role="php" name="DB/Table/Valid.php" />
+        </filelist>
+    </release>
+</package>
