@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.17 2004-12-22 18:14:10 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.18 2004-12-30 15:37:10 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -15,7 +15,7 @@
     </maintainers>
     <release>
         <version>0.23.0</version>
-        <date>2004-12-22</date>
+        <date>2004-12-30</date>
         <license>LGPL</license>
         <state>beta</state>
         <notes>
@@ -87,10 +87,15 @@
             * Valid.php isChar() is less restrictive and allows numbers
               in character fields.  Patch provided by Alex Hoebart.
             
-            * Fixed bug 2799 "error in getFormElement", patch provided by David Glenn.
-            
-            * Fixed bug 2918 "recast($data) timestamp zero packing", reported by Simon Massey.
-            
+            * Fixed bug 2799 "error in getFormElement", patch provided
+              by David Glenn.
+
+            * Fixed bug 2918 "recast($data) timestamp zero packing",
+              reported by Simon Massey.
+
+            * Added selectCount() method to let you get a row-count
+              on an existing query; patch provided by Ian Eure.
+              
         </notes>
         <filelist>
         
