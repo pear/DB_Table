@@ -325,7 +325,7 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 * 
 * @author Paul M. Jones <pmjones@php.net>
 * 
-* @version 0.22 beta
+* @version @package_version@
 *
 */
 
