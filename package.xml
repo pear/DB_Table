@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.2 2004-05-02 13:10:23 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.3 2004-07-08 13:41:54 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -14,15 +14,12 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>0.18</version>
-        <date>2004-04-23</date>
+        <version>0.19</version>
+        <date>2004-07-??</date>
         <license>LGPL</license>
         <state>alpha</state>
         <notes>
-        	* Index names are now prefixes with the table name and underscore, and are suffixed with '_index'; this is to soothe PostgreSQL, which does not like index names to be the same, even if they are on different tables.
-        	* Default rule messages for 'required', 'maxlength', and 'numeric' are now globals and can be internationalized just like the error messages (thanks, Moritz Heidkamp)
-        	* DB_Table_QuickForm now has better default support for unrecognized rules (thanks Moritz Heidkamp)
-        	* Fixed 'static' element in DB_Table_QuickForm, now correctly displays label and value
+            * Fixed bug 1671 (missing dependency), package.xml now includes deps on Date and HTML_QuickForm
         </notes>
         <filelist>
             <file role="php" name="DB/Table.php" />
@@ -30,5 +27,9 @@
             <file role="php" name="DB/Table/QuickForm.php" />
             <file role="php" name="DB/Table/Valid.php" />
         </filelist>
+        <deps>
+            <dep type="pkg" rel="has" optional="no">Date</dep>
+            <dep type="pkg" rel="has" optional="yes">HTML_QuickForm</dep>
+        </deps>
     </release>
 </package>
