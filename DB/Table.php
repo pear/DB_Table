@@ -1226,7 +1226,7 @@ class DB_Table {
     function nextID($seq_name = null)
     {
         if (is_null($seq_name)) {
-            $seq_name = "{$this->table}_id";
+            $seq_name = "{$this->table}";
         } else {
             $seq_name = "{$this->table}_{$seq_name}";
         }
