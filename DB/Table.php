@@ -118,11 +118,17 @@ define('DB_TABLE_ERR_DECLARE_IDXNAME',  -19);
 */
 define('DB_TABLE_ERR_IDX_COL_CLOB',     -20);
 
-
+/**
+* Error code at create() time when you define a column name that is
+* more than 30 chars long (an Oracle restriction).
+*/
 define('DB_TABLE_ERR_DECLARE_STRLEN',   -21);
 
+/**
+* Error code at create() time when the index name ends up being more
+* than 30 chars long (an Oracle restriction).
+*/
 define('DB_TABLE_ERR_IDX_STRLEN',   -21);
-
 
 
 /**
@@ -725,7 +731,15 @@ class DB_Table {
         $restore_class = $this->db->fetchmode_object_class;
         
         // swap modes
-        $this->_swapModes($this->fetchmode, $this->fetchmode_object_class);
+        $fetchmode = $this->fetchmode;
+        $fetchmode_object_class = $this->fetchmode_object_class;
+        if (isset($this->sql[$sqlkey]['fetchmode'])) {
+            $fetchmode = $this->sql[$sqlkey]['fetchmode'];
+        }
+        if (isset($this->sql[$sqlkey]['fetchmode_object_class'])) {
+            $fetchmode_object_class = $this->sql[$sqlkey]['fetchmode_object_class'];
+        }
+        $this->_swapModes($fetchmode, $fetchmode_object_class);
         
         // get the result
         $result = $this->db->$method($sql);
@@ -780,7 +794,15 @@ class DB_Table {
         $restore_class = $this->db->fetchmode_object_class;
         
         // swap modes
-        $this->_swapModes($this->fetchmode, $this->fetchmode_object_class);
+        $fetchmode = $this->fetchmode;
+        $fetchmode_object_class = $this->fetchmode_object_class;
+        if (isset($this->sql[$sqlkey]['fetchmode'])) {
+            $fetchmode = $this->sql[$sqlkey]['fetchmode'];
+        }
+        if (isset($this->sql[$sqlkey]['fetchmode_object_class'])) {
+            $fetchmode_object_class = $this->sql[$sqlkey]['fetchmode_object_class'];
+        }
+        $this->_swapModes($fetchmode, $fetchmode_object_class);
         
         // get the result
         $result =& $this->db->query($sql);
