@@ -1219,7 +1219,7 @@ class DB_Table {
     * 
     * @access public
     * 
-    * @param string $seq_name The sequence name; defaults to _table_id.
+    * @param string $seq_name The sequence name; defaults to table_id.
     * 
     * @return integer The next value in the sequence.
     *
@@ -1302,11 +1302,11 @@ class DB_Table {
     function autoRecast($flag = true)
     {
         if ($flag === true || $flag === false) {
-            $this->_valid_insert = $flag;
+            $this->_auto_recast = $flag;
         } elseif ($flag) {
-            $this->_valid_insert = true;
+            $this->_auto_recast = true;
         } else {
-            $this->_valid_insert = false;
+            $this->_auto_recast = false;
         }
     }
     
