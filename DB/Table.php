@@ -1341,6 +1341,12 @@ class DB_Table {
             unset($val);
             $val =& $data[$key];
             
+            // skip explicit NULL values
+            if (is_null($val)) {
+            	continue;
+            }
+            
+            // otherwise, recast to the column type
             switch ($this->col[$key]['type']) {
             
             case 'boolean':
@@ -1606,16 +1612,12 @@ class DB_Table {
         // have we passed the check so far, and should we
         // also check for allowed values?
         if ($result && isset($this->col[$col]['qf_vals'])) {
-        	echo "checking vals for $col";
         	$keys = array_keys($this->col[$col]['qf_vals']);
-        	print_r($keys);
         	
             $result = in_array(
                 $val,
                 array_keys($this->col[$col]['qf_vals'])
             );
-            
-            echo "result was '$result'";
         }
         
         return $result;
