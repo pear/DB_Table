@@ -63,6 +63,8 @@ class DB_Table_Valid {
     * 
     * Check if a value validates against the 'char' and 'varchar' data type.
     * 
+    * We allow most anything here, only checking that the length is in range.
+    * 
     * @static
     * 
     * @access public
@@ -76,8 +78,9 @@ class DB_Table_Valid {
     
     function isChar($value, $colsize)
     {
+    	$is_scalar = (! is_array($value) && ! is_object($value));
         $in_range = (strlen($value) <= $colsize);
-        return is_string($value) && $in_range;
+        return $is_scalar && $in_range;
     }
     
     
