@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.8 2004-07-11 01:30:41 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.9 2004-07-11 01:40:02 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -51,7 +51,7 @@
 			<file role="doc" name="docs/reserved_words/sqlite-words.txt" />
 			
             <file role="test" name="tests/bogotest.php" />
-            <file role="test" name="tests/setup.ini" />
+            <file role="test" name="tests/setup.ini-dist" />
 
         </filelist>
         <deps>
