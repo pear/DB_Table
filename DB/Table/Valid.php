@@ -10,6 +10,8 @@
 *
 * @author Paul M. Jones <pmjones@php.net>
 * 
+* @license http://www.gnu.org/copyleft/lesser.html LGPL
+* 
 * @version $Id$
 *
 */
