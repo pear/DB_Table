@@ -27,7 +27,8 @@ class example extends DB_Table {
 		),
 		'xsmint' => array(
 			'type'    => 'smallint',
-			'require' => false
+			'require' => false,
+			'qf_client' => true
 		),
 		'xint' => array(
 			'type'    => 'integer',
@@ -111,7 +112,7 @@ if ($opts['example']['fetch']) {
 	Var_Dump::display($result);
 }
 
-$form =& $example->getForm(null, 'mydata');
+$form =& $example->getForm(null, 'mydata', null, false);
 $form->addElement('submit', 'op', 'Submit');
 $form->validate();
 $form->display();

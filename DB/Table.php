@@ -275,7 +275,7 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 *
 * @author Paul M. Jones <pmjones@ciaweb.net>
 * 
-* @version 0.20 alpha
+* @version 0.21 alpha
 *
 * @package DB_Table
 * 
@@ -1687,11 +1687,13 @@ class DB_Table {
     * 
     */
     
-    function &getForm($columns = null, $array_name = null, $args = array())
+    function &getForm($columns = null, $array_name = null, $args = array(),
+    	$clientValidate = null)
     {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
-        return DB_Table_QuickForm::getForm($coldefs, $array_name, $args);
+        return DB_Table_QuickForm::getForm($coldefs, $array_name, $args,
+        	$clientValidate);
     }
     
     
@@ -1719,12 +1721,14 @@ class DB_Table {
     * 
     */
     
-    function addFormElements(&$form, $columns = null, $array_name = null)
+    function addFormElements(&$form, $columns = null, $array_name = null,
+    	$clientValidate = null)
     {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
         DB_Table_QuickForm::addElements($form, $coldefs, $array_name);
-        DB_Table_QuickForm::addRules($form, $coldefs, $array_name);
+        DB_Table_QuickForm::addRules($form, $coldefs, $array_name,
+        	$clientValidate);
     }
     
     

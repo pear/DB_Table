@@ -8,9 +8,9 @@ require_once 'HTML/QuickForm.php';
 */
 if (! isset($GLOBALS['_DB_TABLE']['qf_rules'])) {
     $GLOBALS['_DB_TABLE']['qf_rules'] = array(
-      'required'  => 'This element is required.',
-      'numeric'   => 'This element must be numbers only.',
-      'maxlength' => 'This element can have no more than %d characters.'
+      'required'  => 'The item %s is required.',
+      'numeric'   => 'The item %s must be numbers only.',
+      'maxlength' => 'The item %s can have no more than %d characters.'
     );
 }
 
@@ -68,9 +68,9 @@ class DB_Table_QuickForm {
     * 'trackSubmit' : Boolean, whether to track if the form was
     * submitted by adding a special hidden field
     * 
-    * @param string $forceValidate By default, validation will match
-    * the 'qf_validate' value from the column definition.  However,
-    * if you set $forceValidate to 'client' or 'server', this will
+    * @param string $clientValidate By default, validation will match
+    * the 'qf_client' value from the column definition.  However,
+    * if you set $clientValidate to true or false, this will
     * override the value from the column definition.
     * 
     * @return object HTML_QuickForm
@@ -80,7 +80,7 @@ class DB_Table_QuickForm {
     */
     
     function &getForm($cols, $arrayName = null, $args = array(),
-        $forceValidate = false)
+        $clientValidate = null)
     {
         $formName = isset($args['formName'])
             ? $args['formName'] : $this->table;
@@ -104,7 +104,7 @@ class DB_Table_QuickForm {
             $attributes, $trackSubmit);
             
         DB_Table_QuickForm::addElements($form, $cols, $arrayName);
-        DB_Table_QuickForm::addRules($form, $cols, $arrayName, $forceValidate);
+        DB_Table_QuickForm::addRules($form, $cols, $arrayName, $clientValidate);
         
         return $form;
     }
@@ -438,9 +438,9 @@ class DB_Table_QuickForm {
     * $arrayName, the column names will become keys in an array named
     * for this parameter.
     * 
-    * @param string $forceValidate By default, validation will match
-    * the 'qf_validate' value from the column definition.  However,
-    * if you set $forceValidate to 'client' or 'server', this will
+    * @param string $clientValidate By default, validation will match
+    * the 'qf_client' value from the column definition.  However,
+    * if you set $clientValidate to true or false, this will
     * override the value from the column definition.
     * 
     * @return void
@@ -448,7 +448,7 @@ class DB_Table_QuickForm {
     */
     
     function addRules(&$form, $cols, $arrayName = null,
-        $forceValidate = false)
+        $clientValidate = null)
     {
         foreach ($cols as $name => $col) {
             
@@ -458,14 +458,28 @@ class DB_Table_QuickForm {
                 $elemname = $name;
             }
             
+            // make sure all necessary elements are in place
             DB_Table_QuickForm::fixColDef($col, $elemname);
             
-            if ($forceValidate) {
-                $validate = $forceValidate;
+            // if clientValidate is specified, override the column
+            // definition.  otherwise use the col def as it is.
+            if (! is_null($clientValidate)) {
+            	// override
+            	if ($clientValidate) {
+                	$validate = 'client';
+                } else {
+                	$validate = 'server';
+                }
             } else {
-                $validate = $col['qf_validate'];
+            	// use as-is
+            	if ($col['qf_client']) {
+                	$validate = 'client';
+            	} else {
+            		$validate = 'server';
+            	}
             }
             
+            // loop through the rules and add them
             foreach ($col['qf_rules'] as $type => $opts) {
                 
                 switch ($type) {
@@ -535,10 +549,10 @@ class DB_Table_QuickForm {
             $col['qf_vals'] = null;
         }
         
-        // where does form rule validation happen?  by default at the
-        // 'server' but could be at 'client' instead.
-        if (! isset($col['qf_validate'])) {
-            $col['qf_validate'] = 'server';
+        // are we doing client validation in addition to 
+        // server validation?  by default, no.
+        if (! isset($col['qf_client'])) {
+            $col['qf_client'] = false;
         }
         
         // the element type; if not set,
@@ -612,8 +626,10 @@ class DB_Table_QuickForm {
         // the element is required
         if (! isset($col['qf_rules']['required']) && $col['require']) {
             
-            $col['qf_rules']['required'] =
-                $GLOBALS['_DB_TABLE']['qf_rules']['required'];
+            $col['qf_rules']['required'] = sprintf(
+                $GLOBALS['_DB_TABLE']['qf_rules']['required'],
+                $elemname
+            );
             
         }
         
@@ -624,8 +640,10 @@ class DB_Table_QuickForm {
         if (! isset($col['qf_rules']['numeric']) &&
             in_array($col['type'], $numeric)) {
             
-            $col['qf_rules']['numeric'] =
-                $GLOBALS['_DB_TABLE']['qf_rules']['numeric'];
+            $col['qf_rules']['numeric'] = sprintf(
+                $GLOBALS['_DB_TABLE']['qf_rules']['numeric'],
+                $elemname
+            );
             
         }
         
@@ -636,7 +654,9 @@ class DB_Table_QuickForm {
             $max = $col['size'];
             
             $msg = sprintf(
-                $GLOBALS['_DB_TABLE']['qf_rules']['maxlength'], $max
+                $GLOBALS['_DB_TABLE']['qf_rules']['maxlength'],
+                $elemname,
+                $max
             );
             
             $col['qf_rules']['maxlength'] = array($msg, $max);
