@@ -1732,7 +1732,9 @@ class DB_Table {
         // make sure we have the validation class
         include_once 'DB/Table/Valid.php';
         
-        // validate values per the column type
+        // validate values per the column type.  we use sqlite
+        // as the single authentic list of allowed column types,
+        // regardless of the actual rdbms being used.
         $map = array_keys($GLOBALS['_DB_TABLE']['type']['sqlite']);
         
         // is the column type on the map?
