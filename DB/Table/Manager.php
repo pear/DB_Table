@@ -150,11 +150,18 @@ class DB_Table_Manager {
             // string of column names
             $colstring = implode(', ', $cols);
             
+            // we prefix all index names with the table name,
+            // and suffix all index names with '_index'.  this
+            // is to soothe PostgreSQL, which demands that index
+            // names not collide, even when they indexes are on
+            // different tables.
+            $newIdxName = $table . '_' . $idxname . '_index';
+            
             // create index entry
             if ($type == 'unique') {
-                $index[] = "CREATE UNIQUE INDEX $idxname ON $table ($colstring)";
+                $index[] = "CREATE UNIQUE INDEX $newIdxName ON $table ($colstring)";
             } elseif ($type == 'normal') {
-                $index[] = "CREATE INDEX $idxname ON $table ($colstring)";
+                $index[] = "CREATE INDEX $newIdxName ON $table ($colstring)";
             } else {
                 return DB_Table::throwError(
                     DB_TABLE_ERR_IDX_TYPE,
