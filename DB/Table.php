@@ -112,6 +112,12 @@ define('DB_TABLE_ERR_DECLARE_COLNAME',  -18);
 */
 define('DB_TABLE_ERR_DECLARE_IDXNAME',  -19);
 
+/**
+* Error code at create() time when you define an index in $this->idx
+* that refers to a CLOB column.
+*/
+define('DB_TABLE_ERR_IDX_COL_CLOB',     -20);
+
 
 /**
 * The PEAR class for errors
@@ -249,7 +255,8 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 		DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
 		DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
 		DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
-		DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid'
+		DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+		DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index'
 	);
 }
 
@@ -417,6 +424,19 @@ class DB_Table {
     */
     
     var $error = null;
+    
+    
+    /**
+    * 
+    * Whether or not to automatically recast data at insert- and update-time.
+    * 
+    * @access private
+    * 
+    * @var bool
+    * 
+    */
+    
+    var $_auto_recast = true;
     
     
     /**
@@ -639,7 +659,7 @@ class DB_Table {
     
     /**
     *
-    * Select rows from the table using one of the 'DB::get*()' methods.
+    * Selects rows from the table using one of the 'DB::get*()' methods.
     * 
     * @access public
     * 
@@ -712,7 +732,7 @@ class DB_Table {
     
     /**
     *
-    * Select rows from the table as a DB_Result object.
+    * Selects rows from the table as a DB_Result object.
     * 
     * @access public
     * 
@@ -767,7 +787,7 @@ class DB_Table {
     
 	/**
 	* 
-	* Change the $this->db PEAR DB object fetchmode and
+	* Changes the $this->db PEAR DB object fetchmode and
 	* fetchmode_object_class.
 	* 
 	* Becase DB_Table objects tend to use the same PEAR DB object, it
@@ -818,7 +838,7 @@ class DB_Table {
     
     /**
     * 
-    * Build the SQL command from a specified $this->sql element.
+    * Builds the SQL command from a specified $this->sql element.
     * 
     * @access public
     * 
@@ -899,7 +919,7 @@ class DB_Table {
             switch ($key) {
             
             case 'join':
-                $cmd .= strtoupper($key) . " $val\n";
+                $cmd .= " $val\n";
                 break;
                 
             case 'group':
@@ -926,7 +946,7 @@ class DB_Table {
     
     /**
     *
-    * Insert a single table row after validating through validInsert().
+    * Inserts a single table row after validating through validInsert().
     * 
     * @access public
     * 
@@ -945,6 +965,11 @@ class DB_Table {
         
     function insert($data)
     {
+    	// forcibly recast the data elements to their proper types?
+    	if ($this->_auth_recast) {
+	    	$this->recast($data);
+    	}
+    	
         // validate the data if auto-validation is turned on
         if ($this->_valid_insert) {
             $result = $this->validInsert($data);
@@ -960,7 +985,7 @@ class DB_Table {
     
     /**
     * 
-    * Turn on (or off) automatic validation of inserted data.
+    * Turns on (or off) automatic validation of inserted data.
     * 
     * @access public
     * 
@@ -984,7 +1009,7 @@ class DB_Table {
     
     /**
     *
-    * Validate an array for insertion into the table.
+    * Validates an array for insertion into the table.
     * 
     * @access public
     * 
@@ -1045,7 +1070,7 @@ class DB_Table {
     
     /**
     *
-    * Update table row(s) matching a custom WHERE clause, after checking
+    * Updates table row(s) matching a custom WHERE clause, after checking
     * against validUpdate().
     * 
     * @access public
@@ -1067,6 +1092,11 @@ class DB_Table {
     
     function update($data, $where)
     {
+    	// forcibly recast the data elements to their proper types?
+    	if ($this->_auth_recast) {
+	    	$this->recast($data);
+    	}
+    	
         // validate the data if auto-validation is turned on
         if ($this->_valid_update) {
             $result = $this->validUpdate($data);
@@ -1082,7 +1112,7 @@ class DB_Table {
     
     /**
     * 
-    * Turn on (or off) automatic validation of updated data.
+    * Turns on (or off) automatic validation of updated data.
     * 
     * @access public
     * 
@@ -1106,7 +1136,7 @@ class DB_Table {
     
     /**
     *
-    * Validate an array for updating the table.
+    * Validates an array for updating the table.
     * 
     * @access public
     * 
@@ -1165,7 +1195,7 @@ class DB_Table {
     
     /**
     *
-    * Delete table rows matching a custom WHERE clause.
+    * Deletes table rows matching a custom WHERE clause.
     * 
     * @access public
     * 
@@ -1185,7 +1215,7 @@ class DB_Table {
     
     /**
     *
-    * Generate a sequence value; sequence name defaults to the table name.
+    * Generates a sequence value; sequence name defaults to the table name.
     * 
     * @access public
     * 
@@ -1211,7 +1241,7 @@ class DB_Table {
     
     /**
     * 
-    * Escape and enquote a value for use in an SQL query.
+    * Escapes and enquotes a value for use in an SQL query.
     * 
     * Helps makes user input safe against SQL injection attack.
     * 
@@ -1231,7 +1261,7 @@ class DB_Table {
     
     /**
     * 
-    * Return a blank row array based on the column map.
+    * Returns a blank row array based on the column map.
     * 
     * The array keys are the column names, and all values are set to null.
     * 
@@ -1258,7 +1288,32 @@ class DB_Table {
     
     /**
     * 
-    * Force array elements to the proper types for their columns.
+    * Turns on (or off) automatic recasting of insert and update data.
+    * 
+    * @access public
+    * 
+    * @param bool $flag True to autmatically recast insert and update data,
+    * false to not do so.
+    *
+    * @return void
+    * 
+    */
+    
+    function autoRecast($flag = true)
+    {
+        if ($flag === true || $flag === false) {
+            $this->_valid_insert = $flag;
+        } elseif ($flag) {
+            $this->_valid_insert = true;
+        } else {
+            $this->_valid_insert = false;
+        }
+    }
+    
+    
+    /**
+    * 
+    * Forces array elements to the proper types for their columns.
     * 
 	* This will not valiate the data, and will forcibly change the data
 	* to match the recast-type.
@@ -1418,7 +1473,7 @@ class DB_Table {
     
     /**
     * 
-    * Create the table based on $this->col and $this->idx.
+    * Creates the table based on $this->col and $this->idx.
     * 
     * @access public
     * 
@@ -1478,7 +1533,7 @@ class DB_Table {
     
     /**
     * 
-    * Check if a value validates against the DB_Table data type for a
+    * Checks if a value validates against the DB_Table data type for a
     * given column. This only checks that it matches the data type; it
     * does not do extended validation.
     * 
@@ -1592,7 +1647,7 @@ class DB_Table {
     
     /**
     * 
-    * Create and return a QuickForm object based on table columns.
+    * Creates and returns a QuickForm object based on table columns.
     *
     * @access public
     *
