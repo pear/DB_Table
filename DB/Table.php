@@ -275,7 +275,7 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 *
 * @author Paul M. Jones <pmjones@ciaweb.net>
 * 
-* @version 0.19 alpha
+* @version 0.20 alpha
 *
 * @package DB_Table
 * 
@@ -966,7 +966,7 @@ class DB_Table {
     function insert($data)
     {
     	// forcibly recast the data elements to their proper types?
-    	if ($this->_auth_recast) {
+    	if ($this->_auto_recast) {
 	    	$this->recast($data);
     	}
     	
@@ -1093,7 +1093,7 @@ class DB_Table {
     function update($data, $where)
     {
     	// forcibly recast the data elements to their proper types?
-    	if ($this->_auth_recast) {
+    	if ($this->_auto_recast) {
 	    	$this->recast($data);
     	}
     	
