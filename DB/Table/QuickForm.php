@@ -32,6 +32,7 @@ if (! isset($GLOBALS['_DB_TABLE']['qf_rules'])) {
 
 class DB_Table_QuickForm {
     
+    
     /**
     * 
     * Build a form based on DB_Table column definitions.
@@ -76,11 +77,60 @@ class DB_Table_QuickForm {
     * @return object HTML_QuickForm
     * 
     * @see HTML_QuickForm
+    *
+    * @see DB_Table_QuickForm::createForm()
     * 
     */
     
     function &getForm($cols, $arrayName = null, $args = array(),
         $clientValidate = null)
+    {
+        $form =& DB_Table_QuickForm::createForm($args);
+        DB_Table_QuickForm::addElements($form, $cols, $arrayName);
+        DB_Table_QuickForm::addRules($form, $cols, $arrayName, $clientValidate);
+        
+        return $form;
+    }
+    
+    
+    /**
+    * 
+    * Creates an empty form object.
+    *
+    * In case you want more control over your form, you can call this function
+    * to create it, then add whatever elements you want.
+    *
+    * @static
+    * 
+    * @access public
+    * 
+    * @author Ian Eure <ieure@php.net>
+    * 
+    * @param array $args An associative array of optional arguments to
+    * pass to the QuickForm object.  The keys are...
+    *
+    * 'formName' : String, name of the form; defaults to the name of the
+    * table.
+    * 
+    * 'method' : String, form method; defaults to 'post'.
+    * 
+    * 'action' : String, form action; defaults to
+    * $_SERVER['REQUEST_URI'].
+    * 
+    * 'target' : String, form target target; defaults to '_self'
+    * 
+    * 'attributes' : Associative array, extra attributes for <form>
+    * tag; the key is the attribute name and the value is attribute
+    * value.
+    * 
+    * 'trackSubmit' : Boolean, whether to track if the form was
+    * submitted by adding a special hidden field
+    * 
+    * @return object HTML_QuickForm
+    * 
+    */
+    
+    function &createForm($args = array(), $clientValidate = null)
     {
         $formName = isset($args['formName'])
             ? $args['formName'] : $this->table;
@@ -102,9 +152,6 @@ class DB_Table_QuickForm {
         
         $form =& new HTML_QuickForm($formName, $method, $action, $target, 
             $attributes, $trackSubmit);
-            
-        DB_Table_QuickForm::addElements($form, $cols, $arrayName);
-        DB_Table_QuickForm::addRules($form, $cols, $arrayName, $clientValidate);
         
         return $form;
     }
