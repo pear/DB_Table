@@ -5,13 +5,22 @@ require_once 'DB.php';
 require_once 'DB/Table.php';
 require_once 'Var_Dump.php';
 
+error_reporting(E_ALL);
+
 class example extends DB_Table {
 	
 	var $col = array(
 		'xvarchar' => array(
 			'type'    => 'varchar',
 			'size'    => 128,
-			'require' => false
+			'require' => false,
+			'qf_type' => 'autocomplete',
+			'qf_vals' => array(
+				'this',
+				'that',
+				'other',
+				'another'
+			)
 		),
 		'xbool' => array(
 			'type'    => 'boolean'
@@ -113,19 +122,25 @@ if ($opts['example']['fetch']) {
 
 $form =& $example->getForm(null, 'mydata', null, false);
 $form->addElement('submit', 'op', 'Submit');
-$form->validate();
-$form->display();
 
-$values = $form->exportValues();
-$example->recast($values['mydata']);
-Var_Dump::display($values['mydata']);
+echo "<html><head><title>bogotest</title></head><body>\n";
 
-if ($_POST) {
-	$result = $example->validInsert($values['mydata']);
+if ($form->validate()) {
+
+	$values = $form->exportValues();
+	Var_Dump::display($values['mydata']);
+	
+	$result = $example->insert($values['mydata']);
 	Var_Dump::display($result);
+	
 }
 
-require_once 'DB/Table/Valid.php';
+$form->display();
 
+echo "\n<hr />\n";
+$list = $example->select('list');
+Var_Dump($list);
+
+echo "\n</body></html>";
 
 ?>
