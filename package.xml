@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.15 2004-11-19 18:03:25 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.16 2004-12-21 16:11:00 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -19,9 +19,10 @@
         <license>LGPL</license>
         <state>beta</state>
         <notes>
-            * MULTIPLE BC BREAKS related to naming conventions, mostly
-              because of Oracle.  Read and heed the following two notes
-              before you upgrade.
+            * WARNING: MULTIPLE BC BREAKS related to naming conventions,
+              mostly because of Oracle.  Read and heed the following two notes
+              before you upgrade.  These are per email conversations with,
+              patches from, and suggestions by Alex Hoebart.
               
 			* BC BREAK on name lengths:
 			
@@ -45,7 +46,7 @@
 				
 				Error codes and messages have been added to notify of
 				the new rules. effect.  This should only affect users
-				who are starting new tables with DB_Table and should not
+				who are creating new tables with DB_Table and should not
 				affect existing tables and indexes.
                 
 			* BC BREAK on sequences:
@@ -54,13 +55,16 @@
 				DB_Table used to default to '_table_id' as the name of
 				the sequence, and DB would take that to create a
 				'_table_id_seq' sequence name. However, Oracle will not
-				allow a sequence name to start with '_'.
+				allow a sequence name to start with '_'.  In addition,
+				Oracle has a maximum length of 30 for sequence names.
 				
 				For Oracle compliance, and in the interest of
 				consistency between DB and DB_Table, as well as keeping
 				names under 30 chars, DB_Table now uses only the table
 				name as the default, which means that DB translates this
-				into 'tablename_seq'.
+				into 'tablename_seq'.  Also, the nextID() method will 
+				check to make sure the sequence name will end up being 
+				no longer than 30 chars.
 				
 				Users of DB_Table should rename their sequences to
 				remove the initial underscore and change the trailing
@@ -76,7 +80,16 @@
             * Added new keys to the $sql property to support per-query
               'fetchmode' and 'fetchmode_object_class' settings.  Patch
               provided by Ian Eure.
-              
+            
+            * Quickform.php addRules() method now supports any registered
+              rule.  Patch provided by Alex Hoebart.
+            
+            * Valid.php isChar() is less restrictive and allows numbers
+              in character fields.  Patch provided by Alex Hoebart.
+            
+            * Fixed bug 2799, patch provided by David Glenn.
+            
+            * Fixed bug 2918, reported by Simon Massey.
             
         </notes>
         <filelist>
