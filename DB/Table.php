@@ -275,7 +275,7 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 *
 * @author Paul M. Jones <pmjones@ciaweb.net>
 * 
-* @version 0.18 alpha
+* @version 0.19 alpha
 *
 * @package DB_Table
 * 
