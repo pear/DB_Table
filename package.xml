@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.4 2004-07-10 14:25:20 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.5 2004-07-10 14:57:48 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -15,7 +15,7 @@
     </maintainers>
     <release>
         <version>0.19</version>
-        <date>2004-07-??</date>
+        <date>2004-07-10</date>
         <license>LGPL</license>
         <state>alpha</state>
         <notes>
@@ -29,12 +29,29 @@
 			* getForm() and addRules() method have additional $forceValidate parameter to set rule validation at 'server' or 'client' regardless of column definition (suggested by Mark Wiesemann)
 			* QuickForm 'checkbox' elements now always map to 'advcheckbox' elements
 			* boolean columns now default to 'checkbox' with values of 0 and 1 (vice 'select')
+			* added bogus test script and reserved-word documents
         </notes>
         <filelist>
+        
             <file role="php" name="DB/Table.php" />
             <file role="php" name="DB/Table/Manager.php" />
             <file role="php" name="DB/Table/QuickForm.php" />
             <file role="php" name="DB/Table/Valid.php" />
+            
+			<file role="doc" name="docs/reserved_words/_sources.txt" />
+			<file role="doc" name="docs/reserved_words/all-words.txt" />
+			<file role="doc" name="docs/reserved_words/CVS" />
+			<file role="doc" name="docs/reserved_words/mssql-words.txt" />
+			<file role="doc" name="docs/reserved_words/mysql-words.txt" />
+			<file role="doc" name="docs/reserved_words/oci8-words.txt" />
+			<file role="doc" name="docs/reserved_words/pgsql-words.txt" />
+			<file role="doc" name="docs/reserved_words/sql92-words.txt" />
+			<file role="doc" name="docs/reserved_words/sql99-words.txt" />
+			<file role="doc" name="docs/reserved_words/sqlite-words.txt" />
+			
+            <file role="tests" name="tests/bogotest.php" />
+            <file role="tests" name="tests/setup.ini" />
+
         </filelist>
         <deps>
             <dep type="pkg" rel="has" optional="no">Date</dep>
