@@ -16,10 +16,10 @@ class example extends DB_Table {
 			'require' => false,
 			'qf_type' => 'autocomplete',
 			'qf_vals' => array(
-				'this',
-				'that',
+				'another',
 				'other',
-				'another'
+				'that',
+				'this'
 			)
 		),
 		'xbool' => array(
@@ -138,6 +138,7 @@ if ($form->validate()) {
 $form->display();
 
 echo "\n<hr />\n";
+$example->fetchmode = DB_FETCHMODE_ASSOC;
 $list = $example->select('list');
 Var_Dump($list);
 
