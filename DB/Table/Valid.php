@@ -10,11 +10,11 @@ require_once 'DB/Table.php';
 * validation ranges for integers
 */
 if (! isset($GLOBALS['_DB_TABLE']['valid'])) {
-	$GLOBALS['_DB_TABLE']['valid'] = array(
-		'smallint' => array(pow(-2, 15), pow(+2, 15) - 1),
-		'integer' => array(pow(-2, 31), pow(+2, 31) - 1),
-		'bigint' => array(pow(-2, 63), pow(+2, 63) - 1)
-	);
+    $GLOBALS['_DB_TABLE']['valid'] = array(
+        'smallint' => array(pow(-2, 15), pow(+2, 15) - 1),
+        'integer' => array(pow(-2, 31), pow(+2, 31) - 1),
+        'bigint' => array(pow(-2, 63), pow(+2, 63) - 1)
+    );
 }
 
 
@@ -50,11 +50,11 @@ class DB_Table_Valid {
     function isBoolean($value)
     {
         if ($value === true || $value === false) {
-        	return true;
+            return true;
         } elseif (is_numeric($value) && ($value == 0 || $value == 1)) {
-        	return true;
+            return true;
         } else {
-        	return false;
+            return false;
         }
     }
     
@@ -154,23 +154,23 @@ class DB_Table_Valid {
     * 
     * Check if a value validates against the 'decimal' data type.
     * 
-	* For the column defined "DECIMAL(5,2)" standard SQL requires that
-	* the column be able to store any value with 5 digits and 2
-	* decimals. In this case, therefore, the range of values that can be
-	* stored in the column is from -999.99 to 999.99.  DB_Table attempts
-	* to enforce this behavior regardless of the RDBMS backend behavior.
-	* 
+    * For the column defined "DECIMAL(5,2)" standard SQL requires that
+    * the column be able to store any value with 5 digits and 2
+    * decimals. In this case, therefore, the range of values that can be
+    * stored in the column is from -999.99 to 999.99.  DB_Table attempts
+    * to enforce this behavior regardless of the RDBMS backend behavior.
+    * 
     * @static
     * 
     * @access public
     * 
     * @param mixed $value The value to validate.
     * 
-	* @param string $colsize The 'size' to use for validation (to make
-	* sure of min/max and decimal places).
-	* 
-	* @param string $colscope The 'scope' to use for validation (to make
-	* sure of min/max and decimal places).
+    * @param string $colsize The 'size' to use for validation (to make
+    * sure of min/max and decimal places).
+    * 
+    * @param string $colscope The 'scope' to use for validation (to make
+    * sure of min/max and decimal places).
     * 
     * @return boolean True if the value is valid for the data type, false
     * if not.
@@ -179,27 +179,27 @@ class DB_Table_Valid {
     
     function isDecimal($value, $colsize, $colscope)
     {
-    	if (! is_numeric($value)) {
-    		return false;
-    	}
-    	
-    	// maximum number of digits allowed to the left
-    	// and right of the decimal point.
-    	$right_max = $colscope;
-    	$left_max = $colsize - $colscope;
-    	
-    	// ignore negative signs in all validation
-    	$value = str_replace('-', '', $value);
-    	
-    	// find the decimal point, then get the left
-    	// and right portions.
+        if (! is_numeric($value)) {
+            return false;
+        }
+        
+        // maximum number of digits allowed to the left
+        // and right of the decimal point.
+        $right_max = $colscope;
+        $left_max = $colsize - $colscope;
+        
+        // ignore negative signs in all validation
+        $value = str_replace('-', '', $value);
+        
+        // find the decimal point, then get the left
+        // and right portions.
         $pos = strpos($value, '.');
         if ($pos === false) {
-        	$left = $value;
-        	$right = '';
+            $left = $value;
+            $right = '';
         } else {
-	        $left = substr($value, 0, $pos);
-	        $right = substr($value, $pos+1);
+            $left = substr($value, 0, $pos);
+            $right = substr($value, $pos+1);
         }
         
         // how long are the left and right portions?
@@ -208,12 +208,12 @@ class DB_Table_Valid {
         
         // do the portions exceed their maxes?
         if ($left_len > $left_max ||
-        	$right_len > $right_max) {
-        	// one or the other exceeds the max lengths
-        	return false;
+            $right_len > $right_max) {
+            // one or the other exceeds the max lengths
+            return false;
         } else {
-        	// both are within parameters
-        	return true;
+            // both are within parameters
+            return true;
         }
     }
     
