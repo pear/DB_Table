@@ -305,7 +305,9 @@ class DB_Table_QuickForm {
             
         case 'date':
         
-            $col['qf_opts']['format'] = 'Y-m-d';
+            if (! isset($col['qf_opts']['format'])) {
+                $col['qf_opts']['format'] = 'Y-m-d';
+            }
             
             $element =& HTML_QuickForm::createElement(
                 'date',
@@ -323,7 +325,9 @@ class DB_Table_QuickForm {
             
         case 'time':
         
-            $col['qf_opts']['format'] = 'H:i:s';
+            if (! isset($col['qf_opts']['format'])) {
+                $col['qf_opts']['format'] = 'H:i:s';
+            }
             
             $element =& HTML_QuickForm::createElement(
                 'date',
@@ -341,7 +345,9 @@ class DB_Table_QuickForm {
 
         case 'timestamp':
         
-            $col['qf_opts']['format'] = 'Y-m-d H:i:s';
+            if (! isset($col['qf_opts']['format'])) {
+                $col['qf_opts']['format'] = 'Y-m-d H:i:s';
+            }
             
             $element =& HTML_QuickForm::createElement(
                 'date',
