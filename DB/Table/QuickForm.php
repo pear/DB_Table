@@ -771,7 +771,7 @@ class DB_Table_QuickForm {
             
             $col['qf_rules']['required'] = sprintf(
                 $GLOBALS['_DB_TABLE']['qf_rules']['required'],
-                $elemname
+                $col['qf_label']
             );
             
         }
@@ -785,7 +785,7 @@ class DB_Table_QuickForm {
             
             $col['qf_rules']['numeric'] = sprintf(
                 $GLOBALS['_DB_TABLE']['qf_rules']['numeric'],
-                $elemname
+                $col['qf_label']
             );
             
         }
@@ -798,7 +798,7 @@ class DB_Table_QuickForm {
             
             $msg = sprintf(
                 $GLOBALS['_DB_TABLE']['qf_rules']['maxlength'],
-                $elemname,
+                $col['qf_label'],
                 $max
             );
             
