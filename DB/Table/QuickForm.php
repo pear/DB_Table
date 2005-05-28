@@ -202,11 +202,13 @@ class DB_Table_QuickForm {
     function addElements(&$form, $cols, $arrayName = null)
     {
         $elements =& DB_Table_QuickForm::getElements($cols, $arrayName);
+        $cols_keys = array_keys($cols);
         foreach (array_keys($elements) as $k) {
             $element =& $elements[$k];
             if (is_array($element)) {
-                $form->addGroup($element, $element->getName(), $col['qf_label']);
-            } else if (is_object($element)) {
+                //$form->addGroup($element, $element->getName(), $col['qf_label']);
+                $form->addGroup($element, $cols_keys[$k], $cols[$cols_keys[$k]]['qf_label']);
+            } elseif (is_object($element)) {
                 $form->addElement($element);
             }
         }
@@ -400,7 +402,7 @@ class DB_Table_QuickForm {
         
             $element = array();
             
-            foreach ($col['qf_vals'] as $btnvalue => $btnlabel) {
+            foreach ((array) $col['qf_vals'] as $btnvalue => $btnlabel) {
                 
                 if (isset($setval) && $setval == $btnvalue) {
                     $col['qf_attrs']['checked'] = 'checked';
