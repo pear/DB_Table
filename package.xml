@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.28 2005-05-28 13:38:38 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.29 2005-05-28 13:40:00 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -19,7 +19,7 @@
         <date>2005-05-28</date>
         <state>stable</state>
         <notes>
-     		* Applied feature request 3825 (Change $elemname in error messages to $col['qf_label']) -- thanks,  rotmer at gmail dot com
+     		* Applied feature request 3825 "Change $elemname in error messages to $col['qf_label']" -- thanks,  rotmer at gmail dot com
      		* Fixed bug 3892 "Error in DB_Table_QuickForm->addElements" when adding radio elements -- thanks, Mark Wieseman.
         </notes>
         <filelist>
