@@ -227,6 +227,21 @@ $GLOBALS['_DB_TABLE']['type'] = array(
         'time'      => 'CHAR(8)',
         'timestamp' => 'CHAR(19)'
     ),
+    'mysqli' => array(
+        'boolean'   => 'DECIMAL(1,0)',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR',
+        'smallint'  => 'SMALLINT',
+        'integer'   => 'INTEGER',
+        'bigint'    => 'BIGINT',
+        'decimal'   => 'DECIMAL',
+        'single'    => 'FLOAT',
+        'double'    => 'DOUBLE',
+        'clob'      => 'LONGTEXT',
+        'date'      => 'CHAR(10)',
+        'time'      => 'CHAR(8)',
+        'timestamp' => 'CHAR(19)'
+    ),
     'oci8' => array(
         'boolean'   => 'NUMBER(1)',
         'char'      => 'CHAR',
