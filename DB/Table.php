@@ -796,12 +796,8 @@ class DB_Table {
         $this->_swapModes($fetchmode, $fetchmode_object_class);
 
         // make sure params is an array
-        if (!is_array($params)) {
-            if (is_scalar($params)) {
-                $params = array($params);
-            } else {
-                $params = array();
-            }
+        if (! is_null($params)) {
+            $params = (array) $params;
         }
         
         // get the result
@@ -881,12 +877,8 @@ class DB_Table {
         $this->_swapModes($fetchmode, $fetchmode_object_class);
         
         // make sure params is an array
-        if (!is_array($params)) {
-            if (is_scalar($params)) {
-                $params = array($params);
-            } else {
-                $params = array();
-            }
+        if (! is_null($params)) {
+            $params = (array) $params;
         }
      
         // get the result
