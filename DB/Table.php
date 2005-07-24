@@ -741,6 +741,9 @@ class DB_Table {
     * result set.
     * 
     * @param int $count The number of rows to list in the result set.
+    *
+    * @param array $params Parameters to use in placeholder substitutions (if
+    * any).
     * 
     * @return mixed An array of records from the table (if anything but
     * 'getOne'), a single value (if 'getOne'), or a PEAR_Error object.
@@ -760,7 +763,7 @@ class DB_Table {
     */
     
     function select($sqlkey, $filter = null, $order = null,
-        $start = null, $count = null)
+        $start = null, $count = null, $params = array())
     {
         // build the base command
         $sql = $this->buildSQL($sqlkey, $filter, $order, $start, $count);
@@ -791,9 +794,28 @@ class DB_Table {
             $fetchmode_object_class = $this->sql[$sqlkey]['fetchmode_object_class'];
         }
         $this->_swapModes($fetchmode, $fetchmode_object_class);
+
+        // make sure params is an array
+        if (!is_array($params)) {
+            if (is_scalar($params)) {
+                $params = array($params);
+            } else {
+                $params = array();
+            }
+        }
         
         // get the result
-        $result = $this->db->$method($sql);
+        switch($method) {
+            case 'getCol':
+                $result = $this->db->$method($sql, 0, $params);
+                break;
+            case 'getAssoc':
+                $result = $this->db->$method($sql, false, $params);
+                break;
+            default:
+                $result = $this->db->$method($sql, $params);
+                break;
+        }
             
         // swap modes back
         $this->_swapModes($restore_mode, $restore_class);
@@ -823,6 +845,9 @@ class DB_Table {
     * 
     * @param int $count The number of records to list in the result set.
     * 
+    * @param array $params Parameters to use in placeholder substitutions (if
+    * any).
+    * 
     * @return mixed A PEAR_Error on failure, or a DB_Result object on
     * success.
     *
@@ -831,7 +856,7 @@ class DB_Table {
     */
     
     function selectResult($sqlkey, $filter = null, $order = null, 
-        $start = null, $count = null)
+        $start = null, $count = null, $params = array())
     {
         // build the base command
         $sql = $this->buildSQL($sqlkey, $filter, $order, $start, $count);
@@ -855,8 +880,17 @@ class DB_Table {
         }
         $this->_swapModes($fetchmode, $fetchmode_object_class);
         
+        // make sure params is an array
+        if (!is_array($params)) {
+            if (is_scalar($params)) {
+                $params = array($params);
+            } else {
+                $params = array();
+            }
+        }
+     
         // get the result
-        $result =& $this->db->query($sql);
+        $result =& $this->db->query($sql, $params);
         
         // swap modes back
         $this->_swapModes($restore_mode, $restore_class);
@@ -896,6 +930,9 @@ class DB_Table {
     * 
     * @param int $count The number of rows to list in the result set.
     * 
+    * @param array $params Parameters to use in placeholder substitutions (if
+    * any).
+    * 
     * @return mixed An integer number of records from the table, or a
     * PEAR_Error object.
     *
@@ -904,7 +941,7 @@ class DB_Table {
     */
     
     function selectCount($sqlkey, $filter = null, $order = null,
-        $start = null, $count = null)
+        $start = null, $count = null, $params = array())
     {
         // does the SQL SELECT key exist?
         $tmp = array_keys($this->sql);
@@ -942,7 +979,8 @@ class DB_Table {
         }
         
         // retrieve the count results
-        return $this->select($count_key, $filter, $order, $start, $count);
+        return $this->select($count_key, $filter, $order, $start, $count,
+            $params);
     }
     
     
