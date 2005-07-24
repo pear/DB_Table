@@ -421,7 +421,7 @@ class DB_Table_QuickForm {
             break;
             
         case 'select':
-        	
+            
             $element =& HTML_QuickForm::createElement(
                 $col['qf_type'],
                 $elemname,
@@ -644,16 +644,16 @@ class DB_Table_QuickForm {
                     break;
                 
                 default:
-					// by Alex Hoebart: this should allow any registered rule.
-					if (in_array($type,$form->getRegisteredRules())) {
-						if (is_array($opts)) {
-							// $opts[0] is the message, $opts[1] is the size or regex
-							$form->addRule($elemname, $opts[0], $type, $opts[1], $validate);
-						} else {
-							// $opts is the error message
-							$form->addRule($elemname, $opts, $type, $validate);
-						}
-					}
+                    // by Alex Hoebart: this should allow any registered rule.
+                    if (in_array($type,$form->getRegisteredRules())) {
+                        if (is_array($opts)) {
+                            // $opts[0] is the message, $opts[1] is the size or regex
+                            $form->addRule($elemname, $opts[0], $type, $opts[1], $validate);
+                        } else {
+                            // $opts is the error message
+                            $form->addRule($elemname, $opts, $type, $validate);
+                        }
+                    }
                     break;
                 }
             }
@@ -740,10 +740,17 @@ class DB_Table_QuickForm {
         }
         
         // label for the element; defaults to the element
-        // name
+        // name.  adds both quickform label and table-header
+        // label if qf_label is not set.
         if (! isset($col['qf_label'])) {
-            $col['qf_label'] = $elemname . ':';
+            if (isset($col['label'])) {
+                $col['qf_label'] = $col['label'];
+            }
+            else {
+                $col['qf_label'] = $elemname . ':';
+            }
         }
+        
         
         // special options for the element, typically used
         // for 'date' element types
