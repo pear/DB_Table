@@ -206,8 +206,23 @@ class DB_Table_QuickForm {
         foreach (array_keys($elements) as $k) {
             $element =& $elements[$k];
             if (is_array($element)) {
-                //$form->addGroup($element, $element->getName(), $col['qf_label']);
-                $form->addGroup($element, $cols_keys[$k], $cols[$cols_keys[$k]]['qf_label']);
+                
+                // get the label for the group.  have to do it this way
+                // because the group of elements does not itself have a
+                // label, there are only the labels for the individual
+                // elements.
+                $tmp = $cols[$cols_keys[$k]];
+                if (! isset($tmp['qf_label'])) {
+                	$label = $cols_keys[$k];
+                	if ($arrayName) {
+                		$label = $arrayName . "[$label]";
+                	}
+                } else {
+                	$label = $tmp['qf_label'];
+                }
+                	
+                $form->addGroup($element, $cols_keys[$k], $label);
+                
             } elseif (is_object($element)) {
                 $form->addElement($element);
             }
@@ -254,6 +269,7 @@ class DB_Table_QuickForm {
 
             $elements[] =& DB_Table_QuickForm::getElement($col, $elemname);
         }
+        
         return $elements;
     }
     
@@ -412,7 +428,7 @@ class DB_Table_QuickForm {
                     $col['qf_type'],
                     null, // elemname not added because this is a group
                     null,
-                    $btnlabel . '<br />',
+                    $btnlabel . $col['qf_radiosep'],
                     $btnvalue,
                     $col['qf_attrs']
                 );
@@ -742,6 +758,12 @@ class DB_Table_QuickForm {
         // label for the element; defaults to the element
         // name.  adds both quickform label and table-header
         // label if qf_label is not set.
+        
+		if (! isset($col['qf_label'])) {
+			$col['qf_label'] = $elemname . ':';
+		}
+		
+        /*
         if (! isset($col['qf_label'])) {
             if (isset($col['label'])) {
                 $col['qf_label'] = $col['label'];
@@ -750,7 +772,7 @@ class DB_Table_QuickForm {
                 $col['qf_label'] = $elemname . ':';
             }
         }
-        
+        */
         
         // special options for the element, typically used
         // for 'date' element types
@@ -774,6 +796,12 @@ class DB_Table_QuickForm {
         if ($col['qf_type'] == 'hidden') {
             return;
         }
+        
+        // add a separator for radio elements
+        if (! isset($col['qf_radiosep'])) {
+        	$col['qf_radiosep'] = '<br />';
+        }
+        
         
         // the element is required
         if (! isset($col['qf_rules']['required']) && $col['require']) {
