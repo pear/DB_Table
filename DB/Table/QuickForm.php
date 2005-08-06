@@ -204,7 +204,10 @@ class DB_Table_QuickForm {
         $elements =& DB_Table_QuickForm::getElements($cols, $arrayName);
         $cols_keys = array_keys($cols);
         foreach (array_keys($elements) as $k) {
+        
             $element =& $elements[$k];
+            
+            // are we adding a group?
             if (is_array($element)) {
                 
                 // get the label for the group.  have to do it this way
@@ -213,15 +216,23 @@ class DB_Table_QuickForm {
                 // elements.
                 $tmp = $cols[$cols_keys[$k]];
                 if (! isset($tmp['qf_label'])) {
-                	$label = $cols_keys[$k];
-                	if ($arrayName) {
-                		$label = $arrayName . "[$label]";
-                	}
+                    $label = $cols_keys[$k];
+                    if ($arrayName) {
+                        $label = $arrayName . "[$label]";
+                    }
                 } else {
-                	$label = $tmp['qf_label'];
+                    $label = $tmp['qf_label'];
                 }
-                	
-                $form->addGroup($element, $cols_keys[$k], $label);
+                   
+                // set the element name
+                if ($arrayName) {
+                    $name  = $arrayName . '[' . $cols_keys[$k] . ']';
+                } else {
+                	$name = $cols_keys[$k];
+                }
+                
+                // done
+                $form->addGroup($element, $name, $label);
                 
             } elseif (is_object($element)) {
                 $form->addElement($element);
@@ -759,10 +770,10 @@ class DB_Table_QuickForm {
         // name.  adds both quickform label and table-header
         // label if qf_label is not set.
         
-		if (! isset($col['qf_label'])) {
-			$col['qf_label'] = $elemname . ':';
-		}
-		
+        if (! isset($col['qf_label'])) {
+            $col['qf_label'] = $elemname . ':';
+        }
+        
         /*
         if (! isset($col['qf_label'])) {
             if (isset($col['label'])) {
@@ -799,7 +810,7 @@ class DB_Table_QuickForm {
         
         // add a separator for radio elements
         if (! isset($col['qf_radiosep'])) {
-        	$col['qf_radiosep'] = '<br />';
+            $col['qf_radiosep'] = '<br />';
         }
         
         
