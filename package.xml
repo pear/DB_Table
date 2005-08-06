@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.29 2005-05-28 13:40:00 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.30 2005-08-06 16:38:56 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -15,12 +15,29 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>1.0.1</version>
-        <date>2005-05-28</date>
+        <version>1.1.0</version>
+        <date>2005-??-??</date>
         <state>stable</state>
         <notes>
-     		* Applied feature request 3825 "Change $elemname in error messages to $col['qf_label']" -- thanks,  rotmer at gmail dot com
-     		* Fixed bug 3892 "Error in DB_Table_QuickForm->addElements" when adding radio elements -- thanks, Mark Wieseman.
+        	* Added 'mysqli' support; thanks, James Kachel.
+        	
+     		* Applied patch to allow passing of placeholder
+     		substitutions in select(), selectResult(), and
+     		selectCount().  Thanks, Matthew Weier O'Phinney.
+     		
+     		* Added request #4610 to add a 'label' key to column
+     		definitions.  this is in addition to the 'qf_label' key;
+     		the qf_label key is for form labels, but the label key is
+     		for column headers on tabular formats.
+     		
+     		* Added more-reliable way of determining the name and label
+     		for a group when using addElements(), particularly with
+     		respect to radio button sets.
+			
+			* Fixed bug #4614; you can now specify the separator string
+			for radio buttons using the 'qf_radiosep' key; default is
+			'&lt;br /&gt;'.
+			
         </notes>
         <filelist>
         
