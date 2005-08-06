@@ -956,7 +956,7 @@ class DB_Table {
             
             // is a count-field set for the query?
             if (! isset($count_sql['count']) ||
-            	trim($count_sql['count']) == '') {
+                trim($count_sql['count']) == '') {
                 $count_sql['count'] = '*';
             }
             
@@ -1534,6 +1534,9 @@ class DB_Table {
     {
         $keys = array_keys($data);
         
+        $null_if_blank = array('date', 'time', 'timestamp', 'smallint',
+            'integer', 'bigint', 'decimal', 'single', 'double');
+        
         foreach ($keys as $key) {
         
             if (! isset($this->col[$key])) {
@@ -1542,6 +1545,12 @@ class DB_Table {
             
             unset($val);
             $val =& $data[$key];
+            
+            // convert blanks to null for non-character field types
+            $convert = in_array($this->col[$key]['type'], $null_if_blank);
+            if ($convert && trim((string) $val) == '') {
+                $val = null;
+            }
             
             // skip explicit NULL values
             if (is_null($val)) {
