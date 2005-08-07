@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.31 2005-08-07 19:24:36 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.32 2005-08-07 19:33:54 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -19,35 +19,35 @@
         <date>2005-08-07</date>
         <state>stable</state>
         <notes>
-        	* Added 'mysqli' support; thanks, James Kachel.
-        	
-     		* Applied patch to allow passing of placeholder
-     		substitutions in select(), selectResult(), and
-     		selectCount().  Thanks, Matthew Weier O'Phinney.
-     		
-     		* Added request #4610 to add a 'label' key to column
-     		definitions.  this is in addition to the 'qf_label' key;
-     		the qf_label key is for form labels, but the label key is
-     		for column headers on tabular formats.
-     		
-     		* Added more-reliable way of generating the name and label
-     		for a group when using addElements(), particularly with
-     		respect to radio button sets.  This fixes bug #4935,
-     		"element names as array-keys not respected for radio
-     		buttons."
-			
-			* Fixed bug #4614; you can now specify the separator string
-			for radio buttons using the 'qf_radiosep' key; default is
-			'&lt;br /&gt;'.
-			
+            * Added 'mysqli' support; thanks, James Kachel.
+            
+             * Applied patch to allow passing of placeholder
+             substitutions in select(), selectResult(), and
+             selectCount().  Thanks, Matthew Weier O'Phinney.
+             
+             * Added request #4610 to add a 'label' key to column
+             definitions.  this is in addition to the 'qf_label' key;
+             the qf_label key is for form labels, but the label key is
+             for column headers on tabular formats.
+             
+             * Added more-reliable way of generating the name and label
+             for a group when using addElements(), particularly with
+             respect to radio button sets.  This fixes bug #4935,
+             "element names as array-keys not respected for radio
+             buttons."
+            
+            * Fixed bug #4614; you can now specify the separator string
+            for radio buttons using the 'qf_radiosep' key; default is
+            '&lt;br /&gt;'.
+            
         </notes>
         <filelist>
         
             <file role="php" name="DB/Table.php">
-				<replace from="@package_version@" to="version" type="package-info" />
-			</file>
-			
-			<file role="php" name="DB/Table/Manager.php" />
+                <replace from="@package_version@" to="version" type="package-info" />
+            </file>
+            
+            <file role="php" name="DB/Table/Manager.php" />
             <file role="php" name="DB/Table/QuickForm.php" />
             <file role="php" name="DB/Table/Valid.php" />
             
