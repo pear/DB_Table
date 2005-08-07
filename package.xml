@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.30 2005-08-06 16:38:56 pmjones Exp $ -->
+<!-- $Id: package.xml,v 1.31 2005-08-07 19:24:36 pmjones Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -16,7 +16,7 @@
     </maintainers>
     <release>
         <version>1.1.0</version>
-        <date>2005-??-??</date>
+        <date>2005-08-07</date>
         <state>stable</state>
         <notes>
         	* Added 'mysqli' support; thanks, James Kachel.
@@ -30,9 +30,11 @@
      		the qf_label key is for form labels, but the label key is
      		for column headers on tabular formats.
      		
-     		* Added more-reliable way of determining the name and label
+     		* Added more-reliable way of generating the name and label
      		for a group when using addElements(), particularly with
-     		respect to radio button sets.
+     		respect to radio button sets.  This fixes bug #4935,
+     		"element names as array-keys not respected for radio
+     		buttons."
 			
 			* Fixed bug #4614; you can now specify the separator string
 			for radio buttons using the 'qf_radiosep' key; default is

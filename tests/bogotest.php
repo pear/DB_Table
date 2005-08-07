@@ -22,7 +22,8 @@ class example extends DB_Table {
 			'type'    => 'varchar',
 			'size'    => 128,
 			'require' => false,
-			'qf_type' => 'autocomplete',
+			'qf_type' => 'radio',
+			'qf_radiosep' => '<br />',
 			'qf_vals' => array(
 				'another',
 				'other',
@@ -81,7 +82,7 @@ class example extends DB_Table {
 		),
 		'xtimestamp' => array(
 			'type'    => 'timestamp'
-		)
+		),
 	);
 	
 	var $idx = array(
@@ -135,6 +136,12 @@ $form->addElement('submit', 'op', 'Submit');
 
 echo "<html><head><title>bogotest</title></head><body>\n";
 
+// test recasting
+$values = $form->exportValues();
+$example->recast($values['mydata']);
+Var_Dump::display($values);
+
+// test validation and insert
 if ($form->validate()) {
 
 	$values = $form->exportValues();
@@ -151,6 +158,17 @@ echo "\n<hr />\n";
 $example->fetchmode = DB_FETCHMODE_ASSOC;
 $list = $example->select('list');
 Var_Dump::display($list);
+
+$result = $example->insert(array(
+	'xvarchar' => null,
+	'xchar' => 'a',
+	'xdecimal' => '',
+	'xsingle' => null,
+	'xdouble' => null,
+	'xint' => 1,
+));
+
+Var_Dump::display($result);
 
 echo "\n</body></html>";
 
