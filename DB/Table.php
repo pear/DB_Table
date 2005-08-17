@@ -15,6 +15,7 @@
 * @package DB_Table
 *
 * @author Paul M. Jones <pmjones@php.net>
+* @author Mark Wiesemann <wiesemann@php.net>
 * 
 * @license http://www.gnu.org/copyleft/lesser.html LGPL
 * 
@@ -341,8 +342,9 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 * @package DB_Table
 * 
 * @author Paul M. Jones <pmjones@php.net>
+* @author Mark Wiesemann <wiesemann@php.net>
 * 
-* @version 1.1.0
+* @version @package_version@
 *
 */
 
