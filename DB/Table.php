@@ -342,7 +342,7 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
 * 
 * @author Paul M. Jones <pmjones@php.net>
 * 
-* @version @package_version@
+* @version 1.1.0
 *
 */
 
@@ -1901,6 +1901,14 @@ class DB_Table {
     * 'trackSubmit' : Boolean, whether to track if the form was
     * submitted by adding a special hidden field
     * 
+    * @param string $clientValidate By default, validation will match
+    * the 'qf_client' value from the column definition.  However,
+    * if you set $clientValidate to true or false, this will
+    * override the value from the column definition.
+    *
+    * @param array $formFilters An array with filter function names or
+    * callbacks that will be applied to all form elements.
+    *
     * @return object HTML_QuickForm
     * 
     * @see HTML_QuickForm
@@ -1910,12 +1918,12 @@ class DB_Table {
     */
     
     function &getForm($columns = null, $array_name = null, $args = array(),
-        $clientValidate = null)
+        $clientValidate = null, $formFilters = null)
     {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
         return DB_Table_QuickForm::getForm($coldefs, $array_name, $args,
-            $clientValidate);
+            $clientValidate, $formFilters);
     }
     
     

@@ -8,6 +8,7 @@
 * @package DB_Table
 *
 * @author Paul M. Jones <pmjones@php.net>
+* @author Mark Wiesemann <wiesemann@php.net>
 * 
 * @license http://www.gnu.org/copyleft/lesser.html LGPL
 * 
@@ -45,6 +46,7 @@ if (! isset($GLOBALS['_DB_TABLE']['qf_rules'])) {
 * @package DB_Table
 *
 * @author Paul M. Jones <pmjones@ciaweb.net>
+* @author Mark Wiesemann <wiesemann@php.net>
 *
 */
 
@@ -91,6 +93,9 @@ class DB_Table_QuickForm {
     * the 'qf_client' value from the column definition.  However,
     * if you set $clientValidate to true or false, this will
     * override the value from the column definition.
+    *
+    * @param array $formFilters An array with filter function names or
+    * callbacks that will be applied to all form elements.
     * 
     * @return object HTML_QuickForm
     * 
@@ -101,11 +106,12 @@ class DB_Table_QuickForm {
     */
     
     function &getForm($cols, $arrayName = null, $args = array(),
-        $clientValidate = null)
+        $clientValidate = null, $formFilters = null)
     {
         $form =& DB_Table_QuickForm::createForm($args);
         DB_Table_QuickForm::addElements($form, $cols, $arrayName);
         DB_Table_QuickForm::addRules($form, $cols, $arrayName, $clientValidate);
+        DB_Table_QuickForm::addFilters($form, $cols, $arrayName, $formFilters);
         
         return $form;
     }
@@ -317,7 +323,8 @@ class DB_Table_QuickForm {
                 'advcheckbox',
                 $elemname,
                 $col['qf_label'],
-                null,
+                isset($col['qf_label_append']) ?
+                    $col['qf_label_append'] : null,
                 $col['qf_attrs'],
                 $col['qf_vals']
             );
@@ -571,6 +578,55 @@ class DB_Table_QuickForm {
     
     
     /**
+    *
+    * Adds DB_Table filters to a pre-existing HTML_QuickForm object.
+    *
+    * @static
+    *
+    * @access public
+    *
+    * @param object &$form An HTML_QuickForm object.
+    *
+    * @param array $cols A sequential array of DB_Table column definitions
+    * from which to create form elements.
+    *
+    * @param string $arrayName By default, the form will use the names
+    * of the columns as the names of the form elements.  If you pass
+    * $arrayName, the column names will become keys in an array named
+    * for this parameter.
+    *
+    * @param array $formFilters An array with filter function names or
+    * callbacks that will be applied to all form elements.
+    *
+    * @return void
+    *
+    */
+    function addFilters(&$form, $cols, $arrayName = null,
+        $formFilters = null)
+    {
+        foreach ($cols as $name => $col) {
+            if ($arrayName) {
+                $elemname = $arrayName . "[$name]";
+            } else {
+                $elemname = $name;
+            }
+
+            DB_Table_QuickForm::fixColDef($col, $elemname);
+
+            foreach (array_keys($col['qf_filters']) as $fk) {
+                $form->applyFilter($elemname, $col['qf_filters'][$fk]);
+            }
+        }
+
+        if (is_array($formFilters)) {
+            foreach (array_keys($formFilters) as $fk) {
+                $form->applyFilter('__ALL__', $formFilters[$fk]);
+            }
+        }
+    }
+
+
+    /**
     * 
     * Adds element rules to a pre-existing HTML_QuickForm object.
     * 
@@ -655,7 +711,8 @@ class DB_Table_QuickForm {
                 case 'required':
                 case 'uploadedfile':
                     // $opts is the error message
-                    $form->addRule($elemname, $opts, $type, null, $validate);
+                    $message = $opts;
+                    $format = null;
                     break;
                 
                 case 'filename':
@@ -666,23 +723,43 @@ class DB_Table_QuickForm {
                 case 'regex':
                     // $opts[0] is the message
                     // $opts[1] is the size, mimetype, or regex
-                    $form->addRule($elemname, $opts[0], $type, $opts[1],
-                        $validate);
+                    $message = $opts[0];
+                    $format = $opts[1];
                     break;
                 
                 default:
                     // by Alex Hoebart: this should allow any registered rule.
                     if (in_array($type,$form->getRegisteredRules())) {
                         if (is_array($opts)) {
-                            // $opts[0] is the message, $opts[1] is the size or regex
-                            $form->addRule($elemname, $opts[0], $type, $opts[1], $validate);
+                            // $opts[0] is the message
+                            // $opts[1] is the size or regex
+                            $message = $opts[0];
+                            $format = $opts[1];
                         } else {
                             // $opts is the error message
-                            $form->addRule($elemname, $opts, $type, $validate);
+                            $message = $opts;
+                            $format = null;
                         }
+                    } else {  // rule is not registered ==> do not add a rule
+                        continue;
                     }
                     break;
                 }
+                
+                switch ($col['qf_type']) {
+                case 'date':
+                case 'time':
+                case 'timestamp':
+                    // date "elements" are groups ==> use addGroupRule()
+                    $form->addGroupRule($elemname, $message, $type, $format,
+                        null, $validate);
+                    break;
+                default:  // use addRule() for all other elements
+                    $form->addRule($elemname, $message, $type, $format,
+                        $validate);
+                    break;
+                }
+
             }
         }
     }
@@ -725,6 +802,10 @@ class DB_Table_QuickForm {
         // server validation?  by default, no.
         if (! isset($col['qf_client'])) {
             $col['qf_client'] = false;
+        }
+
+        if (! isset($col['qf_filters'])) {
+            $col['qf_filters'] = array();
         }
         
         // the element type; if not set,
@@ -769,12 +850,6 @@ class DB_Table_QuickForm {
         // label for the element; defaults to the element
         // name.  adds both quickform label and table-header
         // label if qf_label is not set.
-        
-        if (! isset($col['qf_label'])) {
-            $col['qf_label'] = $elemname . ':';
-        }
-        
-        /*
         if (! isset($col['qf_label'])) {
             if (isset($col['label'])) {
                 $col['qf_label'] = $col['label'];
@@ -783,7 +858,6 @@ class DB_Table_QuickForm {
                 $col['qf_label'] = $elemname . ':';
             }
         }
-        */
         
         // special options for the element, typically used
         // for 'date' element types
