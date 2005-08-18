@@ -803,16 +803,20 @@ class DB_Table {
         }
         
         // get the result
-        switch($method) {
-            case 'getCol':
-                $result = $this->db->$method($sql, 0, $params);
-                break;
-            case 'getAssoc':
-                $result = $this->db->$method($sql, false, $params);
-                break;
-            default:
-                $result = $this->db->$method($sql, $params);
-                break;
+        switch ($method) {
+
+        case 'getCol':
+            $result = $this->db->$method($sql, 0, $params);
+            break;
+
+        case 'getAssoc':
+            $result = $this->db->$method($sql, false, $params);
+            break;
+
+        default:
+            $result = $this->db->$method($sql, $params);
+            break;
+
         }
             
         // swap modes back
@@ -1686,6 +1690,7 @@ class DB_Table {
             case 'double':
                 settype($val, 'float');
                 break;
+
             }
         }
     }
@@ -1737,6 +1742,7 @@ class DB_Table {
                 DB_TABLE_ERR_CREATE_FLAG,
                 "('$flag')"
             );
+
         }
         
         // are we going to create the table?
@@ -1829,6 +1835,7 @@ class DB_Table {
                 $val
             );
             break;
+
         }
         
         // have we passed the check so far, and should we

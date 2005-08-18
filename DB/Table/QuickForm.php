@@ -529,6 +529,7 @@ class DB_Table_QuickForm {
             }
             
             break;
+
         }
         
         // done
@@ -729,24 +730,25 @@ class DB_Table_QuickForm {
                 
                 default:
                     // by Alex Hoebart: this should allow any registered rule.
-                    if (in_array($type,$form->getRegisteredRules())) {
-                        if (is_array($opts)) {
-                            // $opts[0] is the message
-                            // $opts[1] is the size or regex
-                            $message = $opts[0];
-                            $format = $opts[1];
-                        } else {
-                            // $opts is the error message
-                            $message = $opts;
-                            $format = null;
-                        }
-                    } else {  // rule is not registered ==> do not add a rule
+                    if (!in_array($type, $form->getRegisteredRules())) {
+                        // rule is not registered ==> do not add a rule
                         continue;
+                    }
+                    if (is_array($opts)) {
+                        // $opts[0] is the message
+                        // $opts[1] is the size or regex
+                        $message = $opts[0];
+                        $format = $opts[1];
+                    } else {
+                        // $opts is the error message
+                        $message = $opts;
+                        $format = null;
                     }
                     break;
                 }
                 
                 switch ($col['qf_type']) {
+
                 case 'date':
                 case 'time':
                 case 'timestamp':
@@ -754,10 +756,12 @@ class DB_Table_QuickForm {
                     $form->addGroupRule($elemname, $message, $type, $format,
                         null, $validate);
                     break;
+
                 default:  // use addRule() for all other elements
                     $form->addRule($elemname, $message, $type, $format,
                         $validate);
                     break;
+
                 }
 
             }
@@ -844,6 +848,7 @@ class DB_Table_QuickForm {
                     $col['qf_type'] = 'text';
                 }
                 break;
+
             }
         }
         

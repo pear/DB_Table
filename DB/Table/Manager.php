@@ -12,6 +12,7 @@
 * @package DB_Table
 *
 * @author Paul M. Jones <pmjones@php.net>
+* @author Mark Wiesemann <wiesemann@php.net>
 * 
 * @license http://www.gnu.org/copyleft/lesser.html LGPL
 * 
@@ -34,6 +35,7 @@ require_once 'DB/Table.php';
 * @package DB_Table
 *
 * @author Paul M. Jones <pmjones@php.net>
+* @author Mark Wiesemann <wiesemann@php.net>
 *
 */
 
