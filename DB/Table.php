@@ -1554,7 +1554,24 @@ class DB_Table {
             
             // convert blanks to null for non-character field types
             $convert = in_array($this->col[$key]['type'], $null_if_blank);
-            if ($convert && trim((string) $val) == '') {
+            if (is_array($val)) {  // if one of the given array values is
+                                   // empty, null will be the new value if
+                                   // the field is not required
+                $tmp_val = implode('', $val);
+                foreach ($val as $array_val) {
+                    if (trim((string) $array_val) == '') {
+                        $tmp_val = '';
+                        break;
+                    }
+                }
+            } else {
+                $tmp_val = $val;
+            }
+            if ($convert && trim((string) $tmp_val) == '' && (
+                !isset($this->col[$key]['require']) ||
+                $this->col[$key]['require'] === false
+              )
+            ) {
                 $val = null;
             }
             
