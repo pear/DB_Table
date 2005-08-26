@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.35 2005-08-24 20:16:57 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.36 2005-08-26 15:17:30 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -51,6 +51,11 @@
             * Bug #5060: Empty fields were wrongly casted to null it they
             were required. Also making the casting to null for date and
             time values work correctly.
+            
+            * Added smart handling of non-standard (i.e. Y-m-d) date
+            formats, this allows to use two-digit years (y) and short (M)
+            or long (F) names of months without having to recast the date
+            value yourself.
         </notes>
         <filelist>
         

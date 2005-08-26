@@ -1594,7 +1594,23 @@ class DB_Table {
                 break;
                 
             case 'date':
-            
+
+                // smart handling of non-standard (i.e. Y-m-d) date formats,
+                // this allows to use two-digit years (y) and short (M) or
+                // long (F) names of months without having to recast the
+                // date value yourself
+                if (is_array($val)) {
+                    if (isset($val['y'])) {
+                        $val['Y'] = $val['y'];
+                    }
+                    if (isset($val['F'])) {
+                        $val['m'] = $val['F'];
+                    }
+                    if (isset($val['M'])) {
+                        $val['m'] = $val['M'];
+                    }
+                }
+
                 if (is_array($val) &&
                     isset($val['Y']) &&
                     isset($val['m']) &&
@@ -1655,6 +1671,23 @@ class DB_Table {
                 break;
                 
             case 'timestamp':
+
+                // smart handling of non-standard (i.e. Y-m-d) date formats,
+                // this allows to use two-digit years (y) and short (M) or
+                // long (F) names of months without having to recast the
+                // date value yourself
+                if (is_array($val)) {
+                    if (isset($val['y'])) {
+                        $val['Y'] = $val['y'];
+                    }
+                    if (isset($val['F'])) {
+                        $val['m'] = $val['F'];
+                    }
+                    if (isset($val['M'])) {
+                        $val['m'] = $val['M'];
+                    }
+                }
+
                 if (is_array($val) &&
                     isset($val['Y']) &&
                     isset($val['m']) &&
