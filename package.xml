@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.37 2005-08-29 10:39:07 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.38 2005-09-13 14:46:08 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -21,41 +21,13 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>1.2.0</version>
-        <date>2005-08-29</date>
+        <version>1.2.1</version>
+        <date>2005-09-13</date>
         <state>stable</state>
         <notes>
-            * Re-added request #4610 to add a 'label' key to column
-            definitions.  this is in addition to the 'qf_label' key;
-            the qf_label key is for form labels, but the label key is
-            for column headers on tabular formats.
-            
-            * Feature request #4941: new "qf_label_append" key for
-            columns that will be displayed after (adv)checkbox
-            QuickForm elements.
-            
-            * Bugfix: QuickForm's date "element" is a group, therefore
-            we have to use addGroupRule() instead of addRule() for such
-            elements; this also fixes a bug with non-standard rules
-            when only an error message was given in the rule definition
-            (missing $format param).
-            
-            * Feature request #5029: new "qf_filters" key for columns
-            that applies filters to DB_Table generated forms; with the
-            new $formFilters parameter in getForm() one can apply
-            filters to all form elements
-            (thanks to ieure at php dot net)
-            
-            * Optimized some pieces of code and applied Coding Standards
-            
-            * Bug #5060: Empty fields were wrongly casted to null it they
-            were required. Also making the casting to null for date and
-            time values work correctly.
-            
-            * Added smart handling of non-standard (i.e. Y-m-d) date
-            formats, this allows to use two-digit years (y) and short (M)
-            or long (F) names of months without having to recast the date
-            value yourself.
+            * Bug #5382: Setting default values via getForm() did not
+            work for radio elements because QuickForm "resets" the
+            checked state when one adds a group.
         </notes>
         <filelist>
         

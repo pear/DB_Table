@@ -238,8 +238,14 @@ class DB_Table_QuickForm {
                 }
                 
                 // done
-                $form->addGroup($element, $name, $label);
-                
+                $group =& $form->addGroup($element, $name, $label);
+
+                // set default value (if given) for radio elements
+                // (reason: QF "resets" the checked state, when adding a group)
+                if ($tmp['qf_type'] == 'radio' && isset($tmp['qf_setvalue'])) {
+                    $form->setDefaults(array($name => $tmp['qf_setvalue']));
+                }
+
             } elseif (is_object($element)) {
                 $form->addElement($element);
             }
@@ -438,10 +444,6 @@ class DB_Table_QuickForm {
             
             foreach ((array) $col['qf_vals'] as $btnvalue => $btnlabel) {
                 
-                if (isset($setval) && $setval == $btnvalue) {
-                    $col['qf_attrs']['checked'] = 'checked';
-                }
-                
                 $element[] =& HTML_QuickForm::createElement(
                     $col['qf_type'],
                     null, // elemname not added because this is a group
@@ -450,6 +452,7 @@ class DB_Table_QuickForm {
                     $btnvalue,
                     $col['qf_attrs']
                 );
+                
             }
             
             break;
