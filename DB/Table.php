@@ -537,7 +537,8 @@ class DB_Table {
         }
         
         // done!
-        return PEAR::throwError($text, $code);
+        $error = PEAR::throwError($text, $code);
+        return $error;
     }
     
     
@@ -1981,8 +1982,9 @@ class DB_Table {
     {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
-        return DB_Table_QuickForm::getForm($coldefs, $array_name, $args,
+        $form =& DB_Table_QuickForm::getForm($coldefs, $array_name, $args,
             $clientValidate, $formFilters);
+        return $form;
     }
     
     
@@ -2048,7 +2050,8 @@ class DB_Table {
     {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
-        return DB_Table_QuickForm::getGroup($coldefs, $array_name);
+        $group =& DB_Table_QuickForm::getGroup($coldefs, $array_name);
+        return $group;
     }
     
     
@@ -2076,7 +2079,9 @@ class DB_Table {
     {
         include_once 'DB/Table/QuickForm.php';
         $coldef = $this->_getFormColDefs($column);
-        return DB_Table_QuickForm::getElement($coldef[$column], $elemname);
+        $element =& DB_Table_QuickForm::getElement($coldef[$column],
+            $elemname);
+        return $element;
     }
 
     /**
@@ -2103,7 +2108,9 @@ class DB_Table {
     function &getFormElements($cols, $array_name = null)
     {
         include_once 'DB/Table/QuickForm.php';
-        return DB_Table_QuickForm::getElements($cols, $array_name);
+        $elements =& DB_Table_QuickForm::getElements($cols,
+            $array_name);
+        return $elements;
     }
     
     
