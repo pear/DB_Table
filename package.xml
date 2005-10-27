@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.38 2005-09-13 14:46:08 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.39 2005-10-27 12:43:43 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -21,13 +21,12 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>1.2.1</version>
-        <date>2005-09-13</date>
+        <version>1.2.2</version>
+        <date>2005-MM-DD</date>
         <state>stable</state>
         <notes>
-            * Bug #5382: Setting default values via getForm() did not
-            work for radio elements because QuickForm "resets" the
-            checked state when one adds a group.
+            * Improvement related to bug report #5679: $col and $idx may
+              now be null in the table definition.
         </notes>
         <filelist>
         

@@ -87,6 +87,10 @@ class DB_Table_Manager {
         // definitions, and note column indexes as we go.
         //
         
+        if (is_null($column_set)) {
+            $column_set = array();
+        }
+        
         foreach ($column_set as $colname => $val) {
             
             $colname = trim($colname);
@@ -139,6 +143,10 @@ class DB_Table_Manager {
         // 
         // validate the indexes.
         //
+        
+        if (is_null($index_set)) {
+            $index_set = array();
+        }
         
         foreach ($index_set as $idxname => $val) {
             
