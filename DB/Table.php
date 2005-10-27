@@ -770,6 +770,9 @@ class DB_Table {
     {
         // build the base command
         $sql = $this->buildSQL($sqlkey, $filter, $order, $start, $count);
+        if (PEAR::isError($sql)) {
+            return $sql;
+        }
         
         // set the get*() method name
         if (isset($this->sql[$sqlkey]['get'])) {
@@ -863,6 +866,9 @@ class DB_Table {
     {
         // build the base command
         $sql = $this->buildSQL($sqlkey, $filter, $order, $start, $count);
+        if (PEAR::isError($sql)) {
+            return $sql;
+        }
         
         // DB_Table assumes you are using a shared PEAR DB object.  Other
         // scripts using the same object probably expect its fetchmode
