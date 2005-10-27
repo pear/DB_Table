@@ -821,6 +821,13 @@ class DB_Table_QuickForm {
         // values, in which case the type is 'select')
         if (! isset($col['qf_type'])) {
         
+            // if $col['type'] is not set, set it to null
+            // ==> in the switch statement below, the
+            //     default case will be used
+            if (!isset($col['type'])) {
+                $col['type'] = null;
+            }
+
             switch ($col['type']) {
             
             case 'boolean':

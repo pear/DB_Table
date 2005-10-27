@@ -1063,6 +1063,9 @@ class DB_Table {
         $start = null, $count = null)
     {
         // does the SQL SELECT key exist?
+        if (is_null($this->sql)) {
+            $this->sql = array();
+        }
         $tmp = array_keys($this->sql);
         if (! in_array($sqlkey, $tmp)) {
             return $this->throwError(
