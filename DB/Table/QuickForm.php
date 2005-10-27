@@ -910,7 +910,7 @@ class DB_Table_QuickForm {
             'single', 'double');
         
         // the element is numeric
-        if (! isset($col['qf_rules']['numeric']) &&
+        if (! isset($col['qf_rules']['numeric']) && isset($col['type']) &&
             in_array($col['type'], $numeric)) {
             
             $col['qf_rules']['numeric'] = sprintf(

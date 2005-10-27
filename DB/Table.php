@@ -2079,6 +2079,7 @@ class DB_Table {
     {
         include_once 'DB/Table/QuickForm.php';
         $coldef = $this->_getFormColDefs($column);
+        DB_Table_QuickForm::fixColDef($coldef[$column], $elemname);
         $element =& DB_Table_QuickForm::getElement($coldef[$column],
             $elemname);
         return $element;
