@@ -902,7 +902,14 @@ class DB_Table_QuickForm {
             $col['qf_radiosep'] = '<br />';
         }
         
-        
+        // $col['qf_set_default_rules'] === false allows to turn off
+        // the automatic creation of QF rules for this "column"
+        // (suggested by Arne Bippes)
+        if (isset($col['qf_set_default_rules']) &&
+                  $col['qf_set_default_rules'] === false) {
+            return;
+        }        
+
         // the element is required
         if (! isset($col['qf_rules']['required']) && $col['require']) {
             
