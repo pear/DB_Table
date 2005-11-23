@@ -265,7 +265,120 @@ class DB_Table_Manager {
         return true;
     }
     
+    /**
+    * 
+    * Verify whether the table and columns exists, whether the columns
+    * have the right type and whether the indexes exist.
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param object &$db A PEAR DB object.
+    * 
+    * @param string $table The table name to connect to in the database.
+    * 
+    * @param mixed $column_set A DB_Table $this->col array.
+    * 
+    * @param mixed $index_set A DB_Table $this->idx array.
+    * 
+    * @return mixed Boolean true if the verification was successful, and a
+    * PEAR_Error if verification failed.
+    * 
+    */
     
+    function verify(&$db, $table, $column_set, $index_set)
+    {
+        // check #1: does the table exist?
+        $tableInfo = $db->tableInfo($table, DB_TABLEINFO_FULL);
+        if (PEAR::isError($tableInfo)) {
+            if ($tableInfo['code'] == DB_ERROR_NEED_MORE_DATA) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_VER_TABLE_MISSING,
+                    "(table='$table')"
+                );
+            }
+            return $tableInfo;
+        }
+
+        if (is_null($column_set)) {
+            $column_set = array();
+        }
+        
+        foreach ($column_set as $colname => $val) {
+            $colname = trim($colname);
+
+            // check #2: do all columns exist?
+            if (!array_key_exists($colname, $tableInfo['order'])) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_VER_COLUMN_MISSING,
+                    "(column='$colname')"
+                );
+            }
+
+            // check #3: do all columns have the right type?
+            $valid_types = array();
+            switch ($val['type']) {
+
+                case 'boolean':
+                case 'decimal':
+                case 'single':
+                case 'double':
+                    $valid_types = array('real');
+                    break;
+
+                case 'smallint':
+                case 'integer':
+                case 'bigint':
+                    $valid_types = array('int', 'integer');
+                    break;
+
+                case 'clob':
+                    $valid_types = array('blob');
+                    break;
+
+                case 'char':
+                case 'varchar':
+                case 'date':
+                case 'time':
+                case 'timestamp':
+                    $valid_types = array('string');
+                    break;
+
+                default:
+                    // map of column types and declarations for this RDBMS
+                    $map = $GLOBALS['_DB_TABLE']['type'][$db->phptype];
+                    // is it a recognized column type?
+                    $types = array_keys($map);
+                    if (!in_array($val['type'], $types)) {
+                        return DB_Table::throwError(
+                            DB_TABLE_ERR_DECLARE_TYPE,
+                            "('" . $val['type'] . "')"
+                        );
+                    }
+            }
+
+            $colindex = $tableInfo['order'][$colname];
+            $type = $tableInfo[$colindex]['type'];
+            if (!in_array($type, $valid_types)) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_VER_COLUMN_TYPE,
+                    "(column='$colname', type='$type')"
+                );
+            }
+
+        }
+
+        // check #4: do all indexes exist?
+        /* TODO:
+           check, whether indexes can be checked ($db->tableInfo and
+           mysql_* functions don't (seem to) offer information about
+           the indexes
+        */
+
+        return true;
+    }
+
     /**
     * 
     * Get the column declaration string for a DB_Table column.

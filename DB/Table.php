@@ -165,6 +165,23 @@ define('DB_TABLE_ERR_TABLE_STRLEN',     -23);
 */
 define('DB_TABLE_ERR_SEQ_STRLEN',       -24);
 
+/**
+* Error code at verify() time when the table does not exist in the
+* database.
+*/
+define('DB_TABLE_ERR_VER_TABLE_MISSING', -25);
+
+/**
+* Error code at verify() time when the column does not exist in the
+* database table.
+*/
+define('DB_TABLE_ERR_VER_COLUMN_MISSING', -26);
+
+/**
+* Error code at verify() time when the column type does not match the
+* type specified in the column declaration.
+*/
+define('DB_TABLE_ERR_VER_COLUMN_TYPE',  -27);
 
 /**
 * The PEAR class for errors
@@ -322,7 +339,10 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
         DB_TABLE_ERR_DECLARE_STRLEN      => 'Column name too long, 30 char max',
         DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max',
         DB_TABLE_ERR_TABLE_STRLEN        => 'Table name too long, 30 char max',
-        DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max'
+        DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max',
+        DB_TABLE_ERR_VER_TABLE_MISSING   => 'Verification failed: table does not exist',
+        DB_TABLE_ERR_VER_COLUMN_MISSING  => 'Verification failed: column does not exist',
+        DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type'
     );
 }
 
@@ -559,7 +579,10 @@ class DB_Table {
     * boolean false to not attempt creation, 'safe' to
     * create the table only if it does not exist, or
     * 'drop' to drop any existing table with the same name
-    * and re-create it.
+    * and re-create it. This can also be 'verify'; DB_Table will then
+    * check whether the table exists, whether all the columns exist,
+    * whether the columns have the right type, whether the columns
+    * have the right type, and whether the indexes exists
     * 
     * @return object DB_Table
     * 
@@ -1765,7 +1788,10 @@ class DB_Table {
     * @param mixed $flag Boolean false to abort the create attempt from
     * the start, 'drop' to drop the existing table and
     * re-create it, or 'safe' to only create the table if it
-    * does not exist in the database.
+    * does not exist in the database. This can also be 'verify';
+    * DB_Table will then check whether the table exists, whether all
+    * the columns exist, whether the columns have the right type, and
+    * whether the indexes exists.
     * 
     * @return mixed Boolean false if there was no attempt to create the
     * table, boolean true if the attempt succeeded, or a PEAR_Error if
@@ -1782,38 +1808,57 @@ class DB_Table {
         
         // check the create-flag
         switch ($flag) {
-        
-        case 'drop':
-            // forcibly drop an existing table
-            $this->db->query("DROP TABLE {$this->table}");
-            $ok = true;
-            break;
-        
-        case 'safe':
-            // create only if table does not exist
-            $list = $this->db->getListOf('tables');
-            // ok to create only if table does not exist
-            $ok = (! in_array($this->table, $list));
-            break;
-            
-        default:
-            // unknown flag
-            return $this->throwError(
-                DB_TABLE_ERR_CREATE_FLAG,
-                "('$flag')"
-            );
+
+            case 'drop':
+                // forcibly drop an existing table
+                $this->db->query("DROP TABLE {$this->table}");
+                $ok = true;
+                break;
+
+            case 'safe':
+                // create only if table does not exist
+                $list = $this->db->getListOf('tables');
+                // ok to create only if table does not exist
+                $ok = (! in_array($this->table, $list));
+                break;
+
+            case 'verify':
+                // verify the table, the columns and the indexes
+                $ok = true;
+                break;
+
+            default:
+                // unknown flag
+                return $this->throwError(
+                    DB_TABLE_ERR_CREATE_FLAG,
+                    "('$flag')"
+                );
 
         }
-        
+
         // are we going to create the table?
         if (! $ok) {
             return false;
-        } else {
-            include_once 'DB/Table/Manager.php';
-            return DB_Table_Manager::create(
-                $this->db, $this->table, $this->col, $this->idx, $flag
-            );
         }
+
+        include_once 'DB/Table/Manager.php';
+
+        switch ($flag) {
+
+            case 'drop':
+            case 'safe':
+                return DB_Table_Manager::create(
+                    $this->db, $this->table, $this->col, $this->idx  //, $flag
+                );
+                break;
+
+            case 'verify':
+                return DB_Table_Manager::verify(
+                    $this->db, $this->table, $this->col, $this->idx
+                );
+                break;
+        }
+
     }
     
     
