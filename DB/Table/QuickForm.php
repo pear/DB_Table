@@ -503,6 +503,33 @@ class DB_Table_QuickForm {
                 (isset($setval) ? $setval : '')
             );
             break;
+
+        case 'callback':  // custom QF elements that need more than
+                          // the standard parameters
+                          // code from Arne Bippes <arne.bippes@brandao.de>
+
+            if (is_callable(array($col['qf_callback'], 'createElement'))) {
+                // Does an object with name from $col['qf_callback'] and
+                // a method with name 'createElement' exist?
+                $ret_value = call_user_func_array(
+                    array($col['qf_callback'], 'createElement'),
+                    array(&$element, &$col, &$elemname, &$setval));
+            }
+            elseif (is_callable($col['qf_callback'])) {
+                // Does a method with name from $col['qf_callback'] exist?
+                $ret_value = call_user_func_array(
+                    $col['qf_callback'],
+                    array(&$element, &$col, &$elemname, &$setval));
+            }
+            if ($ret_value) {
+                break;
+            }
+            // fall into default block of switch statement:
+            // - if $col['qf_callback'] is ...
+            //   - not a valid object
+            //   - a valid object, but a method 'createElement' doesn't exist
+            //   - not valid a method name
+            // - if an error occured in 'createElement' or in the method
             
         default:
             
