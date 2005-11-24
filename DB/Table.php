@@ -184,6 +184,12 @@ define('DB_TABLE_ERR_VER_COLUMN_MISSING', -26);
 define('DB_TABLE_ERR_VER_COLUMN_TYPE',  -27);
 
 /**
+* Error code at instantiation time when the column definition array
+* does not contain at least one column.
+*/
+define('DB_TABLE_ERR_NO_COLS',          -28);
+
+/**
 * The PEAR class for errors
 */
 require_once 'PEAR.php';
@@ -342,7 +348,8 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
         DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max',
         DB_TABLE_ERR_VER_TABLE_MISSING   => 'Verification failed: table does not exist',
         DB_TABLE_ERR_VER_COLUMN_MISSING  => 'Verification failed: column does not exist',
-        DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type'
+        DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type',
+        DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty'
     );
 }
 
@@ -605,6 +612,13 @@ class DB_Table {
             return;
         }
         
+        // array with column definition may not be empty        
+        if (! isset($this->col) || is_null($this->col) ||
+                (is_array($this->col) && count($this->col) === 0)) {
+            $this->error =& DB_Table::throwError(DB_TABLE_ERR_NO_COLS);
+            return;
+        }
+
         // set the class properties
         $this->db =& $db;
         $this->table = $table;
