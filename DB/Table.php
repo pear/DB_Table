@@ -77,7 +77,7 @@ define('DB_TABLE_ERR_UPD_DATA_INVALID', -9);
 
 /**
 * Error code when you use a create() flag that is not recognized (must
-* be 'safe', 'drop', or boolean false.
+* be 'safe', 'drop', 'verify' or boolean false.
 */
 define('DB_TABLE_ERR_CREATE_FLAG',      -10);
 
@@ -1848,7 +1848,7 @@ class DB_Table {
             case 'drop':
             case 'safe':
                 return DB_Table_Manager::create(
-                    $this->db, $this->table, $this->col, $this->idx  //, $flag
+                    $this->db, $this->table, $this->col, $this->idx
                 );
                 break;
 
