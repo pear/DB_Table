@@ -1833,7 +1833,7 @@ class DB_Table {
                 // create only if table does not exist
                 $list = $this->db->getListOf('tables');
                 // ok to create only if table does not exist
-                $ok = (! in_array($this->table, $list));
+                $ok = (! in_array(strtolower($this->table), $list));
                 break;
 
             case 'verify':
