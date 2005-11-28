@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.39 2005-10-27 12:43:43 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.40 2005-11-28 15:12:00 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -21,12 +21,50 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>1.2.2</version>
-        <date>2005-MM-DD</date>
-        <state>stable</state>
+        <version>1.3.0RC1</version>
+        <date>2005-12-DD</date>
+        <state>beta</state>
         <notes>
-            * Improvement related to bug report #5679: $col and $idx may
-              now be null in the table definition.
+            Minor changes:
+
+            * Improvement related to bug report #5679: many arrays (in the
+              table definition and as function parameters) may now be null
+              (of course, an empty array is still allowed).
+            * The column definition array $col may not be empty because it
+              isn't possible to create empty database tables and because
+              the work with DB_Table makes only sense with at least one
+              column.
+            * Fixed several return by reference problems (that caused
+              notices in PHP 4.4.x and 5.x).
+            * Fixed several "undefined index" problems (causing notices).
+            * Bugfix: select() and selectResult() didn't return error
+              objects caused due to problems in $sql array.
+            * Bug #6025: DB_Table no longer tries to create a table if a
+              table with the same name but with different use of lower and
+              upper letters.
+
+            Major changes / enhancements:
+            * Request #5478: Verification/check, whether the table exists,
+              whether all the columns exist, whether the columns have the
+              right type, and whether the indexes exists. This can be used
+              by setting $create in the constructor of your extended class
+              to 'verify' instead of false/'safe'/'drop'. In case of an
+              error in the schema, you will find the PEAR_Error object in
+              $object->error (assuming $object is your DB_Table instance).
+            * Request #5965: Turn off automatic setting of default QF rules
+              like 'numeric' or 'required' (can be done by setting
+              $cols[...]['qf_set_default_rules'] = false).
+              (thanks to Arne Bippes)
+            * Request #6036: new qf_type 'callback' which allows to add
+              custom QF elements that need more than the standard
+              parameters. You need to specify a key named 'qf_callback',
+              filled with either the name of a class (this class needs to
+              have a method 'createElement') or the name of a method.
+              Both method types must return true if the element was created
+              successfully. (thanks to Arne Bippes)
+            
+            Please note that there are three new error messages (only
+            relevant if you are using localized error messages).
         </notes>
         <filelist>
         
