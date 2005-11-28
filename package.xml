@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.40 2005-11-28 15:12:00 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.41 2005-11-28 15:39:25 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -44,6 +44,7 @@
               upper letters.
 
             Major changes / enhancements:
+
             * Request #5478: Verification/check, whether the table exists,
               whether all the columns exist, whether the columns have the
               right type, and whether the indexes exists. This can be used
@@ -63,7 +64,7 @@
               Both method types must return true if the element was created
               successfully. (thanks to Arne Bippes)
             
-            Please note that there are three new error messages (only
+            Please note that there are four new error messages (only
             relevant if you are using localized error messages).
         </notes>
         <filelist>
