@@ -190,6 +190,18 @@ define('DB_TABLE_ERR_VER_COLUMN_TYPE',  -27);
 define('DB_TABLE_ERR_NO_COLS',          -28);
 
 /**
+* Error code at verify() time when an index cannot be found in the
+* database table.
+*/
+define('DB_TABLE_ERR_VER_IDX_MISSING',   -29);
+
+/**
+* Error code at verify() time when an index does not contain all
+* columns that it should contain.
+*/
+define('DB_TABLE_ERR_VER_IDX_COL_MISSING', -30);
+
+/**
 * The PEAR class for errors
 */
 require_once 'PEAR.php';
@@ -349,7 +361,9 @@ if (! isset($GLOBALS['_DB_TABLE']['error'])) {
         DB_TABLE_ERR_VER_TABLE_MISSING   => 'Verification failed: table does not exist',
         DB_TABLE_ERR_VER_COLUMN_MISSING  => 'Verification failed: column does not exist',
         DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type',
-        DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty'
+        DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty',
+        DB_TABLE_ERR_VER_IDX_MISSING     => 'Verification failed: index does not exist',
+        DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols'
     );
 }
 

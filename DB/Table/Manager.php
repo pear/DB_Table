@@ -370,11 +370,122 @@ class DB_Table_Manager {
         }
 
         // check #4: do all indexes exist?
-        /* TODO:
-           check, whether indexes can be checked ($db->tableInfo and
-           mysql_* functions don't (seem to) offer information about
-           the indexes
-        */
+        $table_indexes = $db->getAll('SHOW KEYS FROM ' . $this->table);
+        if (PEAR::isError($table_indexes)) {
+            return $table_indexes;
+        }
+
+        if (is_null($index_set)) {
+            $index_set = array();
+        }
+        
+        foreach ($index_set as $idxname => $val) {
+            
+            if (is_string($val)) {
+                // shorthand for index names: colname => index_type
+                $type = trim($val);
+                $cols = trim($idxname);
+            } elseif (is_array($val)) {
+                // normal: index_name => array('type' => ..., 'cols' => ...)
+                $type = (isset($val['type'])) ? $val['type'] : 'normal';
+                $cols = (isset($val['cols'])) ? $val['cols'] : null;
+            }
+            
+            // index name cannot be a reserved keyword
+            $reserved = in_array(
+                strtoupper($idxname),
+                $GLOBALS['_DB_TABLE']['reserved']
+            );
+            
+            if ($reserved) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_DECLARE_IDXNAME,
+                    "('$idxname')"
+                );
+            }
+            
+            // are there any columns for the index?
+            if (! $cols) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_IDX_NO_COLS,
+                    "('$idxname')"
+                );
+            }
+            
+            // are there any CLOB columns, or any columns that are not
+            // in the schema?
+            settype($cols, 'array');
+            $valid_cols = array_keys($column_set);
+            foreach ($cols as $colname) {
+            
+                if (! in_array($colname, $valid_cols)) {
+                    return DB_Table::throwError(
+                        DB_TABLE_ERR_IDX_COL_UNDEF,
+                        "'$idxname' ('$colname')"
+                    );
+                }
+                
+                if ($column_set[$colname]['type'] == 'clob') {
+                    return DB_Table::throwError(
+                        DB_TABLE_ERR_IDX_COL_CLOB,
+                        "'$idxname' ('$colname')"
+                    );
+                }
+                
+            }
+            
+            // we prefix all index names with the table name,
+            // and suffix all index names with '_idx'.  this
+            // is to soothe PostgreSQL, which demands that index
+            // names not collide, even when they indexes are on
+            // different tables.
+            $newIdxName = $table . '_' . $idxname . '_idx';
+            
+            // now check the length; must be under 30 chars to
+            // soothe Oracle.
+            if (strlen($newIdxName) > 30) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_IDX_STRLEN,
+                    "'$idxname' ('$newIdxName')"
+                );
+            }
+            
+            // check index type
+            if ($type != 'unique' && $type != 'normal') {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_IDX_TYPE,
+                    "'$idxname' ('$type')"
+                );
+            }
+
+            $index_found = false;
+            foreach ($table_indexes as $table_index) {
+                if ($table_index['Key_name'] == $newIdxName) {
+                    $index_found = true;
+                    if (($key = array_search($table_index['Column_name'],
+                                             $cols)) !== false) {
+                        unset($cols[$key]);
+                    }
+                }
+            }
+
+            if (!$index_found) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_VER_IDX_MISSING,
+                    "'$idxname' ('$newIdxName')"
+                );
+            }
+
+            if (count($cols) > 0) {
+                // string of column names
+                $colstring = implode(', ', $cols);
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_VER_IDX_COL_MISSING,
+                    "'$idxname' ($colstring)"
+                );
+            }
+
+        }
 
         return true;
     }
