@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.41 2005-11-28 15:39:25 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.42 2005-12-05 21:07:50 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -42,6 +42,7 @@
             * Bug #6025: DB_Table no longer tries to create a table if a
               table with the same name but with different use of lower and
               upper letters.
+            * The dependency on the Date package was removed.
 
             Major changes / enhancements:
 
@@ -73,6 +74,7 @@
                 <replace from="@package_version@" to="version" type="package-info" />
             </file>
             
+            <file role="php" name="DB/Table/Date.php" />
             <file role="php" name="DB/Table/Manager.php" />
             <file role="php" name="DB/Table/QuickForm.php" />
             <file role="php" name="DB/Table/Valid.php" />
@@ -93,7 +95,6 @@
         </filelist>
         <deps>
             <dep type="pkg" rel="has" optional="no">DB</dep>
-            <dep type="pkg" rel="has" optional="no">Date</dep>
             <dep type="pkg" rel="has" optional="yes">HTML_QuickForm</dep>
         </deps>
     </release>

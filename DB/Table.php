@@ -197,7 +197,7 @@ require_once 'PEAR.php';
 /**
 * The Date class for recasting date and time values
 */
-require_once 'Date.php';
+require_once 'DB/Table/Date.php';
 
 
 /**
@@ -1680,7 +1680,7 @@ class DB_Table {
                 } else {
                 
                     // convert using the Date class
-                    $tmp =& new Date($val);
+                    $tmp =& new DB_Table_Date($val);
                     $val = $tmp->format('%Y-%m-%d');
                     
                 }
@@ -1770,7 +1770,7 @@ class DB_Table {
                     
                 } else {
                     // convert using the Date class
-                    $tmp =& new Date($val);
+                    $tmp =& new DB_Table_Date($val);
                     $val = $tmp->format('%Y-%m-%d %H:%M:%S');
                 }
                 
