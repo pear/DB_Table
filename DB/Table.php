@@ -7,7 +7,7 @@
 * DB_Table provides database API abstraction, data type abstraction,
 * automated SELECT, INSERT, and UPDATE queries, automated table
 * creation, automated validation of inserted/updated column values,
-* and automated creation of QuickForm elemnts based on the column
+* and automated creation of QuickForm elements based on the column
 * definitions.
 * 
 * @category DB
@@ -327,48 +327,6 @@ $GLOBALS['_DB_TABLE']['type'] = array(
 
 
 /**
-* US-English error messages.  DB_Table has no other embedded strings, so
-* if you want to internationalize, you can modify these for your
-* language; just set them before or after including DB_Table.
-*/
-if (! isset($GLOBALS['_DB_TABLE']['error'])) {
-    $GLOBALS['_DB_TABLE']['error'] = array(
-        DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB object',
-        DB_TABLE_ERR_PHPTYPE             => 'DB phptype not supported',
-        DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
-        DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
-        DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
-        DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
-        DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
-        DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
-        DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
-        DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
-        DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
-        DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
-        DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
-        DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
-        DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
-        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-        DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
-        DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
-        DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
-        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-        DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index',
-        DB_TABLE_ERR_DECLARE_STRLEN      => 'Column name too long, 30 char max',
-        DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max',
-        DB_TABLE_ERR_TABLE_STRLEN        => 'Table name too long, 30 char max',
-        DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max',
-        DB_TABLE_ERR_VER_TABLE_MISSING   => 'Verification failed: table does not exist',
-        DB_TABLE_ERR_VER_COLUMN_MISSING  => 'Verification failed: column does not exist',
-        DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type',
-        DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty',
-        DB_TABLE_ERR_VER_IDX_MISSING     => 'Verification failed: index does not exist',
-        DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols'
-    );
-}
-
-
-/**
 * 
 * DB_Table is a database API and data type SQL abstraction class.
 * 
@@ -532,8 +490,62 @@ class DB_Table {
     */
     
     var $error = null;
-    
-    
+
+
+    /**
+    * 
+    * US-English error messages.
+    * 
+    * If you want to internationalize these messages, set them like this:
+    * <code>
+    * $obj =& new DB_Table();
+    * $obj->setErrorMessage(DB_TABLE_ERR_PHPTYPE, 'localized error message');
+    * // or to set more than one message:
+    * $obj->setErrorMessage(array(DB_TABLE_ERR_PHPTYPE => 'message 1',
+    *                             DB_TABLE_ERR_NOT_DB_OBJECT => 'message 2'));
+    * </code>
+    * 
+    * @access private
+    * 
+    * @var array
+    * 
+    */
+
+    var $_error_messages = array(
+        DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB object',
+        DB_TABLE_ERR_PHPTYPE             => 'DB phptype not supported',
+        DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
+        DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
+        DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
+        DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
+        DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
+        DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
+        DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
+        DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
+        DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
+        DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
+        DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
+        DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
+        DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
+        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+        DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
+        DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
+        DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
+        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+        DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index',
+        DB_TABLE_ERR_DECLARE_STRLEN      => 'Column name too long, 30 char max',
+        DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max',
+        DB_TABLE_ERR_TABLE_STRLEN        => 'Table name too long, 30 char max',
+        DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max',
+        DB_TABLE_ERR_VER_TABLE_MISSING   => 'Verification failed: table does not exist',
+        DB_TABLE_ERR_VER_COLUMN_MISSING  => 'Verification failed: column does not exist',
+        DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type',
+        DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty',
+        DB_TABLE_ERR_VER_IDX_MISSING     => 'Verification failed: index does not exist',
+        DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols'
+    );
+
+
     /**
     * 
     * Whether or not to automatically recast data at insert- and update-time.
@@ -570,7 +582,7 @@ class DB_Table {
     function &throwError($code, $extra = null)
     {
         // get the error message text based on the error code
-        $text = $GLOBALS['_DB_TABLE']['error'][$code];
+        $text = $this->_error_messages[$code];
         
         // add any additional error text
         if ($extra) {
@@ -603,7 +615,7 @@ class DB_Table {
     * and re-create it. This can also be 'verify'; DB_Table will then
     * check whether the table exists, whether all the columns exist,
     * whether the columns have the right type, whether the columns
-    * have the right type, and whether the indexes exists
+    * have the right type, and whether the indexes exist
     * 
     * @return object DB_Table
     * 
@@ -611,6 +623,11 @@ class DB_Table {
     
     function DB_Table(&$db, $table, $create = false)
     {
+        // merge user defined and DB_Table error messages
+        if (isset($GLOBALS['_DB_TABLE']['error'])) {
+            $this->setErrorMessage($GLOBALS['_DB_TABLE']['error']);
+        }
+
         // is the first argument a DB object?
         if (! is_subclass_of($db, 'db_common')) {
             $this->error =& DB_Table::throwError(DB_TABLE_ERR_NOT_DB_OBJECT);
@@ -670,9 +687,35 @@ class DB_Table {
         $supported = array_keys($GLOBALS['_DB_TABLE']['type']);
         return in_array(strtolower($phptype), $supported);
     }
-    
-    
-    
+
+
+    /**
+    * 
+    * Overwrite one or more error messages, e.g. to internationalize them.
+    * 
+    * @access public
+    * 
+    * @param mixed $code If string, the error message with code $code will
+    * be overwritten by $message. If array, the error messages with code
+    * of each array key will be overwritten by the key's value.
+    * 
+    * @param string $message Only used if $key is not an array.
+    *
+    * @return void
+    * 
+    */
+
+    function setErrorMessage($code, $message = null) {
+        if (is_array($code)) {
+            foreach ($code as $single_code => $single_message) {
+                $this->_error_messages[$single_code] = $single_message;
+            }
+        } else {
+            $this->_error_messages[$code] = $message;
+        }
+    }
+
+
     /**
     * 
     * Returns all or part of the $this->col property array.
@@ -1819,7 +1862,7 @@ class DB_Table {
     * does not exist in the database. This can also be 'verify';
     * DB_Table will then check whether the table exists, whether all
     * the columns exist, whether the columns have the right type, and
-    * whether the indexes exists.
+    * whether the indexes exist.
     * 
     * @return mixed Boolean false if there was no attempt to create the
     * table, boolean true if the attempt succeeded, or a PEAR_Error if

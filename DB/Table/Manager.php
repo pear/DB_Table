@@ -267,7 +267,7 @@ class DB_Table_Manager {
     
     /**
     * 
-    * Verify whether the table and columns exists, whether the columns
+    * Verify whether the table and columns exist, whether the columns
     * have the right type and whether the indexes exist.
     * 
     * @static
