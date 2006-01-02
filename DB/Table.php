@@ -1614,7 +1614,7 @@ class DB_Table {
         // the maximum length is 30, but PEAR DB/MDB2 will add "_seq" to the
         // name, so the max length here is less 4 chars. we have to
         // check here because the sequence will be created automatically
-        // by PEAR DB, which will not check for length on its own.
+        // by PEAR DB/MDB2, which will not check for length on its own.
         if (strlen($seq_name) > 26) {
             return DB_Table::throwError(
                 DB_TABLE_ERR_SEQ_STRLEN,
