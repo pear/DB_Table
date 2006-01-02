@@ -50,7 +50,7 @@ class DB_Table_Manager {
     * 
     * @access public
     * 
-    * @param object &$db A PEAR DB object.
+    * @param object &$db A PEAR DB/MDB2 object.
     * 
     * @param string $table The table name to connect to in the database.
     * 
@@ -74,10 +74,10 @@ class DB_Table_Manager {
         
         // is the table name too long?
         if (strlen($table) > 30) {
-			return DB_Table::throwError(
-				DB_TABLE_ERR_TABLE_STRLEN,
-				" ('$table')"
-			);
+            return DB_Table::throwError(
+                DB_TABLE_ERR_TABLE_STRLEN,
+                " ('$table')"
+            );
         }
         
         
@@ -110,10 +110,10 @@ class DB_Table_Manager {
             
             // column must be no longer than 30 chars
             if (strlen($colname) > 30) {
-				return DB_Table::throwError(
-					DB_TABLE_ERR_DECLARE_STRLEN,
-					"('$colname')"
-				);
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_DECLARE_STRLEN,
+                    "('$colname')"
+                );
             }
             
             
@@ -216,10 +216,10 @@ class DB_Table_Manager {
             // now check the length; must be under 30 chars to
             // soothe Oracle.
             if (strlen($newIdxName) > 30) {
-				return DB_Table::throwError(
-					DB_TABLE_ERR_IDX_STRLEN,
-					"'$idxname' ('$newIdxName')"
-				);
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_IDX_STRLEN,
+                    "'$idxname' ('$newIdxName')"
+                );
             }
             
             // create index entry
@@ -274,7 +274,7 @@ class DB_Table_Manager {
     * 
     * @access public
     * 
-    * @param object &$db A PEAR DB object.
+    * @param object &$db A PEAR DB/MDB2 object.
     * 
     * @param string $table The table name to connect to in the database.
     * 
@@ -289,6 +289,8 @@ class DB_Table_Manager {
     
     function verify(&$db, $table, $column_set, $index_set)
     {
+        // TODO: add verify functionality for MDB2
+
         // check #1: does the table exist?
         $tableInfo = $db->tableInfo($table, DB_TABLEINFO_FULL);
         if (PEAR::isError($tableInfo)) {
@@ -498,7 +500,7 @@ class DB_Table_Manager {
     * 
     * @access public
     * 
-    * @param string $phptype The DB phptype key.
+    * @param string $phptype The DB/MDB2 phptype key.
     * 
     * @param string $coltype The DB_Table column type.
     * 

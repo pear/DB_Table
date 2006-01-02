@@ -458,7 +458,7 @@ class DB_Table {
     * 
     * When calling select() and selectResult(), use this fetch mode (usually
     * a DB_FETCHMODE_* constant).  If null, uses whatever is set in the $db
-    * PEAR DB object.
+    * PEAR DB/MDB2 object.
     * 
     * @access public
     * 
@@ -473,7 +473,7 @@ class DB_Table {
     * 
     * When fetchmode is DB_FETCHMODE_OBJECT, use this class for each
     * returned row.  If null, uses whatever is set in the $db
-    * PEAR DB object.
+    * PEAR DB/MDB2 object.
     * 
     * @access public
     * 
@@ -525,8 +525,8 @@ class DB_Table {
     */
 
     var $_error_messages = array(
-        DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB object',
-        DB_TABLE_ERR_PHPTYPE             => 'DB phptype not supported',
+        DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB/MDB2 object',
+        DB_TABLE_ERR_PHPTYPE             => 'DB/MDB2 phptype not supported',
         DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
         DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
         DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
@@ -617,7 +617,7 @@ class DB_Table {
     * 
     * @access public
     * 
-    * @param object &$db A PEAR DB object.
+    * @param object &$db A PEAR DB/MDB2 object.
     * 
     * @param string $table The table name to connect to in the database.
     * 
@@ -641,7 +641,7 @@ class DB_Table {
             $this->setErrorMessage($GLOBALS['_DB_TABLE']['error']);
         }
 
-        // is the first argument a DB object?
+        // is the first argument a DB/MDB2 object?
         $this->backend = null;
         if (! is_subclass_of($db, 'db_common')) {
             $this->backend = 'db';
@@ -842,7 +842,7 @@ class DB_Table {
     
     /**
     *
-    * Selects rows from the table using one of the 'DB::get*()' methods.
+    * Selects rows from the table using one of the DB/MDB2 get*() methods.
     * 
     * @access public
     * 
@@ -867,14 +867,24 @@ class DB_Table {
     * 'getOne'), a single value (if 'getOne'), or a PEAR_Error object.
     *
     * @see DB::getAll()
+    * 
+    * @see MDB2::getAll()
     *
     * @see DB::getAssoc()
+    * 
+    * @see MDB2::getAssoc()
     *
     * @see DB::getCol()
+    * 
+    * @see MDB2::getCol()
     *
     * @see DB::getOne()
     *
+    * @see MDB2::getOne()
+    * 
     * @see DB::getRow()
+    * 
+    * @see MDB2::getRow()
     *
     * @see DB_Table::_swapModes()
     *
@@ -897,7 +907,7 @@ class DB_Table {
             $method = 'getAll';
         }
         
-        // DB_Table assumes you are using a shared PEAR DB object.  Other
+        // DB_Table assumes you are using a shared PEAR DB/MDB2 object.  Other
         // scripts using the same object probably expect its fetchmode
         // not to change, unless they change it themselves.  Thus, to
         // provide friendly mode-swapping, we will restore these modes
@@ -925,32 +935,24 @@ class DB_Table {
         }
         
         // get the result
-        switch ($method) {
+        if ($this->backend == 'mdb2') {
+            $result = $this->db->extended->$method($sql, null, $params);
+        } else {
+            switch ($method) {
 
-        case 'getCol':
-            if ($this->backend == 'mdb2') {
-                $result = $this->db->extended->$method($sql, null, $params);
-            } else {
-                $result = $this->db->$method($sql, 0, $params);
+                case 'getCol':
+                    $result = $this->db->$method($sql, 0, $params);
+                    break;
+
+                case 'getAssoc':
+                    $result = $this->db->$method($sql, false, $params);
+                    break;
+
+                default:
+                    $result = $this->db->$method($sql, $params);
+                    break;
+
             }
-            break;
-
-        case 'getAssoc':
-            if ($this->backend == 'mdb2') {
-                $result = $this->db->extended->$method($sql, null, $params);
-            } else {
-                $result = $this->db->$method($sql, false, $params);
-            }
-            break;
-
-        default:
-            if ($this->backend == 'mdb2') {
-                $result = $this->db->extended->$method($sql, null, $params);
-            } else {
-                $result = $this->db->$method($sql, $params);
-            }
-            break;
-
         }
             
         // swap modes back
@@ -963,7 +965,7 @@ class DB_Table {
     
     /**
     *
-    * Selects rows from the table as a DB_Result object.
+    * Selects rows from the table as a DB_Result/MDB2_Result_* object.
     * 
     * @access public
     * 
@@ -984,8 +986,8 @@ class DB_Table {
     * @param array $params Parameters to use in placeholder substitutions (if
     * any).
     * 
-    * @return mixed A PEAR_Error on failure, or a DB_Result object on
-    * success.
+    * @return mixed A PEAR_Error on failure, or a DB_Result/MDB2_Result_*
+    * object on success.
     *
     * @see DB_Table::_swapModes()
     *
@@ -1000,7 +1002,7 @@ class DB_Table {
             return $sql;
         }
         
-        // DB_Table assumes you are using a shared PEAR DB object.  Other
+        // DB_Table assumes you are using a shared PEAR DB/MDB2 object.  Other
         // scripts using the same object probably expect its fetchmode
         // not to change, unless they change it themselves.  Thus, to
         // provide friendly mode-swapping, we will restore these modes
@@ -1129,22 +1131,22 @@ class DB_Table {
     
     /**
     * 
-    * Changes the $this->db PEAR DB object fetchmode and
+    * Changes the $this->db PEAR DB/MDB2 object fetchmode and
     * fetchmode_object_class.
     * 
-    * Becase DB_Table objects tend to use the same PEAR DB object, it
+    * Because DB_Table objects tend to use the same PEAR DB/MDB2 object, it
     * may sometimes be useful to have one object return results in one
     * mode, and have another object return results in a different mode. 
-    * This method allows us to switch DB fetch modes on the fly.
+    * This method allows us to switch DB/MDB2 fetch modes on the fly.
     * 
     * @access private
     * 
     * @param string $new_mode A DB_FETCHMODE_* constant.  If null,
-    * defaults to whatever the DB object is currently using.
+    * defaults to whatever the DB/MDB2 object is currently using.
     * 
     * @param string $new_class The object class to use for results when
     * the $db object is in DB_FETCHMODE_OBJECT fetch mode.  If null,
-    * defaults to whatever the the DB object is currently using.
+    * defaults to whatever the the DB/MDB2 object is currently using.
     * 
     * @return void
     * 
@@ -1314,6 +1316,8 @@ class DB_Table {
     * 
     * @see DB::autoExecute()
     * 
+    * @see MDB2::autoExecute()
+    * 
     */
         
     function insert($data)
@@ -1444,6 +1448,8 @@ class DB_Table {
     *
     * @see DB::autoExecute()
     * 
+    * @see MDB2::autoExecute()
+    * 
     */
     
     function update($data, $where)
@@ -1566,6 +1572,8 @@ class DB_Table {
     *
     * @see DB::query()
     * 
+    * @see MDB2::exec()
+    * 
     */
     
     function delete($where)
@@ -1590,6 +1598,8 @@ class DB_Table {
     * @return integer The next value in the sequence.
     *
     * @see DB::nextID()
+    * 
+    * @see MDB2::nextID()
     *
     */
     
@@ -1601,7 +1611,7 @@ class DB_Table {
             $seq_name = "{$this->table}_{$seq_name}";
         }
         
-        // the maximum length is 30, but PEAR DB will add "_seq" to the
+        // the maximum length is 30, but PEAR DB/MDB2 will add "_seq" to the
         // name, so the max length here is less 4 chars. we have to
         // check here because the sequence will be created automatically
         // by PEAR DB, which will not check for length on its own.
