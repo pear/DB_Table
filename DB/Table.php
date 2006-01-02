@@ -352,7 +352,7 @@ class DB_Table {
     
     /**
     * 
-    * The PEAR DB object that connects to the database.
+    * The PEAR DB/MDB2 object that connects to the database.
     * 
     * @access public
     * 
@@ -361,6 +361,19 @@ class DB_Table {
     */
     
     var $db = null;
+    
+    
+    /**
+    * 
+    * The backend type
+    * 
+    * @access public
+    * 
+    * @var string
+    * 
+    */
+    
+    var $backend = null;
     
     
     /**
@@ -629,7 +642,15 @@ class DB_Table {
         }
 
         // is the first argument a DB object?
+        $this->backend = null;
         if (! is_subclass_of($db, 'db_common')) {
+            $this->backend = 'db';
+        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $this->backend = 'mdb2';
+            $this->db->loadModule('Extended');
+        }
+
+        if (! is_null($this->backend)) {
             $this->error =& DB_Table::throwError(DB_TABLE_ERR_NOT_DB_OBJECT);
             return;
         }
@@ -882,8 +903,11 @@ class DB_Table {
         // provide friendly mode-swapping, we will restore these modes
         // afterwards.
         $restore_mode = $this->db->fetchmode;
-        $restore_class = $this->db->fetchmode_object_class;
-        
+        if ($this->backend == 'mdb2') {
+            $restore_class = $this->db->getOption('fetch_class');
+        } else {
+            $restore_class = $this->db->fetchmode_object_class;
+        }
         // swap modes
         $fetchmode = $this->fetchmode;
         $fetchmode_object_class = $this->fetchmode_object_class;
@@ -904,15 +928,27 @@ class DB_Table {
         switch ($method) {
 
         case 'getCol':
-            $result = $this->db->$method($sql, 0, $params);
+            if ($this->backend == 'mdb2') {
+                $result = $this->db->extended->$method($sql, null, $params);
+            } else {
+                $result = $this->db->$method($sql, 0, $params);
+            }
             break;
 
         case 'getAssoc':
-            $result = $this->db->$method($sql, false, $params);
+            if ($this->backend == 'mdb2') {
+                $result = $this->db->extended->$method($sql, null, $params);
+            } else {
+                $result = $this->db->$method($sql, false, $params);
+            }
             break;
 
         default:
-            $result = $this->db->$method($sql, $params);
+            if ($this->backend == 'mdb2') {
+                $result = $this->db->extended->$method($sql, null, $params);
+            } else {
+                $result = $this->db->$method($sql, $params);
+            }
             break;
 
         }
@@ -969,8 +1005,11 @@ class DB_Table {
         // not to change, unless they change it themselves.  Thus, to
         // provide friendly mode-swapping, we will restore these modes
         // afterwards.
-        $restore_mode = $this->db->fetchmode;
-        $restore_class = $this->db->fetchmode_object_class;
+        if ($this->backend == 'mdb2') {
+            $restore_class = $this->db->getOption('fetch_class');
+        } else {
+            $restore_class = $this->db->fetchmode_object_class;
+        }
         
         // swap modes
         $fetchmode = $this->fetchmode;
@@ -989,7 +1028,12 @@ class DB_Table {
         }
      
         // get the result
-        $result =& $this->db->query($sql, $params);
+        if ($this->backend == 'mdb2') {
+            $stmt =& $this->db->prepare($sql);
+            $result =& $stmt->execute($params);
+        } else {
+            $result =& $this->db->query($sql, $params);
+        }
         
         // swap modes back
         $this->_swapModes($restore_mode, $restore_class);
@@ -1110,7 +1154,11 @@ class DB_Table {
     {
         // get the old (current) mode and class
         $old_mode = $this->db->fetchmode;
-        $old_class = $this->db->fetchmode_object_class;
+        if ($this->backend == 'mdb2') {
+            $old_class = $this->db->getOption('fetch_class');
+        } else {
+            $old_class = $this->db->fetchmode_object_class;
+        }
         
         // don't need to swap anything if the new modes are both
         // null or if the old and new modes already match.
@@ -1237,8 +1285,12 @@ class DB_Table {
         
         // add LIMIT if requested
         if (! is_null($start) && ! is_null($count)) {
-            $cmd = $this->db->modifyLimitQuery(
-                $cmd, $start, $count);
+            if ($this->backend == 'mdb2') {
+                $this->db->setLimit($count, $start);
+            } else {
+                $cmd = $this->db->modifyLimitQuery(
+                    $cmd, $start, $count);
+            }
         }
         
         return $cmd;
@@ -1278,9 +1330,14 @@ class DB_Table {
                 return $result;
             }
         }
-        
-        return $this->db->autoExecute($this->table, $data,
-            DB_AUTOQUERY_INSERT);
+        if ($this->backend == 'mdb2') {
+            $result = $this->db->extended->autoExecute($this->table, $data,
+                MDB2_AUTOQUERY_INSERT);
+        } else {
+            $result = $this->db->autoExecute($this->table, $data,
+                DB_AUTOQUERY_INSERT);
+        }
+        return $result;
     }
     
     
@@ -1404,8 +1461,15 @@ class DB_Table {
             }
         }
         
-        return $this->db->autoExecute($this->table, $data,
-            DB_AUTOQUERY_UPDATE, $where);
+        if ($this->backend == 'mdb2') {
+            $result = $this->db->extended->autoExecute($this->table, $data,
+                MDB2_AUTOQUERY_UPDATE, $where);
+        } else {
+            $result = $this->db->autoExecute($this->table, $data,
+                DB_AUTOQUERY_UPDATE, $where);
+        }
+        return $result;
+
     }
     
     
@@ -1506,7 +1570,12 @@ class DB_Table {
     
     function delete($where)
     {
-        return $this->db->query("DELETE FROM $this->table WHERE $where");
+        if ($this->backend == 'mdb2') {
+            $result = $this->db->exec("DELETE FROM $this->table WHERE $where");
+        } else {
+            $result = $this->db->query("DELETE FROM $this->table WHERE $where");
+        }
+        return $result;
     }
     
     
@@ -1563,7 +1632,12 @@ class DB_Table {
     
     function quote($val)
     {
-        return $this->db->quoteSmart($val);
+        if ($this->backend == 'mdb2') {
+            $val = $this->db->quote($val);
+        } else {
+            $val = $this->db->quoteSmart($val);
+        }
+        return $val;
     }
     
     
@@ -1874,6 +1948,12 @@ class DB_Table {
     
     function create($flag)
     {
+        if ($this->backend == 'mdb2') {
+            $this->db->loadModule('Manager');
+        } else {
+            include_once 'DB/Table/Manager.php';
+        }
+
         // are we OK to create the table?
         $ok = false;
         
@@ -1882,13 +1962,21 @@ class DB_Table {
 
             case 'drop':
                 // forcibly drop an existing table
-                $this->db->query("DROP TABLE {$this->table}");
+                if ($this->backend == 'mdb2') {
+                    $this->db->manager->dropTable($this->table);
+                } else {
+                    $this->db->query("DROP TABLE {$this->table}");
+                }
                 $ok = true;
                 break;
 
             case 'safe':
                 // create only if table does not exist
-                $list = $this->db->getListOf('tables');
+                if ($this->backend == 'mdb2') {
+                    $list = $this->db->manager->listTables();
+                } else {
+                    $list = $this->db->getListOf('tables');
+                }
                 // ok to create only if table does not exist
                 $ok = (! in_array(strtolower($this->table), $list));
                 break;
@@ -1912,20 +2000,33 @@ class DB_Table {
             return false;
         }
 
-        include_once 'DB/Table/Manager.php';
 
         switch ($flag) {
 
             case 'drop':
             case 'safe':
-                return DB_Table_Manager::create(
-                    $this->db, $this->table, $this->col, $this->idx
-                );
+                if ($this->backend == 'mdb2') {
+                    // todo: massage $this->col, $this->idx into $fields
+                    // http://pear.php.net/package/MDB2/docs/latest/MDB2/MDB2_Driver_Manager_Common.html#methodcreateTable
+                    $fields = array();
+                    $this->db->manager->createTable($this->table, $fields);
+                } else {
+                    return DB_Table_Manager::create(
+                        $this->db, $this->table, $this->col, $this->idx
+                    );
+                }
                 break;
 
             case 'verify':
+                if ($this->backend == 'mdb2') {
+                    include_once 'DB/Table/Manager.php';
+                    $db =& $this->db->loadModule('Reverse');
+                } else {
+                    $db =& $this->db;
+                }
+
                 return DB_Table_Manager::verify(
-                    $this->db, $this->table, $this->col, $this->idx
+                    $db, $this->table, $this->col, $this->idx
                 );
                 break;
         }
