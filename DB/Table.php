@@ -724,7 +724,7 @@ class DB_Table {
     {
         // only Firebird is supported, not its ancestor Interbase
         if ($phptype == 'ibase' && $dbsyntax != 'firebird') {
-          return false;
+            return false;
         }
         $supported = array_keys($GLOBALS['_DB_TABLE']['type']);
         return in_array(strtolower($phptype), $supported);

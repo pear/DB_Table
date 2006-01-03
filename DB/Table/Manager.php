@@ -611,8 +611,8 @@ class DB_Table_Manager {
         
         // set the "NULL"/"NOT NULL" portion
         $null = ' NULL';
-        if ($phptype == 'ibase') {  // Firebird does not like 'NULL' in CREATE TABLE
-          $null = '';
+        if ($phptype == 'ibase') {  // Firebird does not like 'NULL'
+            $null = '';             // in CREATE TABLE
         }
         $declare .= ($require) ? ' NOT NULL' : $null;
         
