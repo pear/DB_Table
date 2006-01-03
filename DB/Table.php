@@ -214,7 +214,7 @@ require_once 'DB/Table/Date.php';
 
 /**
 * DB_Table supports these RDBMS engines and their various native data
-* types; we need these here instead of in Manager.php becuase the
+* types; we need these here instead of in Manager.php because the
 * initial array key tells us what databases are supported.
 */
 $GLOBALS['_DB_TABLE']['type'] = array(
@@ -232,6 +232,21 @@ $GLOBALS['_DB_TABLE']['type'] = array(
         'date'      => 'CHAR(10)',
         'time'      => 'CHAR(8)',
         'timestamp' => 'CHAR(19)'
+    ),
+    'ibase' => array(
+        'boolean'   => 'DECIMAL(1,0)',
+        'char'      => 'CHAR',
+        'varchar'   => 'VARCHAR',
+        'smallint'  => 'SMALLINT',
+        'integer'   => 'INTEGER',
+        'bigint'    => 'BIGINT',
+        'decimal'   => 'DECIMAL',
+        'single'    => 'FLOAT',
+        'double'    => 'DOUBLE PRECISION',
+        'clob'      => 'BLOB SUB_TYPE 1',
+        'date'      => 'DATE',
+        'time'      => 'TIME',
+        'timestamp' => 'TIMESTAMP'
     ),
     'mssql' => array(
         'boolean'   => 'DECIMAL(1,0)',
@@ -526,7 +541,7 @@ class DB_Table {
 
     var $_error_messages = array(
         DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB/MDB2 object',
-        DB_TABLE_ERR_PHPTYPE             => 'DB/MDB2 phptype not supported',
+        DB_TABLE_ERR_PHPTYPE             => 'DB/MDB2 phptype (or dbsyntax) not supported',
         DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
         DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
         DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
@@ -656,7 +671,7 @@ class DB_Table {
         }
         
         // is the RDBMS supported?
-        if (! DB_Table::supported($db->phptype)) {
+        if (! DB_Table::supported($db->phptype, $db->dbsyntax)) {
             $this->error =& DB_Table::throwError(
                 DB_TABLE_ERR_PHPTYPE,
                 "({$db->phptype})"
@@ -699,12 +714,18 @@ class DB_Table {
     * 
     * @param string $phptype The RDBMS type for PHP.
     * 
+    * @param string $dbsyntax The chosen database syntax.
+    * 
     * @return bool True if supported, false if not.
     * 
     */
     
-    function supported($phptype)
+    function supported($phptype, $dbsyntax = '')
     {
+        // only Firebird is supported, not its ancestor Interbase
+        if ($phptype == 'ibase' && $dbsyntax != 'firebird') {
+          return false;
+        }
         $supported = array_keys($GLOBALS['_DB_TABLE']['type']);
         return in_array(strtolower($phptype), $supported);
     }
@@ -1988,6 +2009,8 @@ class DB_Table {
                     $list = $this->db->getListOf('tables');
                 }
                 // ok to create only if table does not exist
+                array_walk($list, create_function('&$value,$key',
+                                      '$value = trim(strtolower($value));'));
                 $ok = (! in_array(strtolower($this->table), $list));
                 break;
 

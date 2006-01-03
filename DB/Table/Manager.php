@@ -294,7 +294,7 @@ class DB_Table_Manager {
         // check #1: does the table exist?
         $tableInfo = $db->tableInfo($table, DB_TABLEINFO_FULL);
         if (PEAR::isError($tableInfo)) {
-            if ($tableInfo['code'] == DB_ERROR_NEED_MORE_DATA) {
+            if ($tableInfo->getCode() == DB_ERROR_NEED_MORE_DATA) {
                 return DB_Table::throwError(
                     DB_TABLE_ERR_VER_TABLE_MISSING,
                     "(table='$table')"
@@ -311,7 +311,8 @@ class DB_Table_Manager {
             $colname = trim($colname);
 
             // check #2: do all columns exist?
-            if (!array_key_exists($colname, $tableInfo['order'])) {
+            $order = array_change_key_case($tableInfo['order'], CASE_LOWER);
+            if (!array_key_exists($colname, $order)) {
                 return DB_Table::throwError(
                     DB_TABLE_ERR_VER_COLUMN_MISSING,
                     "(column='$colname')"
@@ -323,16 +324,31 @@ class DB_Table_Manager {
             switch ($val['type']) {
 
                 case 'boolean':
+                    $valid_types = array('int', 'integer', 'real');
+                    break;
+
                 case 'decimal':
+                    $valid_types = array('numeric', 'real');
+                    break;
+
                 case 'single':
+                    $valid_types = array('float', 'real');
+                    break;
+
                 case 'double':
-                    $valid_types = array('real');
+                    $valid_types = array('double precision', 'real');
                     break;
 
                 case 'smallint':
+                    $valid_types = array('int', 'integer', 'smallint');
+                    break;
+
                 case 'integer':
-                case 'bigint':
                     $valid_types = array('int', 'integer');
+                    break;
+
+                case 'bigint':
+                    $valid_types = array('bigint', 'int', 'integer');
                     break;
 
                 case 'clob':
@@ -340,11 +356,23 @@ class DB_Table_Manager {
                     break;
 
                 case 'char':
+                    $valid_types = array('char', 'string');
+                    break;
+
                 case 'varchar':
+                    $valid_types = array('varchar', 'string');
+                    break;
+
                 case 'date':
+                    $valid_types = array('date', 'string');
+                    break;
+
                 case 'time':
+                    $valid_types = array('string', 'time');
+                    break;
+
                 case 'timestamp':
-                    $valid_types = array('string');
+                    $valid_types = array('string', 'timestamp');
                     break;
 
                 default:
@@ -360,8 +388,12 @@ class DB_Table_Manager {
                     }
             }
 
-            $colindex = $tableInfo['order'][$colname];
-            $type = $tableInfo[$colindex]['type'];
+            $colindex = $order[$colname];
+            $type = strtolower($tableInfo[$colindex]['type']);
+            // strip size information (e.g. NUMERIC(9,2) => NUMERIC) if given
+            if (($pos = strpos($type, '(')) !== false) {
+                $type = substr($type, 0, $pos);
+            }
             if (!in_array($type, $valid_types)) {
                 return DB_Table::throwError(
                     DB_TABLE_ERR_VER_COLUMN_TYPE,
@@ -372,7 +404,11 @@ class DB_Table_Manager {
         }
 
         // check #4: do all indexes exist?
-        $table_indexes = $db->getAll('SHOW KEYS FROM ' . $this->table);
+        if ($db->phptype == 'mysql') {
+            $table_indexes = $db->getAll('SHOW KEYS FROM ' . $this->table);
+        } else {
+            $table_indexes = $db->getAll('SELECT I.RDB$INDEX_NAME AS Key_name, F.RDB$FIELD_NAME AS Column_name FROM RDB$RELATION_FIELDS F, RDB$INDICES I, RDB$INDEX_SEGMENTS S WHERE F.RDB$RELATION_NAME = I.RDB$RELATION_NAME AND F.RDB$FIELD_NAME = S.RDB$FIELD_NAME AND I.RDB$INDEX_NAME = S.RDB$INDEX_NAME AND (F.RDB$SYSTEM_FLAG IS NULL OR F.RDB$SYSTEM_FLAG = 0)');
+        }
         if (PEAR::isError($table_indexes)) {
             return $table_indexes;
         }
@@ -462,9 +498,12 @@ class DB_Table_Manager {
 
             $index_found = false;
             foreach ($table_indexes as $table_index) {
-                if ($table_index['Key_name'] == $newIdxName) {
+                $table_index = array_change_key_case($table_index, CASE_LOWER);
+                array_walk($table_index, create_function('&$value,$key',
+                                      '$value = trim(strtolower($value));'));
+                if ($table_index['key_name'] == strtolower($newIdxName)) {
                     $index_found = true;
-                    if (($key = array_search($table_index['Column_name'],
+                    if (($key = array_search($table_index['column_name'],
                                              $cols)) !== false) {
                         unset($cols[$key]);
                     }
@@ -571,7 +610,11 @@ class DB_Table_Manager {
         }
         
         // set the "NULL"/"NOT NULL" portion
-        $declare .= ($require) ? ' NOT NULL' : ' NULL';
+        $null = ' NULL';
+        if ($phptype == 'ibase') {  // Firebird does not like 'NULL' in CREATE TABLE
+          $null = '';
+        }
+        $declare .= ($require) ? ' NOT NULL' : $null;
         
         // set the "DEFAULT" portion
         $declare .= ($default) ? " DEFAULT $default" : '';
