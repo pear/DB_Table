@@ -753,9 +753,6 @@ class DB_Table {
     function getPHPTypeAndDBSyntax(&$db) {
         $phptype = '';
         $dbsyntax = '';
-        vd($db); echo "\n";
-        vd(is_subclass_of($db, 'mdb2_driver_common')); echo "\n";
-
         if (is_subclass_of($db, 'db_common')) {
             $phptype = $db->phptype;
             $dbsyntax = $db->dbsyntax;
@@ -764,9 +761,7 @@ class DB_Table {
             $phptype = $dsn['phptype'];
             $dbsyntax = $dsn['dbsyntax'];
         }
-        vd($phptype); echo "\n";
-        $x = array($phptype, $dbsyntax);
-        return $x;
+        return array($phptype, $dbsyntax);
     }
 
 
