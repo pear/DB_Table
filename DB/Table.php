@@ -662,20 +662,10 @@ class DB_Table {
             $this->backend = 'db';
         } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
             $this->backend = 'mdb2';
-            $this->db->loadModule('Extended');
         }
 
-        if (! is_null($this->backend)) {
+        if (is_null($this->backend)) {
             $this->error =& DB_Table::throwError(DB_TABLE_ERR_NOT_DB_OBJECT);
-            return;
-        }
-        
-        // is the RDBMS supported?
-        if (! DB_Table::supported($db->phptype, $db->dbsyntax)) {
-            $this->error =& DB_Table::throwError(
-                DB_TABLE_ERR_PHPTYPE,
-                "({$db->phptype})"
-            );
             return;
         }
         
@@ -690,6 +680,21 @@ class DB_Table {
         $this->db =& $db;
         $this->table = $table;
         
+        // is the RDBMS supported?
+        list($phptype, $dbsyntax) = DB_Table::getPHPTypeAndDBSyntax($db);
+        if (! DB_Table::supported($phptype, $dbsyntax)) {
+            $this->error =& DB_Table::throwError(
+                DB_TABLE_ERR_PHPTYPE,
+                "({$db->phptype})"
+            );
+            return;
+        }
+
+        // load MDB2_Extended module
+        if ($this->backend == 'mdb2') {
+            $this->db->loadModule('Extended');
+        }
+
         // should we attempt table creation?
         if ($create) {
             // yes, attempt to create the table with the appropriate
@@ -728,6 +733,40 @@ class DB_Table {
         }
         $supported = array_keys($GLOBALS['_DB_TABLE']['type']);
         return in_array(strtolower($phptype), $supported);
+    }
+
+
+    /**
+    * 
+    * Is a particular RDBMS supported by DB_Table?
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param object &$db A PEAR DB/MDB2 object.
+    * 
+    * @return array Values of 'phptype' and 'dbsyntax' keys of DSN.
+    * 
+    */
+
+    function getPHPTypeAndDBSyntax(&$db) {
+        $phptype = '';
+        $dbsyntax = '';
+        vd($db); echo "\n";
+        vd(is_subclass_of($db, 'mdb2_driver_common')); echo "\n";
+
+        if (is_subclass_of($db, 'db_common')) {
+            $phptype = $db->phptype;
+            $dbsyntax = $db->dbsyntax;
+        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $dsn = MDB2::parseDSN($db->getDSN());
+            $phptype = $dsn['phptype'];
+            $dbsyntax = $dsn['dbsyntax'];
+        }
+        vd($phptype); echo "\n";
+        $x = array($phptype, $dbsyntax);
+        return $x;
     }
 
 
@@ -2053,13 +2092,9 @@ class DB_Table {
             case 'verify':
                 if ($this->backend == 'mdb2') {
                     include_once 'DB/Table/Manager.php';
-                    $db =& $this->db->loadModule('Reverse');
-                } else {
-                    $db =& $this->db;
                 }
-
                 return DB_Table_Manager::verify(
-                    $db, $this->table, $this->col, $this->idx
+                    $this->db, $this->table, $this->col, $this->idx
                 );
                 break;
         }

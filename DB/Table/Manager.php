@@ -39,10 +39,136 @@ require_once 'DB/Table.php';
 *
 */
 
+/**
+* Valid types for the different data types in the different DBMS.
+*/
+$GLOBALS['_DB_TABLE']['valid_type'] = array(
+    'fbsql' => array(
+        'boolean'   => '',
+        'char'      => '',
+        'varchar'   => '',
+        'smallint'  => '',
+        'integer'   => '',
+        'bigint'    => '',
+        'decimal'   => '',
+        'single'    => '',
+        'double'    => '',
+        'clob'      => '',
+        'date'      => '',
+        'time'      => '',
+        'timestamp' => ''
+    ),
+    'ibase' => array(
+        'boolean'   => 'real',
+        'char'      => 'char',
+        'varchar'   => 'varchar',
+        'smallint'  => 'smallint',
+        'integer'   => 'integer',
+        'bigint'    => 'bigint',
+        'decimal'   => 'numeric',
+        'single'    => 'float',
+        'double'    => 'double precision',
+        'clob'      => 'blob',
+        'date'      => 'date',
+        'time'      => 'time',
+        'timestamp' => 'timestamp'
+    ),
+    'mssql' => array(
+        'boolean'   => '',
+        'char'      => '',
+        'varchar'   => '',
+        'smallint'  => '',
+        'integer'   => '',
+        'bigint'    => '',
+        'decimal'   => '',
+        'single'    => '',
+        'double'    => '',
+        'clob'      => '',
+        'date'      => '',
+        'time'      => '',
+        'timestamp' => ''
+    ),
+    'mysql' => array(
+        'boolean'   => 'real',
+        'char'      => 'string',
+        'varchar'   => 'string',
+        'smallint'  => 'int',
+        'integer'   => 'int',
+        'bigint'    => 'int',
+        'decimal'   => 'real',
+        'single'    => 'real',
+        'double'    => 'real',
+        'clob'      => 'blob',
+        'date'      => 'string',
+        'time'      => 'string',
+        'timestamp' => 'string'
+    ),
+    'mysqli' => array(
+        'boolean'   => '',
+        'char'      => '',
+        'varchar'   => '',
+        'smallint'  => '',
+        'integer'   => '',
+        'bigint'    => '',
+        'decimal'   => '',
+        'single'    => '',
+        'double'    => '',
+        'clob'      => '',
+        'date'      => '',
+        'time'      => '',
+        'timestamp' => ''
+    ),
+    'oci8' => array(
+        'boolean'   => '',
+        'char'      => '',
+        'varchar'   => '',
+        'smallint'  => '',
+        'integer'   => '',
+        'bigint'    => '',
+        'decimal'   => '',
+        'single'    => '',
+        'double'    => '',
+        'clob'      => '',
+        'date'      => '',
+        'time'      => '',
+        'timestamp' => ''
+    ),
+    'pgsql' => array(
+        'boolean'   => 'numeric',
+        'char'      => 'bpchar',
+        'varchar'   => 'varchar',
+        'smallint'  => 'int2',
+        'integer'   => 'int4',
+        'bigint'    => 'int8',
+        'decimal'   => 'numeric',
+        'single'    => 'float4',
+        'double'    => 'float8',
+        'clob'      => 'text',
+        'date'      => 'bpchar',
+        'time'      => 'bpchar',
+        'timestamp' => 'bpchar'
+    ),
+    'sqlite' => array(
+        'boolean'   => '',
+        'char'      => '',
+        'varchar'   => '',
+        'smallint'  => '',
+        'integer'   => '',
+        'bigint'    => '',
+        'decimal'   => '',
+        'single'    => '',
+        'double'    => '',
+        'clob'      => '',
+        'date'      => '',
+        'time'      => '',
+        'timestamp' => ''
+    ),
+);
+
 class DB_Table_Manager {
-    
-    
-    /**
+
+
+   /**
     * 
     * Create the table based on DB_Table column and index arrays.
     * 
@@ -289,12 +415,22 @@ class DB_Table_Manager {
     
     function verify(&$db, $table, $column_set, $index_set)
     {
-        // TODO: add verify functionality for MDB2
+        // TODO: complete and test verify functionality for MDB2
+
+        if (is_subclass_of($db, 'db_common')) {
+            $reverse = $db;
+            $table_info_mode = DB_TABLEINFO_FULL;
+            $table_info_error = DB_ERROR_NEED_MORE_DATA;
+        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $reverse =& $this->db->loadModule('Reverse');
+            $table_info_mode = MDB2_TABLEINFO_FULL;
+            $table_info_error = MDB2_ERROR_NEED_MORE_DATA;
+        }
 
         // check #1: does the table exist?
-        $tableInfo = $db->tableInfo($table, DB_TABLEINFO_FULL);
+        $tableInfo = $reverse->tableInfo($table, $table_info_mode);
         if (PEAR::isError($tableInfo)) {
-            if ($tableInfo->getCode() == DB_ERROR_NEED_MORE_DATA) {
+            if ($tableInfo->getCode() == $table_info_error) {
                 return DB_Table::throwError(
                     DB_TABLE_ERR_VER_TABLE_MISSING,
                     "(table='$table')"
@@ -320,72 +456,17 @@ class DB_Table_Manager {
             }
 
             // check #3: do all columns have the right type?
-            $valid_types = array();
-            switch ($val['type']) {
 
-                case 'boolean':
-                    $valid_types = array('int', 'integer', 'real');
-                    break;
-
-                case 'decimal':
-                    $valid_types = array('numeric', 'real');
-                    break;
-
-                case 'single':
-                    $valid_types = array('float', 'real');
-                    break;
-
-                case 'double':
-                    $valid_types = array('double precision', 'real');
-                    break;
-
-                case 'smallint':
-                    $valid_types = array('int', 'integer', 'smallint');
-                    break;
-
-                case 'integer':
-                    $valid_types = array('int', 'integer');
-                    break;
-
-                case 'bigint':
-                    $valid_types = array('bigint', 'int', 'integer');
-                    break;
-
-                case 'clob':
-                    $valid_types = array('blob');
-                    break;
-
-                case 'char':
-                    $valid_types = array('char', 'string');
-                    break;
-
-                case 'varchar':
-                    $valid_types = array('varchar', 'string');
-                    break;
-
-                case 'date':
-                    $valid_types = array('date', 'string');
-                    break;
-
-                case 'time':
-                    $valid_types = array('string', 'time');
-                    break;
-
-                case 'timestamp':
-                    $valid_types = array('string', 'timestamp');
-                    break;
-
-                default:
-                    // map of column types and declarations for this RDBMS
-                    $map = $GLOBALS['_DB_TABLE']['type'][$db->phptype];
-                    // is it a recognized column type?
-                    $types = array_keys($map);
-                    if (!in_array($val['type'], $types)) {
-                        return DB_Table::throwError(
-                            DB_TABLE_ERR_DECLARE_TYPE,
-                            "('" . $val['type'] . "')"
-                        );
-                    }
+            // map of valid types for the current RDBMS
+            list($phptype, $dbsyntax) = DB_Table::getPHPTypeAndDBSyntax($db);
+            $map = $GLOBALS['_DB_TABLE']['valid_type'][$phptype];
+            // is it a recognized column type?
+            $types = array_keys($map);
+            if (!in_array($val['type'], $types)) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_DECLARE_TYPE,
+                    "('" . $val['type'] . "')"
+                );
             }
 
             $colindex = $order[$colname];
@@ -394,7 +475,7 @@ class DB_Table_Manager {
             if (($pos = strpos($type, '(')) !== false) {
                 $type = substr($type, 0, $pos);
             }
-            if (!in_array($type, $valid_types)) {
+            if ($map[$val['type']] !== $type) {
                 return DB_Table::throwError(
                     DB_TABLE_ERR_VER_COLUMN_TYPE,
                     "(column='$colname', type='$type')"
@@ -403,12 +484,28 @@ class DB_Table_Manager {
 
         }
 
+vd($db->loadModule('Manager'));
+/*
+$db->loadModule('Manager');
+$db->listIndexes();
+$db->listConstraints();
+$db->loadModule('Reverse');
+$db->getTableIndexDefinition($index_name);
+$db->getTableConstraintDefinition($constraint_name); 
+*/
         // check #4: do all indexes exist?
-        if ($db->phptype == 'mysql') {
-            $table_indexes = $db->getAll('SHOW KEYS FROM ' . $this->table);
-        } else {
-            $table_indexes = $db->getAll('SELECT I.RDB$INDEX_NAME AS Key_name, F.RDB$FIELD_NAME AS Column_name FROM RDB$RELATION_FIELDS F, RDB$INDICES I, RDB$INDEX_SEGMENTS S WHERE F.RDB$RELATION_NAME = I.RDB$RELATION_NAME AND F.RDB$FIELD_NAME = S.RDB$FIELD_NAME AND I.RDB$INDEX_NAME = S.RDB$INDEX_NAME AND (F.RDB$SYSTEM_FLAG IS NULL OR F.RDB$SYSTEM_FLAG = 0)');
+        switch ($db->phptype) {
+            case 'ibase':
+                $index_query = 'SELECT I.RDB$INDEX_NAME AS Key_name, F.RDB$FIELD_NAME AS Column_name FROM RDB$RELATION_FIELDS F, RDB$INDICES I, RDB$INDEX_SEGMENTS S WHERE F.RDB$RELATION_NAME = I.RDB$RELATION_NAME AND F.RDB$FIELD_NAME = S.RDB$FIELD_NAME AND I.RDB$INDEX_NAME = S.RDB$INDEX_NAME AND (F.RDB$SYSTEM_FLAG IS NULL OR F.RDB$SYSTEM_FLAG = 0)';
+                break;
+            case 'mysql':
+                $index_query = 'SHOW KEYS FROM ' . $this->table;
+                break;
+            default:
+                die('unsupported phptype for index verification');
         }
+        $table_indexes = $db->getAll($index_query);
+            
         if (PEAR::isError($table_indexes)) {
             return $table_indexes;
         }
