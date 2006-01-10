@@ -658,7 +658,7 @@ class DB_Table {
 
         // is the first argument a DB/MDB2 object?
         $this->backend = null;
-        if (! is_subclass_of($db, 'db_common')) {
+        if (is_subclass_of($db, 'db_common')) {
             $this->backend = 'db';
         } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
             $this->backend = 'mdb2';
