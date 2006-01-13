@@ -738,7 +738,7 @@ class DB_Table {
 
     /**
     * 
-    * Is a particular RDBMS supported by DB_Table?
+    * Detect values of 'phptype' and 'dbsyntax' keys of DSN.
     * 
     * @static
     * 
@@ -962,7 +962,7 @@ class DB_Table {
             $method = 'getAll';
         }
         
-        // DB_Table assumes you are using a shared PEAR DB/MDB2 object.  Other
+        // DB_Table assumes you are using a shared PEAR DB/MDB2 object. Other
         // scripts using the same object probably expect its fetchmode
         // not to change, unless they change it themselves.  Thus, to
         // provide friendly mode-swapping, we will restore these modes
@@ -1062,6 +1062,7 @@ class DB_Table {
         // not to change, unless they change it themselves.  Thus, to
         // provide friendly mode-swapping, we will restore these modes
         // afterwards.
+        $restore_mode = $this->db->fetchmode;
         if ($this->backend == 'mdb2') {
             $restore_class = $this->db->getOption('fetch_class');
         } else {
@@ -2041,6 +2042,9 @@ class DB_Table {
                     $list = $this->db->manager->listTables();
                 } else {
                     $list = $this->db->getListOf('tables');
+                }
+                if (PEAR::isError($list)) {
+                    return $list;
                 }
                 // ok to create only if table does not exist
                 array_walk($list, create_function('&$value,$key',
