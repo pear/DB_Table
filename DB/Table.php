@@ -30,7 +30,7 @@
 define('DB_TABLE_ERR_NOT_DB_OBJECT',    -1);
 
 /**
-* Error code at instantiation time when the PEAR DB $phptype is not
+* Error code at instantiation time when the PEAR DB/MDB2 $phptype is not
 * supported by DB_Table.
 */
 define('DB_TABLE_ERR_PHPTYPE',          -2);
@@ -200,6 +200,12 @@ define('DB_TABLE_ERR_VER_IDX_MISSING',   -29);
 * columns that it should contain.
 */
 define('DB_TABLE_ERR_VER_IDX_COL_MISSING', -30);
+
+/**
+* Error code at instantiation time when a creation mode
+* is not available for a phptype.
+*/
+define('DB_TABLE_ERR_CREATE_PHPTYPE', -31);
 
 /**
 * The PEAR class for errors
@@ -570,7 +576,8 @@ class DB_Table {
         DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type',
         DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty',
         DB_TABLE_ERR_VER_IDX_MISSING     => 'Verification failed: index does not exist',
-        DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols'
+        DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols',
+        DB_TABLE_ERR_CREATE_PHPTYPE      => 'Creation mode is not supported for this phptype'
     );
 
 
@@ -733,6 +740,58 @@ class DB_Table {
         }
         $supported = array_keys($GLOBALS['_DB_TABLE']['type']);
         return in_array(strtolower($phptype), $supported);
+    }
+
+
+    /**
+    * 
+    * Is a creation mode supported for a RDBMS by DB_Table?
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param string $mode The chosen creation mode.
+    * 
+    * @param string $phptype The RDBMS type for PHP.
+    * 
+    * @return bool True if supported, false if not.
+    * 
+    */
+    
+    function modeSupported($mode, $phptype)
+    {
+        // check phptype for validity
+        $supported = array_keys($GLOBALS['_DB_TABLE']['type']);
+        if (!in_array(strtolower($phptype), $supported)) {
+            return false;
+        }
+
+        switch ($mode) {
+            case 'drop':
+            case 'safe':
+                // supported for all RDBMS
+                return true;
+
+            //case 'update':
+            case 'verify':
+                // not supported for fbsql, mssql, oci8 (yet)
+                switch ($phptype) {
+                    case 'fbsql':
+                    case 'mssql':
+                    case 'oci8':
+                        return false;
+                    default:
+                         return true;
+                }
+
+            default:
+                // unknown creation mode
+                return $this->throwError(
+                    DB_TABLE_ERR_CREATE_FLAG,
+                    "('$flag')"
+                );
+        }
     }
 
 
@@ -2018,6 +2077,19 @@ class DB_Table {
             $this->db->loadModule('Manager');
         } else {
             include_once 'DB/Table/Manager.php';
+        }
+
+        // check whether the chosen mode is supported
+        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($this->db);
+        $mode_supported = DB_Table::modeSupported($flag, $phptype);
+        if (PEAR::isError($mode_supported)) {
+            return $mode_supported;
+        }
+        if (!$mode_supported) {
+            return $this->throwError(
+                DB_TABLE_ERR_CREATE_PHPTYPE,
+                "('$flag', $phptype')"
+            );
         }
 
         // are we OK to create the table?
