@@ -773,7 +773,7 @@ class DB_Table {
                 // supported for all RDBMS
                 return true;
 
-            //case 'update':
+            case 'alter':
             case 'verify':
                 // not supported for fbsql, mssql, oci8 (yet)
                 switch ($phptype) {
@@ -782,7 +782,7 @@ class DB_Table {
                     case 'oci8':
                         return false;
                     default:
-                         return true;
+                        return true;
                 }
 
             default:
@@ -2075,8 +2075,6 @@ class DB_Table {
     {
         if ($this->backend == 'mdb2') {
             $this->db->loadModule('Manager');
-        } else {
-            include_once 'DB/Table/Manager.php';
         }
 
         // check whether the chosen mode is supported
@@ -2143,21 +2141,15 @@ class DB_Table {
             return false;
         }
 
+        include_once 'DB/Table/Manager.php';
 
         switch ($flag) {
 
             case 'drop':
             case 'safe':
-                if ($this->backend == 'mdb2') {
-                    // todo: massage $this->col, $this->idx into $fields
-                    // http://pear.php.net/package/MDB2/docs/latest/MDB2/MDB2_Driver_Manager_Common.html#methodcreateTable
-                    $fields = array();
-                    $this->db->manager->createTable($this->table, $fields);
-                } else {
-                    return DB_Table_Manager::create(
-                        $this->db, $this->table, $this->col, $this->idx
-                    );
-                }
+                return DB_Table_Manager::create(
+                    $this->db, $this->table, $this->col, $this->idx
+                );
                 break;
 
             case 'verify':

@@ -43,7 +43,7 @@ require_once 'DB/Table.php';
 * Valid types for the different data types in the different DBMS.
 */
 $GLOBALS['_DB_TABLE']['valid_type'] = array(
-    'fbsql' => array(
+    'fbsql' => array(  // currently not supported
         'boolean'   => '',
         'char'      => '',
         'varchar'   => '',
@@ -59,21 +59,21 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'timestamp' => ''
     ),
     'ibase' => array(
-        'boolean'   => 'real',
-        'char'      => 'char',
+        'boolean'   => array('char', 'integer', 'real'),
+        'char'      => array('char', 'varchar'),
         'varchar'   => 'varchar',
-        'smallint'  => 'smallint',
+        'smallint'  => array('integer', 'smallint'),
         'integer'   => 'integer',
-        'bigint'    => 'bigint',
+        'bigint'    => array('bigint', 'integer'),
         'decimal'   => 'numeric',
-        'single'    => 'float',
+        'single'    => array('double precision', 'float'),
         'double'    => 'double precision',
         'clob'      => 'blob',
         'date'      => 'date',
         'time'      => 'time',
         'timestamp' => 'timestamp'
     ),
-    'mssql' => array(
+    'mssql' => array(  // currently not supported
         'boolean'   => '',
         'char'      => '',
         'varchar'   => '',
@@ -89,9 +89,9 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'timestamp' => ''
     ),
     'mysql' => array(
-        'boolean'   => 'real',
-        'char'      => 'string',
-        'varchar'   => 'string',
+        'boolean'   => array('char', 'real'),
+        'char'      => array('char', 'string'),
+        'varchar'   => array('char', 'string'),
         'smallint'  => 'int',
         'integer'   => 'int',
         'bigint'    => 'int',
@@ -99,26 +99,26 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'single'    => 'real',
         'double'    => 'real',
         'clob'      => 'blob',
-        'date'      => 'string',
-        'time'      => 'string',
-        'timestamp' => 'string'
+        'date'      => array('char', 'date', 'string'),
+        'time'      => array('char', 'string', 'time'),
+        'timestamp' => array('char', 'datetime', 'string')
     ),
     'mysqli' => array(
-        'boolean'   => '',
-        'char'      => '',
-        'varchar'   => '',
-        'smallint'  => '',
-        'integer'   => '',
-        'bigint'    => '',
-        'decimal'   => '',
-        'single'    => '',
-        'double'    => '',
-        'clob'      => '',
-        'date'      => '',
-        'time'      => '',
-        'timestamp' => ''
+        'boolean'   => array('char', 'decimal'),
+        'char'      => 'varchar',
+        'varchar'   => 'varchar',
+        'smallint'  => 'int',
+        'integer'   => 'int',
+        'bigint'    => array('int', 'bigint'),
+        'decimal'   => 'decimal',
+        'single'    => array('double', 'float'),
+        'double'    => 'double',
+        'clob'      => 'blob',
+        'date'      => array('date', 'varchar'),
+        'time'      => array('time', 'varchar'),
+        'timestamp' => array('datetime', 'varchar')
     ),
-    'oci8' => array(
+    'oci8' => array(  // currently not supported
         'boolean'   => '',
         'char'      => '',
         'varchar'   => '',
@@ -134,36 +134,56 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'timestamp' => ''
     ),
     'pgsql' => array(
-        'boolean'   => 'numeric',
-        'char'      => 'bpchar',
+        'boolean'   => array('bool', 'numeric'),
+        'char'      => array('bpchar', 'varchar'),
         'varchar'   => 'varchar',
-        'smallint'  => 'int2',
+        'smallint'  => array('int2', 'int4'),
         'integer'   => 'int4',
-        'bigint'    => 'int8',
+        'bigint'    => array('int4', 'int8'),
         'decimal'   => 'numeric',
-        'single'    => 'float4',
+        'single'    => array('float4', 'float8'),
         'double'    => 'float8',
-        'clob'      => 'text',
-        'date'      => 'bpchar',
-        'time'      => 'bpchar',
-        'timestamp' => 'bpchar'
+        'clob'      => array('oid', 'text'),
+        'date'      => array('bpchar', 'date'),
+        'time'      => array('bpchar', 'time'),
+        'timestamp' => array('bpchar', 'timestamp')
     ),
     'sqlite' => array(
-        'boolean'   => '',
-        'char'      => '',
-        'varchar'   => '',
-        'smallint'  => '',
-        'integer'   => '',
-        'bigint'    => '',
-        'decimal'   => '',
-        'single'    => '',
-        'double'    => '',
-        'clob'      => '',
-        'date'      => '',
-        'time'      => '',
-        'timestamp' => ''
+        'boolean'   => 'boolean',
+        'char'      => 'char',
+        'varchar'   => array('char', 'varchar'),
+        'smallint'  => array('int', 'smallint'),
+        'integer'   => array('int', 'integer'),
+        'bigint'    => array('int', 'bigint'),
+        'decimal'   => array('bigint', 'numeric'),
+        'single'    => array('double', 'float'),
+        'double'    => 'double',
+        'clob'      => array('clob', 'longtext'),
+        'date'      => 'date',
+        'time'      => 'time',
+        'timestamp' => array('datetime', 'timestamp')
     ),
 );
+
+/**
+* Mapping between DB_Table and MDB2 data types.
+*/
+$GLOBALS['_DB_TABLE']['mdb2_type'] = array(
+    'boolean'   => 'boolean',
+    'char'      => 'text',
+    'varchar'   => 'text',
+    'smallint'  => 'integer',
+    'integer'   => 'integer',
+    'bigint'    => 'integer',
+    'decimal'   => 'decimal',
+    'single'    => 'float',
+    'double'    => 'float',
+    'clob'      => 'clob',
+    'date'      => 'date',
+    'time'      => 'time',
+    'timestamp' => 'timestamp'
+);
+
 
 class DB_Table_Manager {
 
@@ -192,11 +212,23 @@ class DB_Table_Manager {
     
     function create(&$db, $table, $column_set, $index_set)
     {
+        if (is_subclass_of($db, 'db_common')) {
+            $backend = 'db';
+        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $backend = 'mdb2';
+            $db->loadModule('Manager');
+        }
+
         // columns to be created
         $column = array();
+
+        // max. value for scope (only used with MDB2 as backend)
+        $max_scope = 0;
         
         // indexes to be created
         $index = array();
+        $unique_index = array();
+        $normal_index = array();
         
         // is the table name too long?
         if (strlen($table) > 30) {
@@ -249,19 +281,60 @@ class DB_Table_Manager {
             $scope   = (isset($val['scope']))   ? $val['scope']   : null;
             $require = (isset($val['require'])) ? $val['require'] : null;
             $default = (isset($val['default'])) ? $val['default'] : null;
-            
-            // get the declaration string
-            $result = DB_Table_Manager::getDeclare($db->phptype, $type, $size, 
-                $scope, $require, $default);
-            
-            // did it work?
-            if (PEAR::isError($result)) {
-                $result->userinfo .= " ('$colname')";
-                return $result;
+
+            if ($backend == 'mdb2') {
+
+                $new_column = array(
+                    'type'    => $GLOBALS['_DB_TABLE']['mdb2_type'][$type],
+                    'notnull' => $require
+                );
+
+                if ($size) {
+                    $new_column['length'] = $size;
+                }
+
+                // determine integer length to be used in MDB2
+                if (in_array($type, array('smallint', 'integer', 'bigint'))) {
+                    switch ($type) {
+                        case 'smallint':
+                            $new_column['length'] = 2;
+                            break;
+                        case 'integer':
+                            $new_column['length'] = 4;
+                            break;
+                        case 'bigint':
+                            $new_column['length'] = 5;
+                            break;
+                    }
+                }
+
+                if ($scope) {
+                    $max_scope = max($max_scope, $scope);
+                }
+
+                if ($default) {
+                    $new_column['default'] = $default;
+                }
+
+                $column[$colname] = $new_column;
+
+            } else {
+
+                // get the declaration string
+                $result = DB_Table_Manager::getDeclare($db->phptype, $type,
+                    $size, $scope, $require, $default);
+
+                // did it work?
+                if (PEAR::isError($result)) {
+                    $result->userinfo .= " ('$colname')";
+                    return $result;
+                }
+
+                // add the declaration to the array of all columns
+                $column[] = "$colname $result";
+
             }
-            
-            // add the declaration to the array of all columns
-            $column[] = "$colname $result";
+
         }
         
         
@@ -347,17 +420,40 @@ class DB_Table_Manager {
                     "'$idxname' ('$newIdxName')"
                 );
             }
-            
+
             // create index entry
-            if ($type == 'unique') {
-                $index[] = "CREATE UNIQUE INDEX $newIdxName ON $table ($colstring)";
-            } elseif ($type == 'normal') {
-                $index[] = "CREATE INDEX $newIdxName ON $table ($colstring)";
+            if ($backend == 'mdb2') {
+
+                $idx_cols = array();
+                foreach ($cols as $col) {
+                    $idx_cols[$col] = array();
+                }
+
+                if ($type == 'unique') {
+                    $unique_index[$newIdxName] = array('fields' => $idx_cols,
+                                                       'unique' => true);
+                } elseif ($type == 'normal') {
+                    $normal_index[$newIdxName] = array('fields' => $idx_cols);
+                } else {
+                    return DB_Table::throwError(
+                        DB_TABLE_ERR_IDX_TYPE,
+                        "'$idxname' ('$type')"
+                    );
+                }
+                
             } else {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_IDX_TYPE,
-                    "'$idxname' ('$type')"
-                );
+
+                if ($type == 'unique') {
+                    $index[] = "CREATE UNIQUE INDEX $newIdxName ON $table ($colstring)";
+                } elseif ($type == 'normal') {
+                    $index[] = "CREATE INDEX $newIdxName ON $table ($colstring)";
+                } else {
+                    return DB_Table::throwError(
+                        DB_TABLE_ERR_IDX_TYPE,
+                        "'$idxname' ('$type')"
+                    );
+                }
+
             }
             
         }
@@ -367,24 +463,68 @@ class DB_Table_Manager {
         // 
         // now for the real action: create the table and indexes!
         //
-        
-        // build the CREATE TABLE command
-        $cmd = "CREATE TABLE $table (\n\t";
-        $cmd .= implode(",\n\t", $column);
-        $cmd .= "\n)";
-        
-        // attempt to create the table
-        $result = $db->query($cmd);
-        if (PEAR::isError($result)) {
-            return $result;
-        }
-        
-        // attempt to create the indexes
-        foreach ($index as $cmd) {
+        if ($backend == 'mdb2') {
+
+            // save user defined 'decimal_places' option
+            $decimal_places = $db->getOption('decimal_places');
+            $db->setOption('decimal_places', $max_scope);
+
+            // attempt to create the table
+            $result = $db->manager->createTable($table, $column);
+            // restore user defined 'decimal_places' option
+            $db->setOption('decimal_places', $decimal_places);
+            if (PEAR::isError($result)) {
+                return $result;
+            }
+
+            // save user defined 'idxname_format' option
+            $idxname_format = $db->getOption('idxname_format');
+            $db->setOption('idxname_format', '%s');
+
+            // attempt to create the unique indexes / constraints
+            foreach ($unique_index as $name => $definition) {
+                $result = $db->manager->createConstraint($table, $name, $definition);
+                if (PEAR::isError($result)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $result;
+                }
+            }
+
+            // attempt to create the normal indexes
+            foreach ($normal_index as $name => $definition) {
+                $result = $db->manager->createIndex($table, $name, $definition);
+                if (PEAR::isError($result)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $result;
+                }
+            }
+
+            // restore user defined 'idxname_format' option
+            $db->setOption('idxname_format', $idxname_format);
+
+        } else {
+
+            // build the CREATE TABLE command
+            $cmd = "CREATE TABLE $table (\n\t";
+            $cmd .= implode(",\n\t", $column);
+            $cmd .= "\n)";
+
+            // attempt to create the table
             $result = $db->query($cmd);
             if (PEAR::isError($result)) {
                 return $result;
             }
+
+            // attempt to create the indexes
+            foreach ($index as $cmd) {
+                $result = $db->query($cmd);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+            }
+
         }
         
         // we're done!
@@ -415,13 +555,13 @@ class DB_Table_Manager {
     
     function verify(&$db, $table, $column_set, $index_set)
     {
-        // TODO: complete and test verify functionality for MDB2
-
         if (is_subclass_of($db, 'db_common')) {
+            $backend = 'db';
             $reverse = $db;
             $table_info_mode = DB_TABLEINFO_FULL;
             $table_info_error = DB_ERROR_NEED_MORE_DATA;
         } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $backend = 'mdb2';
             $reverse =& $this->db->loadModule('Reverse');
             $table_info_mode = MDB2_TABLEINFO_FULL;
             $table_info_error = MDB2_ERROR_NEED_MORE_DATA;
@@ -444,7 +584,7 @@ class DB_Table_Manager {
         }
         
         foreach ($column_set as $colname => $val) {
-            $colname = trim($colname);
+            $colname = strtolower(trim($colname));
 
             // check #2: do all columns exist?
             $order = array_change_key_case($tableInfo['order'], CASE_LOWER);
@@ -475,7 +615,7 @@ class DB_Table_Manager {
             if (($pos = strpos($type, '(')) !== false) {
                 $type = substr($type, 0, $pos);
             }
-            if ($map[$val['type']] !== $type) {
+            if (!in_array($type, (array)$map[$val['type']])) {
                 return DB_Table::throwError(
                     DB_TABLE_ERR_VER_COLUMN_TYPE,
                     "(column='$colname', type='$type')"
@@ -484,30 +624,64 @@ class DB_Table_Manager {
 
         }
 
-vd($db->loadModule('Manager'));
-/*
-$db->loadModule('Manager');
-$db->listIndexes();
-$db->listConstraints();
-$db->loadModule('Reverse');
-$db->getTableIndexDefinition($index_name);
-$db->getTableConstraintDefinition($constraint_name); 
-*/
         // check #4: do all indexes exist?
-        switch ($db->phptype) {
-            case 'ibase':
-                $index_query = 'SELECT I.RDB$INDEX_NAME AS Key_name, F.RDB$FIELD_NAME AS Column_name FROM RDB$RELATION_FIELDS F, RDB$INDICES I, RDB$INDEX_SEGMENTS S WHERE F.RDB$RELATION_NAME = I.RDB$RELATION_NAME AND F.RDB$FIELD_NAME = S.RDB$FIELD_NAME AND I.RDB$INDEX_NAME = S.RDB$INDEX_NAME AND (F.RDB$SYSTEM_FLAG IS NULL OR F.RDB$SYSTEM_FLAG = 0)';
-                break;
-            case 'mysql':
-                $index_query = 'SHOW KEYS FROM ' . $this->table;
-                break;
-            default:
-                die('unsupported phptype for index verification');
+        $table_indexes = array();
+        if ($backend == 'mdb2') {
+
+            // save user defined 'idxname_format' option
+            $idxname_format = $db->getOption('idxname_format');
+            $db->setOption('idxname_format', '%s');
+
+            // get table constraints
+            $table_indexes_tmp = $db->manager->listTableConstraints($table);
+            if (PEAR::isError($table_indexes_tmp)) {
+                // restore user defined 'idxname_format' option
+                $db->setOption('idxname_format', $idxname_format);
+                return $table_indexes_tmp;
+            }
+
+            // get fields of table constraints
+            foreach ($table_indexes_tmp as $table_idx_tmp) {
+                $index_fields =
+                    $db->reverse->getTableConstraintDefinition($table,
+                                                               $table_idx_tmp);
+                if (PEAR::isError($index_fields)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $index_fields;
+                }
+                foreach ($index_fields['fields'] as $key => $value) {
+                    $table_indexes[$table_idx_tmp][] = $key;
+                }
+            }
+
+            // get table indexes
+            $table_indexes_tmp = $db->manager->listTableIndexes($table);
+            if (PEAR::isError($table_indexes_tmp)) {
+                // restore user defined 'idxname_format' option
+                $db->setOption('idxname_format', $idxname_format);
+                return $table_indexes_tmp;
+            }
+
+            // get fields of table indexes
+            foreach ($table_indexes_tmp as $table_idx_tmp) {
+                $index_fields =
+                    $db->reverse->getTableIndexDefinition($table,
+                                                          $table_idx_tmp);
+                if (PEAR::isError($index_fields)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $index_fields;
+                }
+                foreach ($index_fields['fields'] as $key => $value) {
+                    $table_indexes[$table_idx_tmp][] = $key;
+                }
+            }
+            // restore user defined 'idxname_format' option
+            $db->setOption('idxname_format', $idxname_format);
         }
-        $table_indexes = $db->getAll($index_query);
-            
-        if (PEAR::isError($table_indexes)) {
-            return $table_indexes;
+        else {
+            // TODO: add index / constraint verification for PEAR::DB
         }
 
         if (is_null($index_set)) {
@@ -594,15 +768,17 @@ $db->getTableConstraintDefinition($constraint_name);
             }
 
             $index_found = false;
-            foreach ($table_indexes as $table_index) {
-                $table_index = array_change_key_case($table_index, CASE_LOWER);
-                array_walk($table_index, create_function('&$value,$key',
-                                      '$value = trim(strtolower($value));'));
-                if ($table_index['key_name'] == strtolower($newIdxName)) {
+            foreach ($table_indexes as $index_name => $index_fields) {
+                if (strtolower($index_name) == strtolower($newIdxName)) {
                     $index_found = true;
-                    if (($key = array_search($table_index['column_name'],
-                                             $cols)) !== false) {
-                        unset($cols[$key]);
+                    array_walk($cols, create_function('&$value,$key',
+                                      '$value = trim(strtolower($value));'));
+                    array_walk($index_fields, create_function('&$value,$key',
+                                      '$value = trim(strtolower($value));'));
+                    foreach ($index_fields as $index_field) {
+                        if (($key = array_search($index_field, $cols)) !== false) {
+                            unset($cols[$key]);
+                        }
                     }
                 }
             }
