@@ -59,7 +59,7 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'timestamp' => ''
     ),
     'ibase' => array(
-        'boolean'   => array('char', 'integer', 'real'),
+        'boolean'   => array('char', 'integer', 'real', 'smallint'),
         'char'      => array('char', 'varchar'),
         'varchar'   => 'varchar',
         'smallint'  => array('integer', 'smallint'),
@@ -89,7 +89,7 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'timestamp' => ''
     ),
     'mysql' => array(
-        'boolean'   => array('char', 'real'),
+        'boolean'   => array('char', 'int', 'real'),
         'char'      => array('char', 'string'),
         'varchar'   => array('char', 'string'),
         'smallint'  => 'int',
@@ -104,7 +104,7 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'timestamp' => array('char', 'datetime', 'string')
     ),
     'mysqli' => array(
-        'boolean'   => array('char', 'decimal'),
+        'boolean'   => array('char', 'decimal', 'tinyint'),
         'char'      => 'varchar',
         'varchar'   => 'varchar',
         'smallint'  => 'int',
@@ -155,7 +155,7 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'smallint'  => array('int', 'smallint'),
         'integer'   => array('int', 'integer'),
         'bigint'    => array('int', 'bigint'),
-        'decimal'   => array('bigint', 'numeric'),
+        'decimal'   => array('decimal', 'numeric'),
         'single'    => array('double', 'float'),
         'double'    => 'double',
         'clob'      => array('clob', 'longtext'),
