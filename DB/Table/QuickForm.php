@@ -154,10 +154,15 @@ class DB_Table_QuickForm {
     * 
     */
     
-    function &createForm($args = array(), $clientValidate = null)
+    function &createForm($args = array())
     {
-        $formName = isset($args['formName'])
-            ? $args['formName'] : $this->table;
+        if (isset($args['formName'])) {
+            $formName = $args['formName'];
+        } elseif (isset($this)) {
+            $formName = $this->table;
+        } else {
+            $formName = '_db_table_form_';
+        }
             
         $method = isset($args['method'])
             ? $args['method'] : 'post';
