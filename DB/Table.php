@@ -644,13 +644,16 @@ class DB_Table {
     * @param string $table The table name to connect to in the database.
     * 
     * @param mixed $create The automatic table creation mode to pursue:
-    * boolean false to not attempt creation, 'safe' to
-    * create the table only if it does not exist, or
-    * 'drop' to drop any existing table with the same name
-    * and re-create it. This can also be 'verify'; DB_Table will then
-    * check whether the table exists, whether all the columns exist,
-    * whether the columns have the right type, whether the columns
-    * have the right type, and whether the indexes exist
+    * - boolean false to not attempt creation
+    * - 'safe' to create the table only if it does not exist
+    * - 'drop' to drop any existing table with the same name and re-create it
+    * - 'verify' to check whether the table exists, whether all the columns
+    *   exist, whether the columns have the right type, and whether the indexes
+    *   exist and have the right type
+    * - 'alter' does the same as 'safe' if the table does not exist; if it
+    *   exists, a verification for columns existence, the column types, the
+    *   indexes existence, and the indexes types will be performed and the
+    *   table schema will be modified if needed
     * 
     * @return object DB_Table
     * 
@@ -747,15 +750,14 @@ class DB_Table {
     * 
     * Is a creation mode supported for a RDBMS by DB_Table?
     * 
-    * @static
-    * 
     * @access public
     * 
     * @param string $mode The chosen creation mode.
     * 
     * @param string $phptype The RDBMS type for PHP.
     * 
-    * @return bool True if supported, false if not.
+    * @return bool|object True if supported, false if not, or a PEAR_Error
+    * if an unknown mode is specified.
     * 
     */
     
@@ -1753,6 +1755,8 @@ class DB_Table {
     * 
     * @see DB_Common::quoteSmart()
     * 
+    * @see MDB2::quote()
+    * 
     */
     
     function quote($val)
@@ -2051,23 +2055,30 @@ class DB_Table {
     
     /**
     * 
-    * Creates the table based on $this->col and $this->idx.
+    * Creates, checks or alters the table based on $this->col and $this->idx.
     * 
     * @access public
     * 
-    * @param mixed $flag Boolean false to abort the create attempt from
-    * the start, 'drop' to drop the existing table and
-    * re-create it, or 'safe' to only create the table if it
-    * does not exist in the database. This can also be 'verify';
-    * DB_Table will then check whether the table exists, whether all
-    * the columns exist, whether the columns have the right type, and
-    * whether the indexes exist.
+    * @param mixed $flag The automatic table creation mode to pursue:
+    * - 'safe' to create the table only if it does not exist
+    * - 'drop' to drop any existing table with the same name and re-create it
+    * - 'verify' to check whether the table exists, whether all the columns
+    *   exist, whether the columns have the right type, and whether the indexes
+    *   exist and have the right type
+    * - 'alter' does the same as 'safe' if the table does not exist; if it
+    *   exists, a verification for columns existence, the column types, the
+    *   indexes existence, and the indexes types will be performed and the
+    *   table schema will be modified if needed
     * 
-    * @return mixed Boolean false if there was no attempt to create the
+    * @return mixed Boolean false if there was no need to create the
     * table, boolean true if the attempt succeeded, or a PEAR_Error if
     * the attempt failed.
     *
+    * @see DB_Table_Manager::alter()
+    * 
     * @see DB_Table_Manager::create()
+    * 
+    * @see DB_Table_Manager::verify()
     * 
     */
     
@@ -2090,11 +2101,28 @@ class DB_Table {
             );
         }
 
+        include_once 'DB/Table/Manager.php';
+
         // are we OK to create the table?
         $ok = false;
         
         // check the create-flag
         switch ($flag) {
+
+            case 'alter':
+                // alter the table columns and indexes if the table exists
+                $table_exists = DB_Table_Manager::tableExists($this->db,
+                                                              $this->table);
+                if (PEAR::isError($table_exists)) {
+                    return $table_exists;
+                }
+                if (!$table_exists) {
+                    // table does not exist => just create the table, there is
+                    // nothing that could be altered
+                    $flag = 'safe';
+                }
+                $ok = true;
+                break;
 
             case 'drop':
                 // forcibly drop an existing table
@@ -2108,18 +2136,13 @@ class DB_Table {
 
             case 'safe':
                 // create only if table does not exist
-                if ($this->backend == 'mdb2') {
-                    $list = $this->db->manager->listTables();
-                } else {
-                    $list = $this->db->getListOf('tables');
-                }
-                if (PEAR::isError($list)) {
-                    return $list;
+                $table_exists = DB_Table_Manager::tableExists($this->db,
+                                                              $this->table);
+                if (PEAR::isError($table_exists)) {
+                    return $table_exists;
                 }
                 // ok to create only if table does not exist
-                array_walk($list, create_function('&$value,$key',
-                                      '$value = trim(strtolower($value));'));
-                $ok = (! in_array(strtolower($this->table), $list));
+                $ok = !$table_exists;
                 break;
 
             case 'verify':
@@ -2141,9 +2164,13 @@ class DB_Table {
             return false;
         }
 
-        include_once 'DB/Table/Manager.php';
-
         switch ($flag) {
+
+            case 'alter':
+                return DB_Table_Manager::alter(
+                    $this->db, $this->table, $this->col, $this->idx
+                );
+                break;
 
             case 'drop':
             case 'safe':
@@ -2153,9 +2180,6 @@ class DB_Table {
                 break;
 
             case 'verify':
-                if ($this->backend == 'mdb2') {
-                    include_once 'DB/Table/Manager.php';
-                }
                 return DB_Table_Manager::verify(
                     $this->db, $this->table, $this->col, $this->idx
                 );

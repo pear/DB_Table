@@ -804,6 +804,69 @@ class DB_Table_Manager {
         return true;
     }
 
+
+   /**
+    * 
+    * Alter columns and indexes of a table based on DB_Table column and index
+    * arrays.
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param object &$db A PEAR DB/MDB2 object.
+    * 
+    * @param string $table The table name to connect to in the database.
+    * 
+    * @param mixed $column_set A DB_Table $this->col array.
+    * 
+    * @param mixed $index_set A DB_Table $this->idx array.
+    * 
+    * @return bool|object True if altering was successful or a PEAR_Error on
+    * failure.
+    * 
+    */
+    
+    function alter(&$db, $table, $column_set, $index_set)
+    {
+        // TODO
+    }
+
+
+    /**
+    * 
+    * Check whether a table exists.
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param object &$db A PEAR DB/MDB2 object.
+    * 
+    * @param string $table The table name that should be checked.
+    * 
+    * @return bool|object True if the table exists, false if not, or a
+    * PEAR_Error on failure.
+    * 
+    */
+    
+    function tableExists(&$db, $table)
+    {
+        if (is_subclass_of($db, 'db_common')) {
+            $list = $db->getListOf('tables');
+        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $db->loadModule('Manager');
+            $list = $db->manager->listTables();
+        }
+        if (PEAR::isError($list)) {
+            return $list;
+        }
+        array_walk($list, create_function('&$value,$key',
+                                          '$value = trim(strtolower($value));'));
+        return in_array(strtolower($table), $list);
+    }
+
+
     /**
     * 
     * Get the column declaration string for a DB_Table column.
