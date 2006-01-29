@@ -2,7 +2,7 @@
 
 /**
 * 
-* Creates tables from DB_Table definitions.
+* Creates, checks or alters tables from DB_Table definitions.
 * 
 * DB_Table_Manager provides database automated table creation
 * facilities.
@@ -25,7 +25,7 @@ require_once 'DB/Table.php';
 
 /**
 * 
-* Creates tables from DB_Table definitions.
+* Creates, checks or alters tables from DB_Table definitions.
 * 
 * DB_Table_Manager provides database automated table creation
 * facilities.
@@ -209,7 +209,7 @@ class DB_Table_Manager {
     * the attempt failed.
     * 
     */
-    
+
     function create(&$db, $table, $column_set, $index_set)
     {
         if (is_subclass_of($db, 'db_common')) {
@@ -218,6 +218,7 @@ class DB_Table_Manager {
             $backend = 'mdb2';
             $db->loadModule('Manager');
         }
+        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
 
         // columns to be created
         $column = array();
@@ -230,12 +231,10 @@ class DB_Table_Manager {
         $unique_index = array();
         $normal_index = array();
         
-        // is the table name too long?
-        if (strlen($table) > 30) {
-            return DB_Table::throwError(
-                DB_TABLE_ERR_TABLE_STRLEN,
-                " ('$table')"
-            );
+        // check the table name
+        $name_check = DB_Table_Manager::_validateTableName($table);
+        if (PEAR::isError($name_check)) {
+            return $name_check;
         }
         
         
@@ -253,25 +252,10 @@ class DB_Table_Manager {
             
             $colname = trim($colname);
             
-            // column name cannot be a reserved keyword
-            $reserved = in_array(
-                strtoupper($colname),
-                $GLOBALS['_DB_TABLE']['reserved']
-            );
-            
-            if ($reserved) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_DECLARE_COLNAME,
-                    " ('$colname')"
-                );
-            }
-            
-            // column must be no longer than 30 chars
-            if (strlen($colname) > 30) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_DECLARE_STRLEN,
-                    "('$colname')"
-                );
+            // check the column name
+            $name_check = DB_Table_Manager::_validateColumnName($colname);
+            if (PEAR::isError($name_check)) {
+                return $name_check;
             }
             
             
@@ -321,7 +305,7 @@ class DB_Table_Manager {
             } else {
 
                 // get the declaration string
-                $result = DB_Table_Manager::getDeclare($db->phptype, $type,
+                $result = DB_Table_Manager::getDeclare($phptype, $type,
                     $size, $scope, $require, $default);
 
                 // did it work?
@@ -349,110 +333,40 @@ class DB_Table_Manager {
         
         foreach ($index_set as $idxname => $val) {
             
-            if (is_string($val)) {
-                // shorthand for index names: colname => index_type
-                $type = trim($val);
-                $cols = trim($idxname);
-            } elseif (is_array($val)) {
-                // normal: index_name => array('type' => ..., 'cols' => ...)
-                $type = (isset($val['type'])) ? $val['type'] : 'normal';
-                $cols = (isset($val['cols'])) ? $val['cols'] : null;
-            }
-            
-            // index name cannot be a reserved keyword
-            $reserved = in_array(
-                strtoupper($idxname),
-                $GLOBALS['_DB_TABLE']['reserved']
-            );
-            
-            if ($reserved) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_DECLARE_IDXNAME,
-                    "('$idxname')"
-                );
-            }
-            
-            // are there any columns for the index?
-            if (! $cols) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_IDX_NO_COLS,
-                    "('$idxname')"
-                );
-            }
-            
-            // are there any CLOB columns, or any columns that are not
-            // in the schema?
-            settype($cols, 'array');
-            $valid_cols = array_keys($column_set);
-            foreach ($cols as $colname) {
-            
-                if (! in_array($colname, $valid_cols)) {
-                    return DB_Table::throwError(
-                        DB_TABLE_ERR_IDX_COL_UNDEF,
-                        "'$idxname' ('$colname')"
-                    );
-                }
-                
-                if ($column_set[$colname]['type'] == 'clob') {
-                    return DB_Table::throwError(
-                        DB_TABLE_ERR_IDX_COL_CLOB,
-                        "'$idxname' ('$colname')"
-                    );
-                }
-                
-            }
-            
-            // string of column names
-            $colstring = implode(', ', $cols);
-            
-            // we prefix all index names with the table name,
-            // and suffix all index names with '_idx'.  this
-            // is to soothe PostgreSQL, which demands that index
-            // names not collide, even when they indexes are on
-            // different tables.
-            $newIdxName = $table . '_' . $idxname . '_idx';
-            
-            // now check the length; must be under 30 chars to
-            // soothe Oracle.
-            if (strlen($newIdxName) > 30) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_IDX_STRLEN,
-                    "'$idxname' ('$newIdxName')"
-                );
+            list($type, $cols) = DB_Table_Manager::_getIndexTypeAndColumns($val, $idxname);
+
+            $newIdxName = '';
+
+            // check the index definition
+            $index_check = DB_Table_Manager::_validateIndexName($idxname,
+                $table, $type, $cols, $column_set, $newIdxName);
+            if (PEAR::isError($index_check)) {
+                return $index_check;
             }
 
             // create index entry
             if ($backend == 'mdb2') {
 
+                // array with column names as keys
                 $idx_cols = array();
                 foreach ($cols as $col) {
                     $idx_cols[$col] = array();
                 }
 
-                if ($type == 'unique') {
-                    $unique_index[$newIdxName] = array('fields' => $idx_cols,
-                                                       'unique' => true);
-                } elseif ($type == 'normal') {
-                    $normal_index[$newIdxName] = array('fields' => $idx_cols);
-                } else {
-                    return DB_Table::throwError(
-                        DB_TABLE_ERR_IDX_TYPE,
-                        "'$idxname' ('$type')"
-                    );
+                switch ($type) {
+                    case 'unique':
+                        $unique_index[$newIdxName] = array('fields' => $idx_cols,
+                                                           'unique' => true);
+                        break;
+                    case 'normal':
+                        $normal_index[$newIdxName] = array('fields' => $idx_cols);
+                        break;
                 }
                 
             } else {
 
-                if ($type == 'unique') {
-                    $index[] = "CREATE UNIQUE INDEX $newIdxName ON $table ($colstring)";
-                } elseif ($type == 'normal') {
-                    $index[] = "CREATE INDEX $newIdxName ON $table ($colstring)";
-                } else {
-                    return DB_Table::throwError(
-                        DB_TABLE_ERR_IDX_TYPE,
-                        "'$idxname' ('$type')"
-                    );
-                }
+                $index[] = DB_Table_Manager::getDeclareForIndex($phptype,
+                    $type, $newIdxName, $table, $cols);
 
             }
             
@@ -530,8 +444,9 @@ class DB_Table_Manager {
         // we're done!
         return true;
     }
-    
-    /**
+
+
+   /**
     * 
     * Verify whether the table and columns exist, whether the columns
     * have the right type and whether the indexes exist.
@@ -552,7 +467,7 @@ class DB_Table_Manager {
     * PEAR_Error if verification failed.
     * 
     */
-    
+
     function verify(&$db, $table, $column_set, $index_set)
     {
         if (is_subclass_of($db, 'db_common')) {
@@ -566,8 +481,17 @@ class DB_Table_Manager {
             $table_info_mode = MDB2_TABLEINFO_FULL;
             $table_info_error = MDB2_ERROR_NEED_MORE_DATA;
         }
+        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
 
         // check #1: does the table exist?
+
+        // check the table name
+        $name_check = DB_Table_Manager::_validateTableName($table);
+        if (PEAR::isError($name_check)) {
+            return $name_check;
+        }
+
+        // get table info
         $tableInfo = $reverse->tableInfo($table, $table_info_mode);
         if (PEAR::isError($tableInfo)) {
             if ($tableInfo->getCode() == $table_info_error) {
@@ -578,48 +502,41 @@ class DB_Table_Manager {
             }
             return $tableInfo;
         }
+        $tableInfoOrder = array_change_key_case($tableInfo['order'], CASE_LOWER);
 
         if (is_null($column_set)) {
             $column_set = array();
         }
-        
+
         foreach ($column_set as $colname => $val) {
             $colname = strtolower(trim($colname));
+            
+            // check the column name
+            $name_check = DB_Table_Manager::_validateColumnName($colname);
+            if (PEAR::isError($name_check)) {
+                return $name_check;
+            }
 
             // check #2: do all columns exist?
-            $order = array_change_key_case($tableInfo['order'], CASE_LOWER);
-            if (!array_key_exists($colname, $order)) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_VER_COLUMN_MISSING,
-                    "(column='$colname')"
-                );
+            $columnExists = DB_Table_Manager::_columnExists($colname,
+                $tableInfoOrder, 'verify');
+            if (PEAR::isError($columnExists)) {
+                return $columnExists;
             }
 
             // check #3: do all columns have the right type?
 
-            // map of valid types for the current RDBMS
-            list($phptype, $dbsyntax) = DB_Table::getPHPTypeAndDBSyntax($db);
-            $map = $GLOBALS['_DB_TABLE']['valid_type'][$phptype];
-            // is it a recognized column type?
-            $types = array_keys($map);
-            if (!in_array($val['type'], $types)) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_DECLARE_TYPE,
-                    "('" . $val['type'] . "')"
-                );
+            // check whether the column type is a known type
+            $type_check = DB_Table_Manager::_validateColumnType($phptype, $val['type']);
+            if (PEAR::isError($type_check)) {
+                return $type_check;
             }
 
-            $colindex = $order[$colname];
-            $type = strtolower($tableInfo[$colindex]['type']);
-            // strip size information (e.g. NUMERIC(9,2) => NUMERIC) if given
-            if (($pos = strpos($type, '(')) !== false) {
-                $type = substr($type, 0, $pos);
-            }
-            if (!in_array($type, (array)$map[$val['type']])) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_VER_COLUMN_TYPE,
-                    "(column='$colname', type='$type')"
-                );
+            // check whether the column has the right type
+            $type_check = DB_Table_Manager::_checkColumnType($phptype,
+                $colname, $val['type'], $tableInfoOrder, $tableInfo, 'verify');
+            if (PEAR::isError($type_check)) {
+                return $type_check;
             }
 
         }
@@ -650,9 +567,7 @@ class DB_Table_Manager {
                     $db->setOption('idxname_format', $idxname_format);
                     return $index_fields;
                 }
-                foreach ($index_fields['fields'] as $key => $value) {
-                    $table_indexes[$table_idx_tmp][] = $key;
-                }
+                $table_indexes[$table_idx_tmp] = array_keys($index_fields['fields']);
             }
 
             // get table indexes
@@ -673,9 +588,7 @@ class DB_Table_Manager {
                     $db->setOption('idxname_format', $idxname_format);
                     return $index_fields;
                 }
-                foreach ($index_fields['fields'] as $key => $value) {
-                    $table_indexes[$table_idx_tmp][] = $key;
-                }
+                $table_indexes[$table_idx_tmp] = array_keys($index_fields['fields']);
             }
             // restore user defined 'idxname_format' option
             $db->setOption('idxname_format', $idxname_format);
@@ -689,82 +602,16 @@ class DB_Table_Manager {
         }
         
         foreach ($index_set as $idxname => $val) {
-            
-            if (is_string($val)) {
-                // shorthand for index names: colname => index_type
-                $type = trim($val);
-                $cols = trim($idxname);
-            } elseif (is_array($val)) {
-                // normal: index_name => array('type' => ..., 'cols' => ...)
-                $type = (isset($val['type'])) ? $val['type'] : 'normal';
-                $cols = (isset($val['cols'])) ? $val['cols'] : null;
-            }
-            
-            // index name cannot be a reserved keyword
-            $reserved = in_array(
-                strtoupper($idxname),
-                $GLOBALS['_DB_TABLE']['reserved']
-            );
-            
-            if ($reserved) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_DECLARE_IDXNAME,
-                    "('$idxname')"
-                );
-            }
-            
-            // are there any columns for the index?
-            if (! $cols) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_IDX_NO_COLS,
-                    "('$idxname')"
-                );
-            }
-            
-            // are there any CLOB columns, or any columns that are not
-            // in the schema?
-            settype($cols, 'array');
-            $valid_cols = array_keys($column_set);
-            foreach ($cols as $colname) {
-            
-                if (! in_array($colname, $valid_cols)) {
-                    return DB_Table::throwError(
-                        DB_TABLE_ERR_IDX_COL_UNDEF,
-                        "'$idxname' ('$colname')"
-                    );
-                }
-                
-                if ($column_set[$colname]['type'] == 'clob') {
-                    return DB_Table::throwError(
-                        DB_TABLE_ERR_IDX_COL_CLOB,
-                        "'$idxname' ('$colname')"
-                    );
-                }
-                
-            }
-            
-            // we prefix all index names with the table name,
-            // and suffix all index names with '_idx'.  this
-            // is to soothe PostgreSQL, which demands that index
-            // names not collide, even when they indexes are on
-            // different tables.
-            $newIdxName = $table . '_' . $idxname . '_idx';
-            
-            // now check the length; must be under 30 chars to
-            // soothe Oracle.
-            if (strlen($newIdxName) > 30) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_IDX_STRLEN,
-                    "'$idxname' ('$newIdxName')"
-                );
-            }
-            
-            // check index type
-            if ($type != 'unique' && $type != 'normal') {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_IDX_TYPE,
-                    "'$idxname' ('$type')"
-                );
+          
+            list($type, $cols) = DB_Table_Manager::_getIndexTypeAndColumns($val, $idxname);
+
+            $newIdxName = '';
+
+            // check the index definition
+            $index_check = DB_Table_Manager::_validateIndexName($idxname,
+                $table, $type, $cols, $column_set, $newIdxName);
+            if (PEAR::isError($index_check)) {
+                return $index_check;
             }
 
             $index_found = false;
@@ -826,14 +673,14 @@ class DB_Table_Manager {
     * failure.
     * 
     */
-    
+
     function alter(&$db, $table, $column_set, $index_set)
     {
         // TODO
     }
 
 
-    /**
+   /**
     * 
     * Check whether a table exists.
     * 
@@ -849,7 +696,7 @@ class DB_Table_Manager {
     * PEAR_Error on failure.
     * 
     */
-    
+
     function tableExists(&$db, $table)
     {
         if (is_subclass_of($db, 'db_common')) {
@@ -867,7 +714,7 @@ class DB_Table_Manager {
     }
 
 
-    /**
+   /**
     * 
     * Get the column declaration string for a DB_Table column.
     * 
@@ -893,7 +740,7 @@ class DB_Table_Manager {
     * PEAR_Error on failure.
     * 
     */
-    
+
     function getDeclare($phptype, $coltype, $size = null, $scope = null,
         $require = null, $default = null)
     {
@@ -958,6 +805,382 @@ class DB_Table_Manager {
         // done
         return $declare;
     }
+
+
+   /**
+    * 
+    * Get the index declaration string for a DB_Table index.
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param string $phptype The DB/MDB2 phptype key.
+    * 
+    * @param string $type The index type.
+    * 
+    * @param string $idxname The index name.
+    * 
+    * @param string $table The table name.
+    * 
+    * @param mixed $cols Array with the column names for the index.
+    * 
+    * @return string A declaration string.
+    * 
+    */
+
+    function getDeclareForIndex($phptype, $type, $idxname, $table, $cols)
+    {
+        // string of column names
+        $colstring = implode(', ', $cols);
+
+        switch ($type) {
+
+            case 'unique':
+                $declare = "CREATE UNIQUE INDEX $idxname ON $table ($colstring)";
+                break;
+
+            case 'normal':
+                $declare = "CREATE INDEX $idxname ON $table ($colstring)";
+                break;
+
+        }
+        
+        return $declare;
+    }
+
+
+   /**
+    * 
+    * Check a table name for validity.
+    * 
+    * @access private
+    * 
+    * @param string $tablename The table name.
+    * 
+    * @return bool|object Boolean true if the table name is valid or a
+    * PEAR_Error with a description about the invalidity, otherwise.
+    * 
+    */
+
+    function _validateTableName($tablename)
+    {
+        // is the table name too long?
+        if (strlen($tablename) > 30) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_TABLE_STRLEN,
+                " ('$tablename')"
+            );
+        }
+
+        return true;
+    }
+
+
+   /**
+    * 
+    * Check a column name for validity.
+    * 
+    * @access private
+    * 
+    * @param string $colname The column name.
+    * 
+    * @return bool|object Boolean true if the column name is valid or a
+    * PEAR_Error with a description about the invalidity, otherwise.
+    * 
+    */
+
+    function _validateColumnName($colname)
+    {
+        // column name cannot be a reserved keyword
+        $reserved = in_array(
+            strtoupper($colname),
+            $GLOBALS['_DB_TABLE']['reserved']
+        );
+
+        if ($reserved) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_DECLARE_COLNAME,
+                " ('$colname')"
+            );
+        }
+ 
+        // column name must be no longer than 30 chars
+        if (strlen($colname) > 30) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_DECLARE_STRLEN,
+                "('$colname')"
+            );
+        }
+
+        return true;
+    }
+
+
+   /**
+    * 
+    * Check whether a column exists.
+    * 
+    * @access private
+    * 
+    * @param string $colname The column name.
+    * 
+    * @param mixed $tableInfoOrder Array with columns in the table (result
+    * from tableInfo(), shortened to key 'order').
+    * 
+    * @param string $mode The name of the calling function, this can be either
+    * 'verify' or 'alter'.
+    * 
+    * @return bool|object Boolean true if the column exists.
+    * Otherwise, either boolean false (case 'alter') or a PEAR_Error
+    * (case 'verify').
+    * 
+    */
+
+    function _columnExists($colname, $tableInfoOrder, $mode)
+    {
+        if (array_key_exists($colname, $tableInfoOrder)) {
+            return true;
+        }
+
+        switch ($mode) {
+
+            case 'alter':
+                return false;
+
+            case 'verify':
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_VER_COLUMN_MISSING,
+                    "(column='$colname')"
+                );
+
+        }
+    }
+
+
+   /**
+    * 
+    * Check whether a column type is a known type.
+    * 
+    * @access private
+    * 
+    * @param string $phptype The DB/MDB2 phptype key.
+    * 
+    * @param string $type The column type.
+    * 
+    * @return bool|object Boolean true if the column type is a known type
+    * or a PEAR_Error, otherwise.
+    * 
+    */
+
+    function _validateColumnType($phptype, $type)
+    {
+        // map of valid types for the current RDBMS
+        $map = $GLOBALS['_DB_TABLE']['valid_type'][$phptype];
+
+        // is it a recognized column type?
+        $types = array_keys($map);
+        if (!in_array($type, $types)) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_DECLARE_TYPE,
+                "('" . $type . "')"
+            );
+        }
+
+        return true;
+    }
+
+
+   /**
+    * 
+    * Check whether a column has the right type.
+    * 
+    * @access private
+    * 
+    * @param string $phptype The DB/MDB2 phptype key.
+    *
+    * @param string $colname The column name.
+    * 
+    * @param string $coltype The column type.
+    * 
+    * @param mixed $tableInfoOrder Array with columns in the table (result
+    * from tableInfo(), shortened to key 'order').
+    * 
+    * @param mixed $tableInfo Array with information about the table (result
+    * from tableInfo()).
+    * 
+    * @param string $mode The name of the calling function, this can be either
+    * 'verify' or 'alter'.
+    * 
+    * @return bool|object Boolean true if the column has the right type.
+    * Otherwise, either boolean false (case 'alter') or a PEAR_Error
+    * (case 'verify').
+    * 
+    */
+
+    function _checkColumnType($phptype, $colname, $coltype, $tableInfoOrder,
+        $tableInfo, $mode)
+    {
+        // map of valid types for the current RDBMS
+        $map = $GLOBALS['_DB_TABLE']['valid_type'][$phptype];
+
+        // get the column type from tableInfo()
+        $colindex = $tableInfoOrder[$colname];
+        $type = strtolower($tableInfo[$colindex]['type']);
+
+        // strip size information (e.g. NUMERIC(9,2) => NUMERIC) if given
+        if (($pos = strpos($type, '(')) !== false) {
+            $type = substr($type, 0, $pos);
+        }
+
+        // is the type valid for the given DB_Table column type?
+        if (in_array($type, (array)$map[$coltype])) {
+            return true;
+        }
+
+        switch ($mode) {
+
+            case 'alter':
+                return false;
+
+            case 'verify':
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_VER_COLUMN_TYPE,
+                    "(column='$colname', type='$type')"
+                );
+
+        }
+    }
+
+
+   /**
+    * 
+    * Return the index type and the columns belonging to this index.
+    * 
+    * @access private
+    * 
+    * @param mixed $idx_def The index definition.
+    * 
+    * @return mixed Array with the index type and the columns belonging to
+    * this index.
+    * 
+    */
+
+    function _getIndexTypeAndColumns($idx_def, $idxname)
+    {
+        $type = '';
+        $cols = '';
+        if (is_string($idx_def)) {
+            // shorthand for index names: colname => index_type
+            $type = trim($idx_def);
+            $cols = trim($idxname);
+        } elseif (is_array($idx_def)) {
+            // normal: index_name => array('type' => ..., 'cols' => ...)
+            $type = (isset($idx_def['type'])) ? $idx_def['type'] : 'normal';
+            $cols = (isset($idx_def['cols'])) ? $idx_def['cols'] : null;
+        }
+
+        return array($type, $cols);
+    }
+
+
+   /**
+    * 
+    * Check an index name for validity.
+    * 
+    * @access private
+    * 
+    * @param string $idxname The index name.
+    * 
+    * @param string $tablename The table name.
+    * 
+    * @param string $type The index type.
+    * 
+    * @param mixed $cols The column names for the index. Will become an array
+    * if it is not an array.
+    * 
+    * @param mixed $column_set A DB_Table $this->col array.
+    * 
+    * @param string $newIdxName The new index name (prefixed with the table
+    * name, suffixed with '_idx').
+    * 
+    * @return bool|object Boolean true if the index name is valid or a
+    * PEAR_Error with a description about the invalidity, otherwise.
+    * 
+    */
+
+    function _validateIndexName($idxname, $table, $type, &$cols, $column_set, &$newIdxName)
+    {
+        // index name cannot be a reserved keyword
+        $reserved = in_array(
+            strtoupper($idxname),
+            $GLOBALS['_DB_TABLE']['reserved']
+        );
+
+        if ($reserved) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_DECLARE_IDXNAME,
+                "('$idxname')"
+            );
+        }
+
+        // are there any columns for the index?
+        if (! $cols) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_IDX_NO_COLS,
+                "('$idxname')"
+            );
+        }
+
+        // are there any CLOB columns, or any columns that are not
+        // in the schema?
+        settype($cols, 'array');
+        $valid_cols = array_keys($column_set);
+        foreach ($cols as $colname) {
+
+            if (! in_array($colname, $valid_cols)) {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_IDX_COL_UNDEF,
+                    "'$idxname' ('$colname')"
+                );
+            }
+
+            if ($column_set[$colname]['type'] == 'clob') {
+                return DB_Table::throwError(
+                    DB_TABLE_ERR_IDX_COL_CLOB,
+                    "'$idxname' ('$colname')"
+                );
+            }
+
+        }
+
+        // we prefix all index names with the table name,
+        // and suffix all index names with '_idx'.  this
+        // is to soothe PostgreSQL, which demands that index
+        // names not collide, even when they indexes are on
+        // different tables.
+        $newIdxName = $table . '_' . $idxname . '_idx';
+            
+        // now check the length; must be under 30 chars to
+        // soothe Oracle.
+        if (strlen($newIdxName) > 30) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_IDX_STRLEN,
+                "'$idxname' ('$newIdxName')"
+            );
+        }
+
+        // check index type
+        if ($type != 'unique' && $type != 'normal') {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_IDX_TYPE,
+                "'$idxname' ('$type')"
+            );
+        }
+
+        return true;
+    }
+
 }
 
 
