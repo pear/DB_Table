@@ -542,59 +542,9 @@ class DB_Table_Manager {
         }
 
         // check #4: do all indexes exist?
-        $table_indexes = array();
-        if ($backend == 'mdb2') {
-
-            // save user defined 'idxname_format' option
-            $idxname_format = $db->getOption('idxname_format');
-            $db->setOption('idxname_format', '%s');
-
-            // get table constraints
-            $table_indexes_tmp = $db->manager->listTableConstraints($table);
-            if (PEAR::isError($table_indexes_tmp)) {
-                // restore user defined 'idxname_format' option
-                $db->setOption('idxname_format', $idxname_format);
-                return $table_indexes_tmp;
-            }
-
-            // get fields of table constraints
-            foreach ($table_indexes_tmp as $table_idx_tmp) {
-                $index_fields =
-                    $db->reverse->getTableConstraintDefinition($table,
-                                                               $table_idx_tmp);
-                if (PEAR::isError($index_fields)) {
-                    // restore user defined 'idxname_format' option
-                    $db->setOption('idxname_format', $idxname_format);
-                    return $index_fields;
-                }
-                $table_indexes[$table_idx_tmp] = array_keys($index_fields['fields']);
-            }
-
-            // get table indexes
-            $table_indexes_tmp = $db->manager->listTableIndexes($table);
-            if (PEAR::isError($table_indexes_tmp)) {
-                // restore user defined 'idxname_format' option
-                $db->setOption('idxname_format', $idxname_format);
-                return $table_indexes_tmp;
-            }
-
-            // get fields of table indexes
-            foreach ($table_indexes_tmp as $table_idx_tmp) {
-                $index_fields =
-                    $db->reverse->getTableIndexDefinition($table,
-                                                          $table_idx_tmp);
-                if (PEAR::isError($index_fields)) {
-                    // restore user defined 'idxname_format' option
-                    $db->setOption('idxname_format', $idxname_format);
-                    return $index_fields;
-                }
-                $table_indexes[$table_idx_tmp] = array_keys($index_fields['fields']);
-            }
-            // restore user defined 'idxname_format' option
-            $db->setOption('idxname_format', $idxname_format);
-        }
-        else {
-            // TODO: add index / constraint verification for PEAR::DB
+        $table_indexes = DB_Table_Manager::_getIndexes($db, $table);
+        if (PEAR::isError($table_indexes)) {
+            return $table_indexes;
         }
 
         if (is_null($index_set)) {
@@ -614,36 +564,12 @@ class DB_Table_Manager {
                 return $index_check;
             }
 
-            $index_found = false;
-            foreach ($table_indexes as $index_name => $index_fields) {
-                if (strtolower($index_name) == strtolower($newIdxName)) {
-                    $index_found = true;
-                    array_walk($cols, create_function('&$value,$key',
-                                      '$value = trim(strtolower($value));'));
-                    array_walk($index_fields, create_function('&$value,$key',
-                                      '$value = trim(strtolower($value));'));
-                    foreach ($index_fields as $index_field) {
-                        if (($key = array_search($index_field, $cols)) !== false) {
-                            unset($cols[$key]);
-                        }
-                    }
-                }
-            }
-
-            if (!$index_found) {
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_VER_IDX_MISSING,
-                    "'$idxname' ('$newIdxName')"
-                );
-            }
-
-            if (count($cols) > 0) {
-                // string of column names
-                $colstring = implode(', ', $cols);
-                return DB_Table::throwError(
-                    DB_TABLE_ERR_VER_IDX_COL_MISSING,
-                    "'$idxname' ($colstring)"
-                );
+            // check whether the index has the right type and has all
+            // specified columns
+            $index_check = DB_Table_Manager::_checkIndex($idxname, $newIdxName,
+                $type, $cols, $table_indexes, 'verify');
+            if (PEAR::isError($index_check)) {
+                return $index_check;
             }
 
         }
@@ -1175,6 +1101,146 @@ class DB_Table_Manager {
             return DB_Table::throwError(
                 DB_TABLE_ERR_IDX_TYPE,
                 "'$idxname' ('$type')"
+            );
+        }
+
+        return true;
+    }
+
+
+   /**
+    * 
+    * Return all indexes for a table.
+    * 
+    * @access private
+    * 
+    * @param object &$db A PEAR DB/MDB2 object.
+    * 
+    * @param string $table The table name.
+    * 
+    * @return mixed Array with all indexes or a PEAR_Error when an error
+    * occured.
+    * 
+    */
+
+    function _getIndexes(&$db, $table) {
+        // TODO: make this compatible with PEAR::DB
+        $indexes = array('normal'  => array(),
+                         'primary' => array(),
+                         'unique'  => array()
+                        );
+
+        // save user defined 'idxname_format' option
+        $idxname_format = $db->getOption('idxname_format');
+        $db->setOption('idxname_format', '%s');
+
+        // get table constraints
+        $table_indexes_tmp = $db->manager->listTableConstraints($table);
+        if (PEAR::isError($table_indexes_tmp)) {
+            // restore user defined 'idxname_format' option
+            $db->setOption('idxname_format', $idxname_format);
+            return $table_indexes_tmp;
+        }
+
+        // get fields of table constraints
+        foreach ($table_indexes_tmp as $table_idx_tmp) {
+            $index_fields = $db->reverse->getTableConstraintDefinition($table,
+                                                              $table_idx_tmp);
+            if (PEAR::isError($index_fields)) {
+                // restore user defined 'idxname_format' option
+                $db->setOption('idxname_format', $idxname_format);
+                return $index_fields;
+            }
+            $index_type = current(array_keys($index_fields));
+            $indexes[$index_type][$table_idx_tmp] = array_keys($index_fields['fields']);
+        }
+
+        // get table indexes
+        $table_indexes_tmp = $db->manager->listTableIndexes($table);
+        if (PEAR::isError($table_indexes_tmp)) {
+            // restore user defined 'idxname_format' option
+            $db->setOption('idxname_format', $idxname_format);
+            return $table_indexes_tmp;
+        }
+
+        // get fields of table indexes
+        foreach ($table_indexes_tmp as $table_idx_tmp) {
+            $index_fields = $db->reverse->getTableIndexDefinition($table,
+                                                         $table_idx_tmp);
+            if (PEAR::isError($index_fields)) {
+                // restore user defined 'idxname_format' option
+                $db->setOption('idxname_format', $idxname_format);
+                return $index_fields;
+            }
+            $indexes['normal'][$table_idx_tmp] = array_keys($index_fields['fields']);
+        }
+
+        // restore user defined 'idxname_format' option
+        $db->setOption('idxname_format', $idxname_format);
+
+        return $indexes;
+    }
+
+
+   /**
+    * 
+    * Check whether an index has the right type and has all specified columns.
+    * 
+    * @access private
+    * 
+    * @param string $idxname The index name.
+    * 
+    * @param string $newIdxName The prefixed and suffixed index name.
+    * 
+    * @param string $type The index type.
+    * 
+    * @param mixed $cols The column names for the index.
+    * 
+    * @param mixed $table_indexes Array with all indexes of the table.
+    * 
+    * @param string $mode The name of the calling function, this can be either
+    * 'verify' or 'alter'.
+    * 
+    * @return bool|object Boolean true if the index has the right type and all
+    * specified columns. Otherwise, either boolean false (case 'alter') or a
+    * PEAR_Error (case 'verify').
+    * 
+    */
+
+    function _checkIndex($idxname, $newIdxName, $type, $cols, &$table_indexes, $mode)
+    {
+        $index_found = false;
+
+        foreach ($table_indexes[$type] as $index_name => $index_fields) {
+            if (strtolower($index_name) == strtolower($newIdxName)) {
+                $index_found = true;
+                array_walk($cols, create_function('&$value,$key',
+                                  '$value = trim(strtolower($value));'));
+                array_walk($index_fields, create_function('&$value,$key',
+                                  '$value = trim(strtolower($value));'));
+                foreach ($index_fields as $index_field) {
+                    if (($key = array_search($index_field, $cols)) !== false) {
+                        unset($cols[$key]);
+                    }
+                }
+                unset($table_indexes[$type][$index_name]);
+                break;
+            }
+        }
+
+        if (!$index_found) {
+            return ($mode == 'alter') ? false : DB_Table::throwError(
+                DB_TABLE_ERR_VER_IDX_MISSING,
+                "'$idxname' ('$newIdxName')"
+            );
+        }
+
+        if (count($cols) > 0) {
+            // string of column names
+            $colstring = implode(', ', $cols);
+            return ($mode == 'alter') ? false : DB_Table::throwError(
+                DB_TABLE_ERR_VER_IDX_COL_MISSING,
+                "'$idxname' ($colstring)"
             );
         }
 
