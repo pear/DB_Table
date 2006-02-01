@@ -726,7 +726,19 @@ class DB_Table_Manager {
         $declare .= ($require) ? ' NOT NULL' : $null;
         
         // set the "DEFAULT" portion
-        $declare .= ($default) ? " DEFAULT $default" : '';
+        if ($default) {
+            switch ($coltype) {        
+                case 'char':
+                case 'varchar':
+                case 'clob':
+                    $declare .= " DEFAULT '$default'";
+                    break;
+
+                default:
+                    $declare .= " DEFAULT $default";
+                    break;
+            }
+        }
         
         // done
         return $declare;
