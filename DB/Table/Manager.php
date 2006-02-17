@@ -1135,32 +1135,55 @@ class DB_Table_Manager {
     * 
     */
 
-    function _getIndexes(&$db, $table) {
-        // TODO: make this compatible with PEAR::DB
+    function _getIndexes(&$db, $table)
+    {
+        if (is_subclass_of($db, 'db_common')) {
+            $backend = 'db';
+            // workaround for missing index and constraint information methods
+            // in PEAR::DB ==> use adopted code from MDB2's driver classes
+            list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
+            require_once 'DB/Table/Manager/' . $phptype . '.php';
+            $classname = 'DB_Table_Manager_' . $phptype;
+            $dbtm =& new $classname();
+            $dbtm->_db =& $db;  // pass database instance to the 'workaround' class
+            $manager =& $dbtm;
+            $reverse =& $dbtm;
+        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $backend = 'mdb2';
+            $manager =& $db->manager;
+            $reverse =& $db->reverse;
+        }
+
         $indexes = array('normal'  => array(),
                          'primary' => array(),
                          'unique'  => array()
                         );
 
-        // save user defined 'idxname_format' option
-        $idxname_format = $db->getOption('idxname_format');
-        $db->setOption('idxname_format', '%s');
+        // save user defined 'idxname_format' option (MDB2 only)
+        if ($backend == 'mdb2') {
+            $idxname_format = $db->getOption('idxname_format');
+            $db->setOption('idxname_format', '%s');
+        }
 
         // get table constraints
-        $table_indexes_tmp = $db->manager->listTableConstraints($table);
+        $table_indexes_tmp = $manager->listTableConstraints($table);
         if (PEAR::isError($table_indexes_tmp)) {
-            // restore user defined 'idxname_format' option
-            $db->setOption('idxname_format', $idxname_format);
+            // restore user defined 'idxname_format' option (MDB2 only)
+            if ($backend == 'mdb2') {
+               $db->setOption('idxname_format', $idxname_format);
+            }
             return $table_indexes_tmp;
         }
 
         // get fields of table constraints
         foreach ($table_indexes_tmp as $table_idx_tmp) {
-            $index_fields = $db->reverse->getTableConstraintDefinition($table,
+            $index_fields = $reverse->getTableConstraintDefinition($table,
                                                               $table_idx_tmp);
             if (PEAR::isError($index_fields)) {
-                // restore user defined 'idxname_format' option
-                $db->setOption('idxname_format', $idxname_format);
+                // restore user defined 'idxname_format' option (MDB2 only)
+                if ($backend == 'mdb2') {
+                    $db->setOption('idxname_format', $idxname_format);
+                }
                 return $index_fields;
             }
             $index_type = current(array_keys($index_fields));
@@ -1168,27 +1191,33 @@ class DB_Table_Manager {
         }
 
         // get table indexes
-        $table_indexes_tmp = $db->manager->listTableIndexes($table);
+        $table_indexes_tmp = $manager->listTableIndexes($table);
         if (PEAR::isError($table_indexes_tmp)) {
-            // restore user defined 'idxname_format' option
-            $db->setOption('idxname_format', $idxname_format);
+            // restore user defined 'idxname_format' option (MDB2 only)
+            if ($backend == 'mdb2') {
+                $db->setOption('idxname_format', $idxname_format);
+            }
             return $table_indexes_tmp;
         }
 
         // get fields of table indexes
         foreach ($table_indexes_tmp as $table_idx_tmp) {
-            $index_fields = $db->reverse->getTableIndexDefinition($table,
+            $index_fields = $reverse->getTableIndexDefinition($table,
                                                          $table_idx_tmp);
             if (PEAR::isError($index_fields)) {
-                // restore user defined 'idxname_format' option
-                $db->setOption('idxname_format', $idxname_format);
+                // restore user defined 'idxname_format' option (MDB2 only)
+                if ($backend == 'mdb2') {
+                    $db->setOption('idxname_format', $idxname_format);
+                }
                 return $index_fields;
             }
             $indexes['normal'][$table_idx_tmp] = array_keys($index_fields['fields']);
         }
 
-        // restore user defined 'idxname_format' option
-        $db->setOption('idxname_format', $idxname_format);
+        // restore user defined 'idxname_format' option (MDB2 only)
+        if ($backend == 'mdb2') {
+            $db->setOption('idxname_format', $idxname_format);
+        }
 
         return $indexes;
     }
