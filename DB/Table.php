@@ -208,6 +208,18 @@ define('DB_TABLE_ERR_VER_IDX_COL_MISSING', -30);
 define('DB_TABLE_ERR_CREATE_PHPTYPE', -31);
 
 /**
+* Error code at create() time when you define more than one primary key
+* in $this->idx.
+*/
+define('DB_TABLE_ERR_DECLARE_PRIMARY', -32);
+
+/**
+* Error code at create() time when you a primary key is defined in $this->idx
+* and SQLite is used (SQLite does not support primary keys).
+*/
+define('DB_TABLE_ERR_DECLARE_PRIM_SQLITE', -33);
+
+/**
 * The PEAR class for errors
 */
 require_once 'PEAR.php';
@@ -577,7 +589,9 @@ class DB_Table {
         DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty',
         DB_TABLE_ERR_VER_IDX_MISSING     => 'Verification failed: index does not exist',
         DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols',
-        DB_TABLE_ERR_CREATE_PHPTYPE      => 'Creation mode is not supported for this phptype'
+        DB_TABLE_ERR_CREATE_PHPTYPE      => 'Creation mode is not supported for this phptype',
+        DB_TABLE_ERR_DECLARE_PRIMARY     => 'Only one primary key is allowed',
+        DB_TABLE_ERR_DECLARE_PRIM_SQLITE => 'SQLite does not support primary keys'
     );
 
 
@@ -2125,11 +2139,19 @@ class DB_Table {
                 break;
 
             case 'drop':
-                // forcibly drop an existing table
-                if ($this->backend == 'mdb2') {
-                    $this->db->manager->dropTable($this->table);
-                } else {
-                    $this->db->query("DROP TABLE {$this->table}");
+                // drop only if table exists
+                $table_exists = DB_Table_Manager::tableExists($this->db,
+                                                              $this->table);
+                if (PEAR::isError($table_exists)) {
+                    return $table_exists;
+                }
+                if ($table_exists) {
+                    // forcibly drop an existing table
+                    if ($this->backend == 'mdb2') {
+                        $this->db->manager->dropTable($this->table);
+                    } else {
+                        $this->db->query("DROP TABLE {$this->table}");
+                    }
                 }
                 $ok = true;
                 break;

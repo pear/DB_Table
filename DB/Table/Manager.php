@@ -89,13 +89,13 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'timestamp' => ''
     ),
     'mysql' => array(
-        'boolean'   => array('char', 'int', 'real'),
+        'boolean'   => array('char', 'decimal', 'int', 'real'),
         'char'      => array('char', 'string'),
         'varchar'   => array('char', 'string'),
         'smallint'  => 'int',
         'integer'   => 'int',
         'bigint'    => 'int',
-        'decimal'   => 'real',
+        'decimal'   => array('decimal', 'real'),
         'single'    => 'real',
         'double'    => 'real',
         'clob'      => 'blob',
@@ -105,8 +105,8 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
     ),
     'mysqli' => array(
         'boolean'   => array('char', 'decimal', 'tinyint'),
-        'char'      => 'varchar',
-        'varchar'   => 'varchar',
+        'char'      => array('char', 'varchar'),
+        'varchar'   => array('char', 'varchar'),
         'smallint'  => 'int',
         'integer'   => 'int',
         'bigint'    => array('int', 'bigint'),
@@ -114,9 +114,9 @@ $GLOBALS['_DB_TABLE']['valid_type'] = array(
         'single'    => array('double', 'float'),
         'double'    => 'double',
         'clob'      => 'blob',
-        'date'      => array('date', 'varchar'),
-        'time'      => array('time', 'varchar'),
-        'timestamp' => array('datetime', 'varchar')
+        'date'      => array('char', 'date', 'varchar'),
+        'time'      => array('char', 'time', 'varchar'),
+        'timestamp' => array('char', 'datetime', 'varchar')
     ),
     'oci8' => array(  // currently not supported
         'boolean'   => '',
@@ -228,6 +228,7 @@ class DB_Table_Manager {
         
         // indexes to be created
         $index = array();
+        $primary_index = array();
         $unique_index = array();
         $normal_index = array();
         
@@ -330,7 +331,9 @@ class DB_Table_Manager {
         if (is_null($index_set)) {
             $index_set = array();
         }
-        
+
+        $count_primary_keys = 0;
+
         foreach ($index_set as $idxname => $val) {
             
             list($type, $cols) = DB_Table_Manager::_getIndexTypeAndColumns($val, $idxname);
@@ -339,9 +342,21 @@ class DB_Table_Manager {
 
             // check the index definition
             $index_check = DB_Table_Manager::_validateIndexName($idxname,
-                $table, $type, $cols, $column_set, $newIdxName);
+                $table, $phptype, $type, $cols, $column_set, $newIdxName);
             if (PEAR::isError($index_check)) {
                 return $index_check;
+            }
+
+            // check number of primary keys (only one is allowed)
+            if ($type == 'primary') {
+                // SQLite does not support primary keys
+                if ($phptype == 'sqlite') {
+                    return DB_Table::throwError(DB_TABLE_ERR_DECLARE_PRIM_SQLITE);
+                }
+                $count_primary_keys++;
+            }
+            if ($count_primary_keys > 1) {
+                return DB_Table::throwError(DB_TABLE_ERR_DECLARE_PRIMARY);
             }
 
             // create index entry
@@ -354,6 +369,10 @@ class DB_Table_Manager {
                 }
 
                 switch ($type) {
+                    case 'primary':
+                        $primary_index[$newIdxName] = array('fields'  => $idx_cols,
+                                                            'primary' => true);
+                        break;
                     case 'unique':
                         $unique_index[$newIdxName] = array('fields' => $idx_cols,
                                                            'unique' => true);
@@ -394,6 +413,16 @@ class DB_Table_Manager {
             // save user defined 'idxname_format' option
             $idxname_format = $db->getOption('idxname_format');
             $db->setOption('idxname_format', '%s');
+
+            // attempt to create the primary key
+            foreach ($primary_index as $name => $definition) {
+                $result = $db->manager->createConstraint($table, $name, $definition);
+                if (PEAR::isError($result)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $result;
+                }
+            }
 
             // attempt to create the unique indexes / constraints
             foreach ($unique_index as $name => $definition) {
@@ -559,7 +588,7 @@ class DB_Table_Manager {
 
             // check the index definition
             $index_check = DB_Table_Manager::_validateIndexName($idxname,
-                $table, $type, $cols, $column_set, $newIdxName);
+                $table, $phptype, $type, $cols, $column_set, $newIdxName);
             if (PEAR::isError($index_check)) {
                 return $index_check;
             }
@@ -753,7 +782,7 @@ class DB_Table_Manager {
     * 
     * @access public
     * 
-    * @param string $phptype The DB/MDB2 phptype key.
+    * @param string $phptype The DB phptype key.
     * 
     * @param string $type The index type.
     * 
@@ -773,6 +802,26 @@ class DB_Table_Manager {
         $colstring = implode(', ', $cols);
 
         switch ($type) {
+
+            case 'primary':
+                switch ($phptype) {
+                    case 'ibase':
+                    case 'oci8':
+                    case 'pgsql':
+                        $declare  = "ALTER TABLE $table ADD";
+                        $declare .= " CONSTRAINT $idxname";
+                        $declare .= " PRIMARY KEY ($colstring)";
+                        break;
+                    case 'mysql':
+                    case 'mysqli':
+                        $declare  = "ALTER TABLE $table ADD PRIMARY KEY";
+                        $declare .= " ($colstring)";
+                        break;
+                    case 'sqlite':
+                        // currently not possible
+                        break;
+                }
+                break;
 
             case 'unique':
                 $declare = "CREATE UNIQUE INDEX $idxname ON $table ($colstring)";
@@ -966,6 +1015,11 @@ class DB_Table_Manager {
         $colindex = $tableInfoOrder[$colname];
         $type = strtolower($tableInfo[$colindex]['type']);
 
+        // workaround for possibly wrong detected column type (taken from MDB2)
+        if ($type == 'unknown' && ($phptype == 'mysql' || $phptype == 'mysqli')) {
+            $type = 'decimal';
+        }
+
         // strip size information (e.g. NUMERIC(9,2) => NUMERIC) if given
         if (($pos = strpos($type, '(')) !== false) {
             $type = substr($type, 0, $pos);
@@ -1030,7 +1084,9 @@ class DB_Table_Manager {
     * 
     * @param string $idxname The index name.
     * 
-    * @param string $tablename The table name.
+    * @param string $table The table name.
+    * 
+    * @param string $phptype The DB/MDB2 phptype key.
     * 
     * @param string $type The index type.
     * 
@@ -1047,7 +1103,8 @@ class DB_Table_Manager {
     * 
     */
 
-    function _validateIndexName($idxname, $table, $type, &$cols, $column_set, &$newIdxName)
+    function _validateIndexName($idxname, $table, $phptype, $type, &$cols,
+                                $column_set, &$newIdxName)
     {
         // index name cannot be a reserved keyword
         $reserved = in_array(
@@ -1098,6 +1155,12 @@ class DB_Table_Manager {
         // names not collide, even when they indexes are on
         // different tables.
         $newIdxName = $table . '_' . $idxname . '_idx';
+
+        // MySQL requires the primary key to be named 'primary', therefore let's
+        // ignore the user defined name
+        if (($phptype == 'mysql' || $phptype == 'mysqli') && $type == 'primary') {
+            $newIdxName = 'primary';
+        }
             
         // now check the length; must be under 30 chars to
         // soothe Oracle.
@@ -1109,7 +1172,7 @@ class DB_Table_Manager {
         }
 
         // check index type
-        if ($type != 'unique' && $type != 'normal') {
+        if ($type != 'primary' && $type != 'unique' && $type != 'normal') {
             return DB_Table::throwError(
                 DB_TABLE_ERR_IDX_TYPE,
                 "'$idxname' ('$type')"

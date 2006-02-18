@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.45 2006-02-17 20:30:59 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.46 2006-02-18 15:10:38 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -98,9 +98,12 @@
                 ('fbsql' is likely to be not supported in the future, while
                 'mssql' will be added when MDB2 has support for index and
                 constraint information for this DBMS.)
+              (thanks to Arne Bippes for the initial idea)
             * Support for primary keys: In the $idx array one index can be
               marked as 'primary' and will be created as the primary key of
               the chosen table.
+              - This not available for 'sqlite' phptype, as SQLite does not
+                support primary keys.
             * Request #6384: DB_Table now supports also MDB2 as the database
               backend. Just pass an MDB2 instance instead of a DB instance to
               the constructor. (thanks to Lukas Smith for the initial patch)
@@ -112,7 +115,7 @@
               good with PHP 5.
             
             Only relevant if you are using localized error messages:
-            * Please note that there are seven new error messages and that the
+            * Please note that there are nine new error messages and that the
               messages for DB_TABLE_ERR_NOT_DB_OBJECT and DB_TABLE_ERR_PHPTYPE
               slightly differ from the old messages.
         </notes>
@@ -128,6 +131,7 @@
             <file role="php" name="DB/Table/Manager/mysql.php" />
             <file role="php" name="DB/Table/Manager/mysqli.php" />
             <file role="php" name="DB/Table/Manager/pgsql.php" />
+<!--            <file role="php" name="DB/Table/Manager/oci8.php" />-->
             <file role="php" name="DB/Table/Manager/sqlite.php" />
             <file role="php" name="DB/Table/QuickForm.php" />
             <file role="php" name="DB/Table/Valid.php" />
@@ -149,7 +153,7 @@
         <deps>
             <dep type="pkg" rel="ge" version="1.7.6" optional="yes">DB</dep>
             <dep type="pkg" rel="has" optional="yes">HTML_QuickForm</dep>
-            <dep type="pkg" rel="ge" version="2.0.0" optional="yes">MDB2</dep>
+            <dep type="pkg" rel="ge" version="2.0.1" optional="yes">MDB2</dep>
         </deps>
     </release>
 </package>
