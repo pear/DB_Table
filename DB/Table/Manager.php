@@ -227,10 +227,7 @@ class DB_Table_Manager {
         $max_scope = 0;
         
         // indexes to be created
-        $index = array();
-        $primary_index = array();
-        $unique_index = array();
-        $normal_index = array();
+        $indexes = array();
         
         // check the table name
         $name_check = DB_Table_Manager::_validateTableName($table);
@@ -269,39 +266,9 @@ class DB_Table_Manager {
 
             if ($backend == 'mdb2') {
 
-                $new_column = array(
-                    'type'    => $GLOBALS['_DB_TABLE']['mdb2_type'][$type],
-                    'notnull' => $require
-                );
-
-                if ($size) {
-                    $new_column['length'] = $size;
-                }
-
-                // determine integer length to be used in MDB2
-                if (in_array($type, array('smallint', 'integer', 'bigint'))) {
-                    switch ($type) {
-                        case 'smallint':
-                            $new_column['length'] = 2;
-                            break;
-                        case 'integer':
-                            $new_column['length'] = 4;
-                            break;
-                        case 'bigint':
-                            $new_column['length'] = 5;
-                            break;
-                    }
-                }
-
-                if ($scope) {
-                    $max_scope = max($max_scope, $scope);
-                }
-
-                if ($default) {
-                    $new_column['default'] = $default;
-                }
-
-                $column[$colname] = $new_column;
+                // get the declaration string
+                $column[$colname] = DB_Table_Manager::getDeclareMDB2($type,
+                    $size, $scope, $require, $default);
 
             } else {
 
@@ -370,21 +337,24 @@ class DB_Table_Manager {
 
                 switch ($type) {
                     case 'primary':
-                        $primary_index[$newIdxName] = array('fields'  => $idx_cols,
-                                                            'primary' => true);
+                        $indexes['primary'][$newIdxName] =
+                            array('fields'  => $idx_cols,
+                                  'primary' => true);
                         break;
                     case 'unique':
-                        $unique_index[$newIdxName] = array('fields' => $idx_cols,
-                                                           'unique' => true);
+                        $indexes['unique'][$newIdxName] =
+                            array('fields' => $idx_cols,
+                                  'unique' => true);
                         break;
                     case 'normal':
-                        $normal_index[$newIdxName] = array('fields' => $idx_cols);
+                        $indexes['normal'][$newIdxName] =
+                            array('fields' => $idx_cols);
                         break;
                 }
                 
             } else {
 
-                $index[] = DB_Table_Manager::getDeclareForIndex($phptype,
+                $indexes[] = DB_Table_Manager::getDeclareForIndex($phptype,
                     $type, $newIdxName, $table, $cols);
 
             }
@@ -410,43 +380,6 @@ class DB_Table_Manager {
                 return $result;
             }
 
-            // save user defined 'idxname_format' option
-            $idxname_format = $db->getOption('idxname_format');
-            $db->setOption('idxname_format', '%s');
-
-            // attempt to create the primary key
-            foreach ($primary_index as $name => $definition) {
-                $result = $db->manager->createConstraint($table, $name, $definition);
-                if (PEAR::isError($result)) {
-                    // restore user defined 'idxname_format' option
-                    $db->setOption('idxname_format', $idxname_format);
-                    return $result;
-                }
-            }
-
-            // attempt to create the unique indexes / constraints
-            foreach ($unique_index as $name => $definition) {
-                $result = $db->manager->createConstraint($table, $name, $definition);
-                if (PEAR::isError($result)) {
-                    // restore user defined 'idxname_format' option
-                    $db->setOption('idxname_format', $idxname_format);
-                    return $result;
-                }
-            }
-
-            // attempt to create the normal indexes
-            foreach ($normal_index as $name => $definition) {
-                $result = $db->manager->createIndex($table, $name, $definition);
-                if (PEAR::isError($result)) {
-                    // restore user defined 'idxname_format' option
-                    $db->setOption('idxname_format', $idxname_format);
-                    return $result;
-                }
-            }
-
-            // restore user defined 'idxname_format' option
-            $db->setOption('idxname_format', $idxname_format);
-
         } else {
 
             // build the CREATE TABLE command
@@ -460,16 +393,14 @@ class DB_Table_Manager {
                 return $result;
             }
 
-            // attempt to create the indexes
-            foreach ($index as $cmd) {
-                $result = $db->query($cmd);
-                if (PEAR::isError($result)) {
-                    return $result;
-                }
-            }
-
         }
-        
+
+        $result = DB_Table_Manager::_createIndexesAndContraints($db, $backend,
+                                                                $table, $indexes);
+        if (PEAR::isError($result)) {
+            return $result;
+        }
+
         // we're done!
         return true;
     }
@@ -501,7 +432,7 @@ class DB_Table_Manager {
     {
         if (is_subclass_of($db, 'db_common')) {
             $backend = 'db';
-            $reverse = $db;
+            $reverse =& $db;
             $table_info_mode = DB_TABLEINFO_FULL;
             $table_info_error = DB_ERROR_NEED_MORE_DATA;
         } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
@@ -547,10 +478,10 @@ class DB_Table_Manager {
             }
 
             // check #2: do all columns exist?
-            $columnExists = DB_Table_Manager::_columnExists($colname,
+            $column_exists = DB_Table_Manager::_columnExists($colname,
                 $tableInfoOrder, 'verify');
-            if (PEAR::isError($columnExists)) {
-                return $columnExists;
+            if (PEAR::isError($column_exists)) {
+                return $column_exists;
             }
 
             // check #3: do all columns have the right type?
@@ -631,7 +562,232 @@ class DB_Table_Manager {
 
     function alter(&$db, $table, $column_set, $index_set)
     {
-        // TODO
+        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
+        if (is_subclass_of($db, 'db_common')) {
+            $backend = 'db';
+            $reverse =& $db;
+            // workaround for missing index and constraint information methods
+            // in PEAR::DB ==> use adopted code from MDB2's driver classes
+            require_once 'DB/Table/Manager/' . $phptype . '.php';
+            $classname = 'DB_Table_Manager_' . $phptype;
+            $dbtm =& new $classname();
+            $dbtm->_db =& $db;  // pass database instance to the 'workaround' class
+            $manager =& $dbtm;
+            $table_info_mode = DB_TABLEINFO_FULL;
+            $ok_const = DB_OK;
+        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
+            $backend = 'mdb2';
+            $db->loadModule('Reverse');
+            $manager =& $db->manager;
+            $reverse =& $db->reverse;
+            $table_info_mode = MDB2_TABLEINFO_FULL;
+            $ok_const = MDB2_OK;
+        }
+
+        // get table info
+        $tableInfo = $reverse->tableInfo($table, $table_info_mode);
+        if (PEAR::isError($tableInfo)) {
+            return $tableInfo;
+        }
+        $tableInfoOrder = array_change_key_case($tableInfo['order'], CASE_LOWER);
+
+        // emulate MDB2 Reverse extension for PEAR::DB as backend
+        if (is_subclass_of($db, 'db_common')) {
+            $reverse =& $dbtm;
+        }
+
+        // check (and alter) columns
+        if (is_null($column_set)) {
+            $column_set = array();
+        }
+
+        foreach ($column_set as $colname => $val) {
+            $colname = strtolower(trim($colname));
+            
+            // check the column name
+            $name_check = DB_Table_Manager::_validateColumnName($colname);
+            if (PEAR::isError($name_check)) {
+                return $name_check;
+            }
+
+            // check the column's existence
+            $column_exists = DB_Table_Manager::_columnExists($colname,
+                $tableInfoOrder, 'alter');
+            if (PEAR::isError($column_exists)) {
+                return $column_exists;
+            }
+            if ($column_exists === false) {  // add the column
+                $definition = DB_Table_Manager::_getColumnDefinition($backend,
+                    $phptype, $val);
+                if (PEAR::isError($definition)) {
+                    return $definition;
+                }
+#                $changes = array('add' => array($colname => array($definition)));
+                $changes = array('add' => array($colname => $definition));
+                if (array_key_exists('debug', $GLOBALS['_DB_TABLE'])) {
+                    echo "(alter) New table field will be added ($colname):\n";
+                    var_dump($changes);
+                    echo "\n";
+                }
+                $result = $manager->alterTable($table, $changes, false);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+                continue;
+            }
+
+            // check whether the column type is a known type
+            $type_check = DB_Table_Manager::_validateColumnType($phptype, $val['type']);
+            if (PEAR::isError($type_check)) {
+                return $type_check;
+            }
+
+            // check whether the column has the right type
+            $type_check = DB_Table_Manager::_checkColumnType($phptype,
+                $colname, $val['type'], $tableInfoOrder, $tableInfo, 'alter');
+            if (PEAR::isError($type_check)) {
+                return $type_check;
+            }
+            if ($type_check === false) {  // change the column type
+                $definition = DB_Table_Manager::_getColumnDefinition($backend,
+                    $phptype, $val);
+                if (PEAR::isError($definition)) {
+                    return $definition;
+                }
+#                $changes = array('change' => array($colname => array($definition)));
+                $changes = array('change' => array($colname => array('definition' => $definition)));
+#                $changes = array('change' => array($colname => $definition));
+                if (array_key_exists('debug', $GLOBALS['_DB_TABLE'])) {
+                    echo "(alter) Table field's type will be changed ($colname):\n";
+                    var_dump($changes);
+                    echo "\n";
+                }
+                $result = $manager->alterTable($table, $changes, false);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+                continue;
+            }
+
+        }
+
+        // get information about indexes / constraints
+        $table_indexes = DB_Table_Manager::_getIndexes($db, $table);
+        if (PEAR::isError($table_indexes)) {
+            return $table_indexes;
+        }
+
+        // check (and alter) indexes / constraints
+        if (is_null($index_set)) {
+            $index_set = array();
+        }
+        
+        foreach ($index_set as $idxname => $val) {
+          
+            list($type, $cols) = DB_Table_Manager::_getIndexTypeAndColumns($val, $idxname);
+
+            $newIdxName = '';
+
+            // check the index definition
+            $index_check = DB_Table_Manager::_validateIndexName($idxname,
+                $table, $phptype, $type, $cols, $column_set, $newIdxName);
+            if (PEAR::isError($index_check)) {
+                return $index_check;
+            }
+
+            // check whether the index has the right type and has all
+            // specified columns
+            $index_check = DB_Table_Manager::_checkIndex($idxname, $newIdxName,
+                $type, $cols, $table_indexes, 'alter');
+            if (PEAR::isError($index_check)) {
+                return $index_check;
+            }
+            if ($index_check === false) {  // (1) drop wrong index/constraint
+                                           // (2) add right index/constraint
+                if ($backend == 'mdb2') {
+                    // save user defined 'idxname_format' option
+                    $idxname_format = $db->getOption('idxname_format');
+                    $db->setOption('idxname_format', '%s');
+                }
+                // drop index/constraint only if it exists
+                foreach(array('normal', 'unique', 'primary') as $idx_type) {
+                    if (array_key_exists(strtolower($newIdxName),
+                                         $table_indexes[$idx_type])) {
+                        if (array_key_exists('debug', $GLOBALS['_DB_TABLE'])) {
+                            echo "(alter) Index/constraint will be deleted (name: '$newIdxName', type: '$idx_type').\n";
+                        }
+                        if ($idx_type == 'normal') {
+                            $result = $manager->dropIndex($table, $newIdxName);
+                        } else {
+                            $result = $manager->dropConstraint($table, $newIdxName);
+                        }
+                        if (PEAR::isError($result)) {
+                            if ($backend == 'mdb2') {
+                                // restore user defined 'idxname_format' option
+                                $db->setOption('idxname_format', $idxname_format);
+                            }
+                            return $result;
+                        }
+                        break;
+                    }
+                }
+
+                // prepare index/constraint definition
+                $indexes = array();
+                if ($backend == 'mdb2') {
+
+                    // array with column names as keys
+                    $idx_cols = array();
+                    foreach ($cols as $col) {
+                        $idx_cols[$col] = array();
+                    }
+
+                    switch ($type) {
+                        case 'primary':
+                            $indexes['primary'][$newIdxName] =
+                                array('fields'  => $idx_cols,
+                                      'primary' => true);
+                            break;
+                        case 'unique':
+                            $indexes['unique'][$newIdxName] =
+                                array('fields' => $idx_cols,
+                                      'unique' => true);
+                            break;
+                        case 'normal':
+                            $indexes['normal'][$newIdxName] =
+                                array('fields' => $idx_cols);
+                            break;
+                    }
+
+                } else {
+
+                    $indexes[] = DB_Table_Manager::getDeclareForIndex($phptype,
+                        $type, $newIdxName, $table, $cols);
+
+                }
+
+                // create index/constraint
+                if (array_key_exists('debug', $GLOBALS['_DB_TABLE'])) {
+                    echo "(alter) New index/constraint will be created (name: '$newIdxName', type: '$type'):\n";
+                    var_dump($indexes);
+                    echo "\n";
+                }
+                $result = DB_Table_Manager::_createIndexesAndContraints(
+                    $db, $backend, $table, $indexes);
+                if ($backend == 'mdb2') {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                }
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+
+                continue;
+            }
+
+        }
+
+        return true;
     }
 
 
@@ -699,22 +855,11 @@ class DB_Table_Manager {
     function getDeclare($phptype, $coltype, $size = null, $scope = null,
         $require = null, $default = null)
     {
-        // validate char and varchar: does it have a size?
-        if (($coltype == 'char' || $coltype == 'varchar') &&
-            ($size < 1 || $size > 255) ) {
-            return DB_Table::throwError(
-                DB_TABLE_ERR_DECLARE_STRING,
-                "(size='$size')"
-            );
-        }
-        
-        // validate decimal: does it have a size and scope?
-        if ($coltype == 'decimal' &&
-            ($size < 1 || $size > 255 || $scope < 0 || $scope > $size)) {
-            return DB_Table::throwError(
-                DB_TABLE_ERR_DECLARE_DECIMAL,
-                "(size='$size' scope='$scope')"
-            );
+        // validate char/varchar/decimal type declaration
+        $validation = DB_Table_Manager::_validateTypeDeclaration($coltype, $size,
+                                                                 $scope);
+        if (PEAR::isError($validation)) {
+            return $validation;
         }
         
         // map of column types and declarations for this RDBMS
@@ -771,6 +916,90 @@ class DB_Table_Manager {
         
         // done
         return $declare;
+    }
+
+
+   /**
+    * 
+    * Get the column declaration string for a DB_Table column.
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param string $coltype The DB_Table column type.
+    * 
+    * @param int $size The size for the column (needed for string and
+    * decimal).
+    * 
+    * @param int $scope The scope for the column (needed for decimal).
+    * 
+    * @param bool $require True if the column should be NOT NULL, false
+    * allowed to be NULL.
+    * 
+    * @param string $default The SQL calculation for a default value.
+    * 
+    * @return string|object A MDB2 column definition array on success, or a
+    * PEAR_Error on failure.
+    * 
+    */
+
+    function getDeclareMDB2($coltype, $size = null, $scope = null,
+        $require = null, $default = null)
+    {
+        // validate char/varchar/decimal type declaration
+        $validation = DB_Table_Manager::_validateTypeDeclaration($coltype, $size,
+                                                                 $scope);
+        if (PEAR::isError($validation)) {
+            return $validation;
+        }
+
+        // map of MDB2 column types
+        $map = $GLOBALS['_DB_TABLE']['mdb2_type'];
+        
+        // is it a recognized column type?
+        $types = array_keys($map);
+        if (! in_array($coltype, $types)) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_DECLARE_TYPE,
+                "('$coltype')"
+            );
+        }
+
+        // build declaration array
+        $new_column = array(
+            'type'    => $map[$coltype],
+            'notnull' => $require
+        );
+
+        if ($size) {
+            $new_column['length'] = $size;
+        }
+
+        // determine integer length to be used in MDB2
+        if (in_array($coltype, array('smallint', 'integer', 'bigint'))) {
+            switch ($coltype) {
+                case 'smallint':
+                    $new_column['length'] = 2;
+                    break;
+                case 'integer':
+                    $new_column['length'] = 4;
+                    break;
+                case 'bigint':
+                    $new_column['length'] = 5;
+                    break;
+            }
+        }
+
+        if ($scope) {
+            $max_scope = max($max_scope, $scope);
+        }
+
+        if ($default) {
+            $new_column['default'] = $default;
+        }
+
+        return $new_column;
     }
 
 
@@ -834,6 +1063,84 @@ class DB_Table_Manager {
         }
         
         return $declare;
+    }
+
+
+   /**
+    * 
+    * Return the definition array for a column.
+    * 
+    * @access private
+    * 
+    * @param string $backend The name of the backend ('db' or 'mdb2').
+    * 
+    * @param string $phptype The DB/MDB2 phptype key.
+    * 
+    * @param mixed $column A single DB_Table column definition array.
+    * 
+    * @return mixed|object Declaration string (DB), declaration array (MDB2) or a
+    * PEAR_Error with a description about the invalidity, otherwise.
+    * 
+    */
+
+    function _getColumnDefinition($backend, $phptype, $column)
+    {
+        // prepare variables
+        $type    = (isset($column['type']))    ? $column['type']    : null;
+        $size    = (isset($column['size']))    ? $column['size']    : null;
+        $scope   = (isset($column['scope']))   ? $column['scope']   : null;
+        $require = (isset($column['require'])) ? $column['require'] : null;
+        $default = (isset($column['default'])) ? $column['default'] : null;
+
+        if ($backend == 'db') {
+            return DB_Table_Manager::getDeclare($phptype, $type,
+                    $size, $scope, $require, $default);
+        } else {
+            return DB_Table_Manager::getDeclareMDB2($type,
+                    $size, $scope, $require, $default);
+        }
+    }
+
+
+   /**
+    * 
+    * Check char/varchar/decimal type declarations for validity.
+    * 
+    * @access private
+    * 
+    * @param string $coltype The DB_Table column type.
+    * 
+    * @param int $size The size for the column (needed for string and
+    * decimal).
+    * 
+    * @param int $scope The scope for the column (needed for decimal).
+    * 
+    * @return bool|object Boolean true if the type declaration is valid or a
+    * PEAR_Error with a description about the invalidity, otherwise.
+    * 
+    */
+
+    function _validateTypeDeclaration($coltype, $size, $scope)
+    {
+        // validate char and varchar: does it have a size?
+        if (($coltype == 'char' || $coltype == 'varchar') &&
+            ($size < 1 || $size > 255) ) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_DECLARE_STRING,
+                "(size='$size')"
+            );
+        }
+        
+        // validate decimal: does it have a size and scope?
+        if ($coltype == 'decimal' &&
+            ($size < 1 || $size > 255 || $scope < 0 || $scope > $size)) {
+            return DB_Table::throwError(
+                DB_TABLE_ERR_DECLARE_DECIMAL,
+                "(size='$size' scope='$scope')"
+            );
+        }
+
+        return true;
     }
 
 
@@ -1327,7 +1634,7 @@ class DB_Table_Manager {
                         unset($cols[$key]);
                     }
                 }
-                unset($table_indexes[$type][$index_name]);
+                #unset($table_indexes[$type][$index_name]);
                 break;
             }
         }
@@ -1349,6 +1656,92 @@ class DB_Table_Manager {
         }
 
         return true;
+    }
+
+
+   /**
+    * 
+    * Create indexes and contraints.
+    * 
+    * @access private
+    * 
+    * @param object &$db A PEAR DB/MDB2 object.
+    * 
+    * @param string $backend The name of the backend ('db' or 'mdb2').
+    * 
+    * @param string $table The table name.
+    * 
+    * @param mixed $indexes An array with index and constraint definitions.
+    * 
+    * @return bool|object Boolean true on success or a PEAR_Error with a
+    * description about the invalidity, otherwise.
+    * 
+    */
+
+    function _createIndexesAndContraints($db, $backend, $table, $indexes)
+    {
+        if ($backend == 'mdb2') {
+
+            // save user defined 'idxname_format' option
+            $idxname_format = $db->getOption('idxname_format');
+            $db->setOption('idxname_format', '%s');
+
+            // attempt to create the primary key
+            if (!array_key_exists('primary', $indexes)) {
+                $indexes['primary'] = array();
+            }
+            foreach ($indexes['primary'] as $name => $definition) {
+                $result = $db->manager->createConstraint($table, $name, $definition);
+                if (PEAR::isError($result)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $result;
+                }
+            }
+
+            // attempt to create the unique indexes / constraints
+            if (!array_key_exists('unique', $indexes)) {
+                $indexes['unique'] = array();
+            }
+            foreach ($indexes['unique'] as $name => $definition) {
+                $result = $db->manager->createConstraint($table, $name, $definition);
+                if (PEAR::isError($result)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $result;
+                }
+            }
+
+            // attempt to create the normal indexes
+            if (!array_key_exists('normal', $indexes)) {
+                $indexes['normal'] = array();
+            }
+            foreach ($indexes['normal'] as $name => $definition) {
+                $result = $db->manager->createIndex($table, $name, $definition);
+                if (PEAR::isError($result)) {
+                    // restore user defined 'idxname_format' option
+                    $db->setOption('idxname_format', $idxname_format);
+                    return $result;
+                }
+            }
+
+            // restore user defined 'idxname_format' option
+            $db->setOption('idxname_format', $idxname_format);
+
+        } else {
+
+            // attempt to create the indexes
+            foreach ($indexes as $cmd) {
+                $result = $db->query($cmd);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+            }
+
+        }
+
+        return true;
+
     }
 
 }
