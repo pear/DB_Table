@@ -214,10 +214,24 @@ define('DB_TABLE_ERR_CREATE_PHPTYPE', -31);
 define('DB_TABLE_ERR_DECLARE_PRIMARY', -32);
 
 /**
-* Error code at create() time when you a primary key is defined in $this->idx
+* Error code at create() time when a primary key is defined in $this->idx
 * and SQLite is used (SQLite does not support primary keys).
 */
 define('DB_TABLE_ERR_DECLARE_PRIM_SQLITE', -33);
+
+/**
+* Error code at alter() time when altering a table field is not possible
+* (e.g. because MDB2 has no support for the change or because the DBMS
+* does not support the change).
+*/
+define('DB_TABLE_ERR_ALTER_TABLE_IMPOS', -34);
+
+/**
+* Error code at alter() time when altering a(n) index/constraint is not possible
+* (e.g. because MDB2 has no support for the change or because the DBMS
+* does not support the change).
+*/
+define('DB_TABLE_ERR_ALTER_INDEX_IMPOS', -35);
 
 /**
 * The PEAR class for errors
@@ -591,7 +605,9 @@ class DB_Table {
         DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols',
         DB_TABLE_ERR_CREATE_PHPTYPE      => 'Creation mode is not supported for this phptype',
         DB_TABLE_ERR_DECLARE_PRIMARY     => 'Only one primary key is allowed',
-        DB_TABLE_ERR_DECLARE_PRIM_SQLITE => 'SQLite does not support primary keys'
+        DB_TABLE_ERR_DECLARE_PRIM_SQLITE => 'SQLite does not support primary keys',
+        DB_TABLE_ERR_ALTER_TABLE_IMPOS   => 'Alter table failed: changing the field type not possible',
+        DB_TABLE_ERR_ALTER_INDEX_IMPOS   => 'Alter table failed: changing the index/constraint not possible'
     );
 
 
@@ -791,11 +807,10 @@ class DB_Table {
 
             case 'alter':
             case 'verify':
-                // not supported for fbsql, mssql, oci8 (yet)
+                // not supported for fbsql and mssql (yet)
                 switch ($phptype) {
                     case 'fbsql':
                     case 'mssql':
-                    case 'oci8':
                         return false;
                     default:
                         return true;
@@ -2111,7 +2126,7 @@ class DB_Table {
         if (!$mode_supported) {
             return $this->throwError(
                 DB_TABLE_ERR_CREATE_PHPTYPE,
-                "('$flag', $phptype')"
+                "('$flag', '$phptype')"
             );
         }
 
