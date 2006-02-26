@@ -268,7 +268,7 @@ class DB_Table_Manager {
 
                 // get the declaration string
                 $column[$colname] = DB_Table_Manager::getDeclareMDB2($type,
-                    $size, $scope, $require, $default);
+                    $size, $scope, $require, $default, $max_scope);
 
             } else {
 
@@ -622,7 +622,6 @@ class DB_Table_Manager {
                 if (PEAR::isError($definition)) {
                     return $definition;
                 }
-#                $changes = array('add' => array($colname => array($definition)));
                 $changes = array('add' => array($colname => $definition));
                 if (array_key_exists('debug', $GLOBALS['_DB_TABLE'])) {
                     echo "(alter) New table field will be added ($colname):\n";
@@ -654,9 +653,9 @@ class DB_Table_Manager {
                 if (PEAR::isError($definition)) {
                     return $definition;
                 }
-#                $changes = array('change' => array($colname => array($definition)));
-                $changes = array('change' => array($colname => array('definition' => $definition)));
-#                $changes = array('change' => array($colname => $definition));
+                $changes = array('change' =>
+                    array($colname => array('type' => null,
+                                            'definition' => $definition)));
                 if (array_key_exists('debug', $GLOBALS['_DB_TABLE'])) {
                     echo "(alter) Table field's type will be changed ($colname):\n";
                     var_dump($changes);
@@ -710,7 +709,7 @@ class DB_Table_Manager {
                     $db->setOption('idxname_format', '%s');
                 }
                 // drop index/constraint only if it exists
-                foreach(array('normal', 'unique', 'primary') as $idx_type) {
+                foreach (array('normal', 'unique', 'primary') as $idx_type) {
                     if (array_key_exists(strtolower($newIdxName),
                                          $table_indexes[$idx_type])) {
                         if (array_key_exists('debug', $GLOBALS['_DB_TABLE'])) {
@@ -897,6 +896,9 @@ class DB_Table_Manager {
         if ($phptype == 'ibase') {  // Firebird does not like 'NULL'
             $null = '';             // in CREATE TABLE
         }
+        if ($phptype == 'pgsql') {  // PostgreSQL does not like 'NULL'
+            $null = '';             // in ALTER TABLE
+        }
         $declare .= ($require) ? ' NOT NULL' : $null;
         
         // set the "DEFAULT" portion
@@ -939,13 +941,16 @@ class DB_Table_Manager {
     * 
     * @param string $default The SQL calculation for a default value.
     * 
+    * @param int $max_scope The maximal scope for all table column
+    * (pass-by-reference).
+    * 
     * @return string|object A MDB2 column definition array on success, or a
     * PEAR_Error on failure.
     * 
     */
 
     function getDeclareMDB2($coltype, $size = null, $scope = null,
-        $require = null, $default = null)
+        $require = null, $default = null, &$max_scope)
     {
         // validate char/varchar/decimal type declaration
         $validation = DB_Table_Manager::_validateTypeDeclaration($coltype, $size,
@@ -1085,6 +1090,8 @@ class DB_Table_Manager {
 
     function _getColumnDefinition($backend, $phptype, $column)
     {
+        static $max_scope;
+
         // prepare variables
         $type    = (isset($column['type']))    ? $column['type']    : null;
         $size    = (isset($column['size']))    ? $column['size']    : null;
@@ -1097,7 +1104,7 @@ class DB_Table_Manager {
                     $size, $scope, $require, $default);
         } else {
             return DB_Table_Manager::getDeclareMDB2($type,
-                    $size, $scope, $require, $default);
+                    $size, $scope, $require, $default, $max_scope);
         }
     }
 
@@ -1634,7 +1641,6 @@ class DB_Table_Manager {
                         unset($cols[$key]);
                     }
                 }
-                #unset($table_indexes[$type][$index_name]);
                 break;
             }
         }
