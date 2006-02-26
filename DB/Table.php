@@ -373,6 +373,80 @@ $GLOBALS['_DB_TABLE']['type'] = array(
 );
 
 
+/** 
+  * US-English default error messages. If you want to internationalize, you can
+  * set the translated messages via $GLOBALS['_DB_TABLE']['error']. You can also
+  * use DB_Table::setErrorMessage(). Examples:
+  * 
+  * <code>
+  * (1) $GLOBALS['_DB_TABLE]['error'] = array(DB_TABLE_ERR_PHPTYPE   => '...',
+  *                                           DB_TABLE_ERR_SQL_UNDEF => '...');
+  * (2) DB_Table::setErrorMessage(DB_TABLE_ERR_PHPTYPE,   '...');
+  *     DB_Table::setErrorMessage(DB_TABLE_ERR_SQL_UNDEF, '...');
+  * (3) DB_Table::setErrorMessage(array(DB_TABLE_ERR_PHPTYPE   => '...');
+  *                                     DB_TABLE_ERR_SQL_UNDEF => '...');
+  * (4) $obj =& new DB_Table();
+  *     $obj->setErrorMessage(DB_TABLE_ERR_PHPTYPE,   '...');
+  *     $obj->setErrorMessage(DB_TABLE_ERR_SQL_UNDEF, '...');
+  * (5) $obj =& new DB_Table();
+  *     $obj->setErrorMessage(array(DB_TABLE_ERR_PHPTYPE   => '...');
+  *                                 DB_TABLE_ERR_SQL_UNDEF => '...');
+  * </code>
+  * 
+  * For errors that can occur with-in the constructor call (i.e. e.g. creating
+  * or altering the database table), only the code from examples (1) to (3)
+  * will alter the default error messages early enough. For errors that can
+  * occur later, examples (4) and (5) are also valid.
+  */
+$GLOBALS['_DB_TABLE']['default_error'] = array(
+    DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB/MDB2 object',
+    DB_TABLE_ERR_PHPTYPE             => 'DB/MDB2 phptype (or dbsyntax) not supported',
+    DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
+    DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
+    DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
+    DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
+    DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
+    DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
+    DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
+    DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
+    DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
+    DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
+    DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
+    DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
+    DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
+    DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+    DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
+    DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
+    DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
+    DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
+    DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index',
+    DB_TABLE_ERR_DECLARE_STRLEN      => 'Column name too long, 30 char max',
+    DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max',
+    DB_TABLE_ERR_TABLE_STRLEN        => 'Table name too long, 30 char max',
+    DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max',
+    DB_TABLE_ERR_VER_TABLE_MISSING   => 'Verification failed: table does not exist',
+    DB_TABLE_ERR_VER_COLUMN_MISSING  => 'Verification failed: column does not exist',
+    DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type',
+    DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty',
+    DB_TABLE_ERR_VER_IDX_MISSING     => 'Verification failed: index does not exist',
+    DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols',
+    DB_TABLE_ERR_CREATE_PHPTYPE      => 'Creation mode is not supported for this phptype',
+    DB_TABLE_ERR_DECLARE_PRIMARY     => 'Only one primary key is allowed',
+    DB_TABLE_ERR_DECLARE_PRIM_SQLITE => 'SQLite does not support primary keys',
+    DB_TABLE_ERR_ALTER_TABLE_IMPOS   => 'Alter table failed: changing the field type not possible',
+    DB_TABLE_ERR_ALTER_INDEX_IMPOS   => 'Alter table failed: changing the index/constraint not possible'
+);
+
+// merge default and user-defined error messages
+if (!isset($GLOBALS['_DB_TABLE']['error'])) {
+    $GLOBALS['_DB_TABLE']['error'] = array();
+}
+foreach ($GLOBALS['_DB_TABLE']['default_error'] as $code => $message) {
+    if (!array_key_exists($code, $GLOBALS['_DB_TABLE']['error'])) {
+        $GLOBALS['_DB_TABLE']['error'][$code] = $message;
+    }
+}
+
 /**
 * 
 * DB_Table is a database API and data type SQL abstraction class.
@@ -554,65 +628,6 @@ class DB_Table {
 
     /**
     * 
-    * US-English error messages.
-    * 
-    * If you want to internationalize these messages, set them like this:
-    * <code>
-    * $obj =& new DB_Table();
-    * $obj->setErrorMessage(DB_TABLE_ERR_PHPTYPE, 'localized error message');
-    * // or to set more than one message:
-    * $obj->setErrorMessage(array(DB_TABLE_ERR_PHPTYPE => 'message 1',
-    *                             DB_TABLE_ERR_NOT_DB_OBJECT => 'message 2'));
-    * </code>
-    * 
-    * @access private
-    * 
-    * @var array
-    * 
-    */
-
-    var $_error_messages = array(
-        DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB/MDB2 object',
-        DB_TABLE_ERR_PHPTYPE             => 'DB/MDB2 phptype (or dbsyntax) not supported',
-        DB_TABLE_ERR_SQL_UNDEF           => 'Select key not in map',
-        DB_TABLE_ERR_INS_COL_NOMAP       => 'Insert column not in map',
-        DB_TABLE_ERR_INS_COL_REQUIRED    => 'Insert data must be set and non-null for column',
-        DB_TABLE_ERR_INS_DATA_INVALID    => 'Insert data not valid for column',
-        DB_TABLE_ERR_UPD_COL_NOMAP       => 'Update column not in map',
-        DB_TABLE_ERR_UPD_COL_REQUIRED    => 'Update column must be set and non-null',
-        DB_TABLE_ERR_UPD_DATA_INVALID    => 'Update data not valid for column',
-        DB_TABLE_ERR_CREATE_FLAG         => 'Create flag not valid',
-        DB_TABLE_ERR_IDX_NO_COLS         => 'No columns for index',
-        DB_TABLE_ERR_IDX_COL_UNDEF       => 'Column not in map for index',
-        DB_TABLE_ERR_IDX_TYPE            => 'Type not valid for index',
-        DB_TABLE_ERR_DECLARE_STRING      => 'String column declaration not valid',
-        DB_TABLE_ERR_DECLARE_DECIMAL     => 'Decimal column declaration not valid',
-        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-        DB_TABLE_ERR_VALIDATE_TYPE       => 'Cannot validate for unknown type on column',
-        DB_TABLE_ERR_DECLARE_COLNAME     => 'Column name not valid',
-        DB_TABLE_ERR_DECLARE_IDXNAME     => 'Index name not valid',
-        DB_TABLE_ERR_DECLARE_TYPE        => 'Column type not valid',
-        DB_TABLE_ERR_IDX_COL_CLOB        => 'CLOB column not allowed for index',
-        DB_TABLE_ERR_DECLARE_STRLEN      => 'Column name too long, 30 char max',
-        DB_TABLE_ERR_IDX_STRLEN          => 'Index name too long, 30 char max',
-        DB_TABLE_ERR_TABLE_STRLEN        => 'Table name too long, 30 char max',
-        DB_TABLE_ERR_SEQ_STRLEN          => 'Sequence name too long, 30 char max',
-        DB_TABLE_ERR_VER_TABLE_MISSING   => 'Verification failed: table does not exist',
-        DB_TABLE_ERR_VER_COLUMN_MISSING  => 'Verification failed: column does not exist',
-        DB_TABLE_ERR_VER_COLUMN_TYPE     => 'Verification failed: wrong column type',
-        DB_TABLE_ERR_NO_COLS             => 'Column definition array may not be empty',
-        DB_TABLE_ERR_VER_IDX_MISSING     => 'Verification failed: index does not exist',
-        DB_TABLE_ERR_VER_IDX_COL_MISSING => 'Verification failed: index does not contain all specified cols',
-        DB_TABLE_ERR_CREATE_PHPTYPE      => 'Creation mode is not supported for this phptype',
-        DB_TABLE_ERR_DECLARE_PRIMARY     => 'Only one primary key is allowed',
-        DB_TABLE_ERR_DECLARE_PRIM_SQLITE => 'SQLite does not support primary keys',
-        DB_TABLE_ERR_ALTER_TABLE_IMPOS   => 'Alter table failed: changing the field type not possible',
-        DB_TABLE_ERR_ALTER_INDEX_IMPOS   => 'Alter table failed: changing the index/constraint not possible'
-    );
-
-
-    /**
-    * 
     * Whether or not to automatically recast data at insert- and update-time.
     * 
     * @access private
@@ -647,7 +662,7 @@ class DB_Table {
     function &throwError($code, $extra = null)
     {
         // get the error message text based on the error code
-        $text = $this->_error_messages[$code];
+        $text = $GLOBALS['_DB_TABLE']['error'][$code];
         
         // add any additional error text
         if ($extra) {
@@ -691,11 +706,6 @@ class DB_Table {
     
     function DB_Table(&$db, $table, $create = false)
     {
-        // merge user defined and DB_Table error messages
-        if (isset($GLOBALS['_DB_TABLE']['error'])) {
-            $this->setErrorMessage($GLOBALS['_DB_TABLE']['error']);
-        }
-
         // is the first argument a DB/MDB2 object?
         $this->backend = null;
         if (is_subclass_of($db, 'db_common')) {
@@ -874,10 +884,10 @@ class DB_Table {
     function setErrorMessage($code, $message = null) {
         if (is_array($code)) {
             foreach ($code as $single_code => $single_message) {
-                $this->_error_messages[$single_code] = $single_message;
+                $GLOBALS['_DB_TABLE']['error'][$single_code] = $single_message;
             }
         } else {
-            $this->_error_messages[$code] = $message;
+            $GLOBALS['_DB_TABLE']['error'][$code] = $message;
         }
     }
 
