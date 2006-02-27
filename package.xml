@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.46 2006-02-18 15:10:38 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.47 2006-02-27 13:55:21 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -22,7 +22,7 @@
     </maintainers>
     <release>
         <version>1.3.0RC1</version>
-        <date>2006-02-DD</date>
+        <date>2006-02-27</date>
         <state>beta</state>
         <notes>
             Short summary:
@@ -66,13 +66,17 @@
               Both method types must return true if the element was created
               successfully. (thanks to Arne Bippes)
             * The dependency on the Date package was removed.
-            * In addition to the option to internationalize error messages
+            * In addition to the option to internationalize some error messages
               via $GLOBALS['_DB_TABLE']['error'], you can now use
               setErrorMessage() like this (assuming $obj is your DB_Table instance):
                 $obj->setErrorMessage(DB_TABLE_ERR_PHPTYPE, 'localized message');
               or to set more than one message:
                 $obj->setErrorMessage(array(DB_TABLE_ERR_PHPTYPE => 'message 1',
                                             DB_TABLE_ERR_NOT_DB_OBJECT => 'message 2'));
+              Static calls (DB_Table::setErrorMessage(...)) are also valid.
+              Setting the error messages via a static call or $GLOBALS is
+              especially needed for errors that can occur with-in the
+              constructor call (i.e. e.g. creating or altering the database table).
 
             Major changes / enhancements in detail:
 
@@ -91,9 +95,16 @@
               be created. Otherwise, table fields' existance and types will be
               checked and, if needed, the field(s) will be added or changed. The
               same applies for indexes' and constraints' existance and types.
+              Columns/indexes/constraints that don't exist anymore in the table
+              definition class, will NOT be removed.              
               - This is a new and powerful feature, use it with caution -- changing
                 a string datatype into a numeric datatype in your table definition
                 class may lead to data loss.
+              - Using " $_DB_TABLE['debug'] = true; " in your scripts will
+                output what will be changed. If something unexpected is changed,
+                please report it via PEAR's bug tracker (please include the
+                debug message and the column and/or index definition from your
+                table definition class, thanks).
               - This is not available for 'fbsql' and 'mssql' phptypes.
                 ('fbsql' is likely to be not supported in the future, while
                 'mssql' will be added when MDB2 has support for index and
@@ -115,7 +126,7 @@
               good with PHP 5.
             
             Only relevant if you are using localized error messages:
-            * Please note that there are nine new error messages and that the
+            * Please note that there are eleven new error messages and that the
               messages for DB_TABLE_ERR_NOT_DB_OBJECT and DB_TABLE_ERR_PHPTYPE
               slightly differ from the old messages.
         </notes>
@@ -131,7 +142,7 @@
             <file role="php" name="DB/Table/Manager/mysql.php" />
             <file role="php" name="DB/Table/Manager/mysqli.php" />
             <file role="php" name="DB/Table/Manager/pgsql.php" />
-<!--            <file role="php" name="DB/Table/Manager/oci8.php" />-->
+            <file role="php" name="DB/Table/Manager/oci8.php" />
             <file role="php" name="DB/Table/Manager/sqlite.php" />
             <file role="php" name="DB/Table/QuickForm.php" />
             <file role="php" name="DB/Table/Valid.php" />
