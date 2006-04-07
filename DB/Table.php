@@ -754,20 +754,20 @@ class DB_Table {
 
             // check whether the chosen mode is supported
             list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($this->db);
-            $mode_supported = DB_Table::modeSupported($flag, $phptype);
+            $mode_supported = DB_Table::modeSupported($create, $phptype);
             if (PEAR::isError($mode_supported)) {
                 return $mode_supported;
             }
             if (!$mode_supported) {
                 return $this->throwError(
                     DB_TABLE_ERR_CREATE_PHPTYPE,
-                    "('$flag', '$phptype')"
+                    "('$create', '$phptype')"
                 );
             }
 
             include_once 'DB/Table/Manager.php';
 
-            switch ($flag) {
+            switch ($create) {
 
                 case 'alter':
                     $result = $this->alter();
@@ -775,7 +775,7 @@ class DB_Table {
 
                 case 'drop':
                 case 'safe':
-                    $result = $this->create($flag);
+                    $result = $this->create($create);
                     break;
 
                 case 'verify':
@@ -863,7 +863,7 @@ class DB_Table {
                 // unknown creation mode
                 return $this->throwError(
                     DB_TABLE_ERR_CREATE_FLAG,
-                    "('$flag')"
+                    "('$mode')"
                 );
         }
     }
