@@ -747,11 +747,44 @@ class DB_Table {
 
         // should we attempt table creation?
         if ($create) {
-            // yes, attempt to create the table with the appropriate
-            // flag.
-            $result = $this->create($create);
+
+            if ($this->backend == 'mdb2') {
+                $this->db->loadModule('Manager');
+            }
+
+            // check whether the chosen mode is supported
+            list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($this->db);
+            $mode_supported = DB_Table::modeSupported($flag, $phptype);
+            if (PEAR::isError($mode_supported)) {
+                return $mode_supported;
+            }
+            if (!$mode_supported) {
+                return $this->throwError(
+                    DB_TABLE_ERR_CREATE_PHPTYPE,
+                    "('$flag', '$phptype')"
+                );
+            }
+
+            include_once 'DB/Table/Manager.php';
+
+            switch ($flag) {
+
+                case 'alter':
+                    $result = $this->alter();
+                    break;
+
+                case 'drop':
+                case 'safe':
+                    $result = $this->create($flag);
+                    break;
+
+                case 'verify':
+                    $result = $this->verify();
+                    break;
+            }
+            
             if (PEAR::isError($result)) {
-                // problem creating the table
+                // problem creating/altering/verifing the table
                 $this->error =& $result;
                 return;
             }
@@ -2094,74 +2127,30 @@ class DB_Table {
     
     /**
     * 
-    * Creates, checks or alters the table based on $this->col and $this->idx.
+    * Creates the table based on $this->col and $this->idx.
     * 
     * @access public
     * 
     * @param mixed $flag The automatic table creation mode to pursue:
     * - 'safe' to create the table only if it does not exist
     * - 'drop' to drop any existing table with the same name and re-create it
-    * - 'verify' to check whether the table exists, whether all the columns
-    *   exist, whether the columns have the right type, and whether the indexes
-    *   exist and have the right type
-    * - 'alter' does the same as 'safe' if the table does not exist; if it
-    *   exists, a verification for columns existence, the column types, the
-    *   indexes existence, and the indexes types will be performed and the
-    *   table schema will be modified if needed
     * 
     * @return mixed Boolean false if there was no need to create the
     * table, boolean true if the attempt succeeded, or a PEAR_Error if
     * the attempt failed.
-    *
-    * @see DB_Table_Manager::alter()
     * 
     * @see DB_Table_Manager::create()
-    * 
-    * @see DB_Table_Manager::verify()
     * 
     */
     
     function create($flag)
     {
-        if ($this->backend == 'mdb2') {
-            $this->db->loadModule('Manager');
-        }
-
-        // check whether the chosen mode is supported
-        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($this->db);
-        $mode_supported = DB_Table::modeSupported($flag, $phptype);
-        if (PEAR::isError($mode_supported)) {
-            return $mode_supported;
-        }
-        if (!$mode_supported) {
-            return $this->throwError(
-                DB_TABLE_ERR_CREATE_PHPTYPE,
-                "('$flag', '$phptype')"
-            );
-        }
-
-        include_once 'DB/Table/Manager.php';
 
         // are we OK to create the table?
         $ok = false;
         
         // check the create-flag
         switch ($flag) {
-
-            case 'alter':
-                // alter the table columns and indexes if the table exists
-                $table_exists = DB_Table_Manager::tableExists($this->db,
-                                                              $this->table);
-                if (PEAR::isError($table_exists)) {
-                    return $table_exists;
-                }
-                if (!$table_exists) {
-                    // table does not exist => just create the table, there is
-                    // nothing that could be altered
-                    $flag = 'safe';
-                }
-                $ok = true;
-                break;
 
             case 'drop':
                 // drop only if table exists
@@ -2192,18 +2181,6 @@ class DB_Table {
                 $ok = !$table_exists;
                 break;
 
-            case 'verify':
-                // verify the table, the columns and the indexes
-                $ok = true;
-                break;
-
-            default:
-                // unknown flag
-                return $this->throwError(
-                    DB_TABLE_ERR_CREATE_FLAG,
-                    "('$flag')"
-                );
-
         }
 
         // are we going to create the table?
@@ -2211,28 +2188,71 @@ class DB_Table {
             return false;
         }
 
-        switch ($flag) {
-
-            case 'alter':
-                return DB_Table_Manager::alter(
-                    $this->db, $this->table, $this->col, $this->idx
-                );
-                break;
-
-            case 'drop':
-            case 'safe':
-                return DB_Table_Manager::create(
-                    $this->db, $this->table, $this->col, $this->idx
-                );
-                break;
-
-            case 'verify':
-                return DB_Table_Manager::verify(
-                    $this->db, $this->table, $this->col, $this->idx
-                );
-                break;
+        return DB_Table_Manager::create(
+            $this->db, $this->table, $this->col, $this->idx
+        );
+    }
+    
+    
+    /**
+    * 
+    * Alters the table based on $this->col and $this->idx.
+    * 
+    * @access public
+    * 
+    * @return mixed Boolean true if altering was successful or a PEAR_Error on
+    * failure.
+    *
+    * @see DB_Table_Manager::alter()
+    * 
+    */
+    
+    function alter()
+    {
+        $create = false;
+        
+        // alter the table columns and indexes if the table exists
+        $table_exists = DB_Table_Manager::tableExists($this->db,
+                                                      $this->table);
+        if (PEAR::isError($table_exists)) {
+            return $table_exists;
+        }
+        if (!$table_exists) {
+            // table does not exist => just create the table, there is
+            // nothing that could be altered
+            $create = true;
         }
 
+        if ($create) {
+            return DB_Table_Manager::create(
+                $this->db, $this->table, $this->col, $this->idx
+            );
+        }
+
+        return DB_Table_Manager::alter(
+            $this->db, $this->table, $this->col, $this->idx
+        );
+    }
+    
+    
+    /**
+    * 
+    * Verifies the table based on $this->col and $this->idx.
+    * 
+    * @access public
+    * 
+    * @return mixed Boolean true if the verification was successful, and a
+    * PEAR_Error if verification failed.
+    *
+    * @see DB_Table_Manager::verify()
+    * 
+    */
+    
+    function verify()
+    {
+        return DB_Table_Manager::verify(
+            $this->db, $this->table, $this->col, $this->idx
+        );
     }
     
     
