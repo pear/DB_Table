@@ -33,6 +33,15 @@ if (! isset($GLOBALS['_DB_TABLE']['qf_rules'])) {
     );
 }
 
+/**
+* If you want to use an extended HTML_QuickForm object, you can specify the
+* class name in $_DB_TABLE['qf_class_name'].
+* ATTENTION: You have to include the class file yourself, DB_Table does
+* not take care of this!
+*/
+if (!isset($GLOBALS['_DB_TABLE']['qf_class_name'])) {
+    $GLOBALS['_DB_TABLE']['qf_class_name'] = 'HTML_QuickForm';
+}
 
 /**
 * 
@@ -179,9 +188,9 @@ class DB_Table_QuickForm {
         $trackSubmit = isset($args['trackSubmit'])
             ? $args['trackSubmit'] : false;
         
-        $form =& new HTML_QuickForm($formName, $method, $action, $target, 
-            $attributes, $trackSubmit);
-        
+        $form =& new $GLOBALS['_DB_TABLE']['qf_class_name']($formName, $method,
+            $action, $target, $attributes, $trackSubmit);
+
         return $form;
     }
     
@@ -730,10 +739,12 @@ class DB_Table_QuickForm {
             // loop through the rules and add them
             foreach ($col['qf_rules'] as $type => $opts) {
                 
-                // override the onlyServer types so that we don't attempt
-                // client-side validation at all.
+                // some rules (e.g. rules for file elements) can only be
+                // checked on the server; therefore, don't use client-side
+                // validation for these rules
+                $ruleValidate = $validate;
                 if (in_array($type, $onlyServer)) {
-                    $validate = 'server';
+                    $ruleValidate = 'server';
                 }
                 
                 switch ($type) {
@@ -789,12 +800,12 @@ class DB_Table_QuickForm {
                 case 'timestamp':
                     // date "elements" are groups ==> use addGroupRule()
                     $form->addGroupRule($elemname, $message, $type, $format,
-                        null, $validate);
+                        null, $ruleValidate);
                     break;
 
                 default:  // use addRule() for all other elements
                     $form->addRule($elemname, $message, $type, $format,
-                        $validate);
+                        $ruleValidate);
                     break;
 
                 }
