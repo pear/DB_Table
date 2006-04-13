@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<!-- $Id: package.xml,v 1.49 2006-04-07 20:12:26 wiesemann Exp $ -->
+<!-- $Id: package.xml,v 1.50 2006-04-13 15:21:26 wiesemann Exp $ -->
 <package version="1.0">
     <name>DB_Table</name>
     <summary>Builds on PEAR DB to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
@@ -21,10 +21,18 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>1.3.0RC3</version>
-        <date>2006-04-07</date>
+        <version>1.3.0RC4</version>
+        <date>2006-04-13</date>
         <state>beta</state>
         <notes>
+            Changes since 1.3.0RC3:
+            * Fixed handling of QuickForm rules: If there was a server-side-only
+              rule (like 'uploadedfile'), client-side validation was disabled
+              for all rules. Now it is disabled only for server-side-only rules.
+            * You can now use an extended HTML_QuickForm object by specifying
+              the class name in $_DB_TABLE['qf_class_name']. (Attention: You
+              have to include the extended class file yourself.)
+
             Changes since 1.3.0RC2:
             * Fixed copy &amp; paste errors introduced by fixing bug #7287.
 
