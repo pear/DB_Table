@@ -742,7 +742,7 @@ class DB_Table {
 
         // load MDB2_Extended module
         if ($this->backend == 'mdb2') {
-            $this->db->loadModule('Extended');
+            $this->db->loadModule('Extended', null, false);
         }
 
         // should we attempt table creation?
