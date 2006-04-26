@@ -23,42 +23,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <date>2006-04-26</date>
  <time>11:52:27</time>
  <version>
-  <release>1.3.0RC5</release>
-  <api>1.3.0RC5</api>
+  <release>1.3.0</release>
+  <api>1.3.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
- <notes>Changes since 1.3.0RC4:
-* Fixed a safe mode issue that occured when MDB2 is used as backend.
-
-Changes since 1.3.0RC3:
-* Fixed handling of QuickForm rules: If there was a server-side-only
-  rule (like 'uploadedfile'), client-side validation was disabled
-  for all rules. Now it is disabled only for server-side-only rules.
-* You can now use an extended HTML_QuickForm object by specifying
-  the class name in $_DB_TABLE['qf_class_name']. (Attention: You
-  have to include the extended class file yourself.)
-
-Changes since 1.3.0RC2:
-* Fixed copy-and-paste errors introduced by fixing bug #7287.
-
-Changes since 1.3.0RC1:
-* Bug #7287: create() was called when using the new creation modes
-  'verify' or 'alter'. This can be seen as a BC break (especially
-  when somebody extends DB_Table), and therefore, there are new
-  methods verify() and alter() in DB_Table class.
-  (thanks to vdb at mail dot ru)
-
+ <notes>
 Short summary:
 * New table creation modes 'verify' and 'alter'
 * Primary keys are now supported
 * MDB2 is now supported as database backend
 * Firebird DBMS is now supported (but Interbase isn't)
 * Auto-creation of QuickForm rules can be disabled now
-* Usage of custom QuickForm elements is now more flexible
+* Usage of QuickForm and custom QuickForm elements is now more flexible
 * Internationalizing/customizing of error messages now easier
 
 Minor changes in detail:
@@ -103,6 +83,12 @@ Minor changes in detail:
   Setting the error messages via a static call or $GLOBALS is
   especially needed for errors that can occur with-in the
   constructor call (i.e. e.g. creating or altering the database table).
+* Fixed handling of QuickForm rules: If there was a server-side-only
+  rule (like 'uploadedfile'), client-side validation was disabled
+  for all rules. Now it is disabled only for server-side-only rules.
+* You can now use an extended HTML_QuickForm object by specifying
+  the class name in $_DB_TABLE['qf_class_name']. (Attention: You
+  have to include the extended class file yourself.)
 
 Major changes / enhancements in detail:
 * Request #5478: Verification/check, whether the table exists,
