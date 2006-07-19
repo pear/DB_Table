@@ -20,10 +20,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2006-04-26</date>
- <time>11:52:27</time>
+ <date>2006-07-19</date>
+ <time>11:30:00</time>
  <version>
-  <release>1.3.0</release>
+  <release>1.3.1</release>
   <api>1.3.0</api>
  </version>
  <stability>
@@ -32,114 +32,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
-Short summary:
-* New table creation modes 'verify' and 'alter'
-* Primary keys are now supported
-* MDB2 is now supported as database backend
-* Firebird DBMS is now supported (but Interbase isn't)
-* Auto-creation of QuickForm rules can be disabled now
-* Usage of QuickForm and custom QuickForm elements is now more flexible
-* Internationalizing/customizing of error messages now easier
-
-Minor changes in detail:
-* Improvement related to bug report #5679: many arrays (in the
-  table definition and as function parameters) may now be null
-  (of course, an empty array is still allowed).
-* The column definition array $col may not be empty because it
-  isn't possible to create empty database tables and because
-  the work with DB_Table makes only sense with at least one
-  column.
-* Fixed several return by reference problems (that caused
-  notices in PHP 4.4.x and 5.x).
-* Fixed several "undefined index" problems (causing notices).
-* Bugfix: select() and selectResult() didn't return error
-  objects caused due to problems in $sql array.
-* Bugfix: static usage of DB_Table_QuickForm::createForm()
-  resulted in fatal error when 'formName' wasn't specified
-  in the $args parameter.
-* Request #5965: Turn off automatic setting of default QF rules
-  like 'numeric' or 'required' (can be done by setting
-  $cols[...]['qf_set_default_rules'] = false).
-  (thanks to Arne Bippes)
-* Bug #6025: DB_Table no longer tries to create a table if a
-  table with the same name but with different use of lower and
-  upper letters.
-* Request #6036: new qf_type 'callback' which allows to add
-  custom QF elements that need more than the standard
-  parameters. You need to specify a key named 'qf_callback',
-  filled with either the name of a class (this class needs to
-  have a method 'createElement') or the name of a method.
-  Both method types must return true if the element was created
-  successfully. (thanks to Arne Bippes)
-* The dependency on the Date package was removed.
-* In addition to the option to internationalize some error messages
-  via $GLOBALS['_DB_TABLE']['error'], you can now use
-  setErrorMessage() like this (assuming $obj is your DB_Table instance):
-    $obj->setErrorMessage(DB_TABLE_ERR_PHPTYPE, 'localized message');
-  or to set more than one message:
-    $obj->setErrorMessage(array(DB_TABLE_ERR_PHPTYPE => 'message 1',
-                                DB_TABLE_ERR_NOT_DB_OBJECT => 'message 2'));
-  Static calls (DB_Table::setErrorMessage(...)) are also valid.
-  Setting the error messages via a static call or $GLOBALS is
-  especially needed for errors that can occur with-in the
-  constructor call (i.e. e.g. creating or altering the database table).
-* Fixed handling of QuickForm rules: If there was a server-side-only
-  rule (like 'uploadedfile'), client-side validation was disabled
-  for all rules. Now it is disabled only for server-side-only rules.
-* You can now use an extended HTML_QuickForm object by specifying
-  the class name in $_DB_TABLE['qf_class_name']. (Attention: You
-  have to include the extended class file yourself.)
-
-Major changes / enhancements in detail:
-* Request #5478: Verification/check, whether the table exists,
-  whether all the columns exist, whether the columns have the
-  right type, and whether the indexes exists. This can be used
-  by setting $create in the constructor of your extended class
-  to 'verify' instead of false/'safe'/'drop'. In case of an
-  error in the schema, you will find the PEAR_Error object in
-  $obj->error (assuming $obj is your DB_Table instance).
-  - This is not available for 'fbsql' and 'mssql' phptypes.
-    ('fbsql' is likely to be not supported in the future, while
-    'mssql' will be added when MDB2 has support for index and
-    constraint information for this DBMS.)
-* New creation mode 'alter': If the table does not exist, it will
-  be created. Otherwise, table fields' existance and types will be
-  checked and, if needed, the field(s) will be added or changed. The
-  same applies for indexes' and constraints' existance and types.
-  Columns/indexes/constraints that don't exist anymore in the table
-  definition class, will NOT be removed.              
-  - This is a new and powerful feature, use it with caution -- changing
-    a string datatype into a numeric datatype in your table definition
-    class may lead to data loss.
-  - Using " $_DB_TABLE['debug'] = true; " in your scripts will
-    output what will be changed. If something unexpected is changed,
-    please report it via PEAR's bug tracker (please include the
-    debug message and the column and/or index definition from your
-    table definition class, thanks).
-  - This is not available for 'fbsql' and 'mssql' phptypes.
-    ('fbsql' is likely to be not supported in the future, while
-    'mssql' will be added when MDB2 has support for index and
-    constraint information for this DBMS.)
-  (thanks to Arne Bippes for the initial idea)
-* Support for primary keys: In the $idx array one index can be
-  marked as 'primary' and will be created as the primary key of
-  the chosen table.
-  - This not available for 'sqlite' phptype, as SQLite does not
-    support primary keys.
-* Request #6384: DB_Table now supports also MDB2 as the database
-  backend. Just pass an MDB2 instance instead of a DB instance to
-  the constructor. (thanks to Lukas Smith for the initial patch)
-* DB_Table now supports the Firebird DBMS (version >= 1.5
-  required). Because of the limited features of Interbase
-  (its ancestor), only Firebird is supported. Therefore,
-  'dbsyntax' must be set to 'firebird' in your DSN. Please note
-  that the ibase extension is very buggy in PHP 4, while it works
-  good with PHP 5.
-
-Only relevant if you are using localized error messages:
-* Please note that there are eleven new error messages and that the
-  messages for DB_TABLE_ERR_NOT_DB_OBJECT and DB_TABLE_ERR_PHPTYPE
-  slightly differ from the old messages.
+- updated the allowed data types for 'alter' and 'verify' modes according to
+the latest MDB2 changes
  </notes>
  <contents>
   <dir name="/">
