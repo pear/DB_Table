@@ -246,13 +246,19 @@ class DB_Table_QuickForm {
                    
                 // set the element name
                 if ($arrayName) {
-                    $name  = $arrayName . '[' . $cols_keys[$k] . ']';
+                    $name = $arrayName . '[' . $cols_keys[$k] . ']';
                 } else {
                 	$name = $cols_keys[$k];
                 }
-                
+
+                // fix the column definition temporarily to get the separator
+                // for the group
+                $col = $cols[$cols_keys[$k]];
+                DB_Table_QuickForm::fixColDef($col, $name);
+
                 // done
-                $group =& $form->addGroup($element, $name, $label);
+                $group =& $form->addGroup($element, $name, $label,
+                                          $col['qf_radiosep']);
 
                 // set default value (if given) for radio elements
                 // (reason: QF "resets" the checked state, when adding a group)
@@ -462,7 +468,7 @@ class DB_Table_QuickForm {
                     $col['qf_type'],
                     null, // elemname not added because this is a group
                     null,
-                    $btnlabel . $col['qf_radiosep'],
+                    $btnlabel,
                     $btnvalue,
                     $col['qf_attrs']
                 );
