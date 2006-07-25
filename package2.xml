@@ -32,7 +32,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
-- Bug #8249: &nbsp; occured wrongly between grouped radio buttons
+- Bug #8249: &amp;nbsp; occured wrongly between grouped radio buttons
   (thanks to Arne Bippes, arne dot bippes at brandao dot de)
 - Renamed the key 'qf_radiosep' for the separator of grouped QuickForm elements
   into 'qf_groupsep', as it is not only used for radio buttons
