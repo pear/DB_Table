@@ -258,7 +258,7 @@ class DB_Table_QuickForm {
 
                 // done
                 $group =& $form->addGroup($element, $name, $label,
-                                          $col['qf_radiosep']);
+                                          $col['qf_groupsep']);
 
                 // set default value (if given) for radio elements
                 // (reason: QF "resets" the checked state, when adding a group)
@@ -946,9 +946,14 @@ class DB_Table_QuickForm {
             return;
         }
         
-        // add a separator for radio elements
-        if (! isset($col['qf_radiosep'])) {
-            $col['qf_radiosep'] = '<br />';
+        // code to keep BC for the separator for grouped QF elements
+        if (isset($col['qf_radiosep'])) {
+            $col['qf_groupsep'] = $col['qf_radiosep'];
+        }
+
+        // add a separator for grouped elements
+        if (!isset($col['qf_groupsep'])) {
+            $col['qf_groupsep'] = '<br />';
         }
         
         // $col['qf_set_default_rules'] === false allows to turn off
