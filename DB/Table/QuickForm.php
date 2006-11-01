@@ -524,6 +524,38 @@ class DB_Table_QuickForm {
             );
             break;
 
+        case 'hierselect':
+
+            $element =& HTML_QuickForm::createElement(
+                $col['qf_type'],
+                $elemname,
+                $col['qf_label'],
+                $col['qf_attrs'],
+                $col['qf_groupsep']
+            );
+
+            if (isset($setval)) {
+                $element->setValue($setval);
+            }
+
+            break;
+
+        case 'jscalendar':
+
+            $element =& HTML_QuickForm::createElement(
+                $col['qf_type'],
+                $elemname,
+                $col['qf_label'],
+                $col['qf_opts'],
+                $col['qf_attrs']
+            );
+
+            if (isset($setval)) {
+                $element->setValue($setval);
+            }
+
+            break;
+
         case 'callback':  // custom QF elements that need more than
                           // the standard parameters
                           // code from Arne Bippes <arne.bippes@brandao.de>
@@ -548,7 +580,7 @@ class DB_Table_QuickForm {
             // - if $col['qf_callback'] is ...
             //   - not a valid object
             //   - a valid object, but a method 'createElement' doesn't exist
-            //   - not valid a method name
+            //   - not a valid method name
             // - if an error occured in 'createElement' or in the method
             
         default:

@@ -12,7 +12,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <name>Paul M. Jones</name>
   <user>pmjones</user>
   <email>pmjones@php.net</email>
-  <active>yes</active>
+  <active>no</active>
  </lead>
  <lead>
   <name>Mark Wiesemann</name>
@@ -20,11 +20,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2006-07-25</date>
- <time>12:20:00</time>
+ <date>?</date>
+ <time>?</time>
  <version>
-  <release>1.3.2</release>
-  <api>1.3.0</api>
+  <release>1.4.0</release>
+  <api>1.4.0</api>
  </version>
  <stability>
   <release>stable</release>
@@ -32,10 +32,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
-- Bug #8249: &amp;nbsp; occured wrongly between grouped radio buttons
-  (thanks to Arne Bippes, arne dot bippes at brandao dot de)
-- Renamed the key 'qf_radiosep' for the separator of grouped QuickForm elements
-  into 'qf_groupsep', as it is not only used for radio buttons
+- added support for "hierselect" and "jscalendar" QuickForm elements as
+  "qf_type" values in the column definition arrays
+  (thanks to Arne Bippes and QDog for the patches)
  </notes>
  <contents>
   <dir name="/">
