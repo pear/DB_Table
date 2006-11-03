@@ -35,6 +35,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
 - added support for "hierselect" and "jscalendar" QuickForm elements as
   "qf_type" values in the column definition arrays
   (thanks to Arne Bippes and QDog for the patches)
+- fixes / optimizations for columns with 'qf_type' == 'file':
+  * if the column is marked as required, the 'uploadedfile' QF rule is now set
+    instead of the 'required' QF rule
+  * the 'numeric' and 'maxlength' QF rules are not set anymore (the corresponding
+    checks will still be done before inserting/updating data into the database)
  </notes>
  <contents>
   <dir name="/">

@@ -997,41 +997,48 @@ class DB_Table_QuickForm {
         }        
 
         // the element is required
-        if (! isset($col['qf_rules']['required']) && $col['require']) {
-            
-            $col['qf_rules']['required'] = sprintf(
+        // ==> set 'uploadedfile' (for file elements) or 'required' (for all
+        // other elements) rule if it is was not already set
+        $req_rule_name = ($col['qf_type'] == 'file') ? 'uploadedfile' : 'required';
+        if (!isset($col['qf_rules'][$req_rule_name]) && $col['require']) {
+
+            $col['qf_rules'][$req_rule_name] = sprintf(
                 $GLOBALS['_DB_TABLE']['qf_rules']['required'],
                 $col['qf_label']
             );
-            
+
         }
-        
+
+        // for file elements the 'numeric' and 'maxlength' rules must not be set
+        if ($col['qf_type'] == 'file') {
+            return;
+        }
+
         $numeric = array('smallint', 'integer', 'bigint', 'decimal', 
             'single', 'double');
-        
+
         // the element is numeric
-        if (! isset($col['qf_rules']['numeric']) && isset($col['type']) &&
+        if (!isset($col['qf_rules']['numeric']) && isset($col['type']) &&
             in_array($col['type'], $numeric)) {
-            
+
             $col['qf_rules']['numeric'] = sprintf(
                 $GLOBALS['_DB_TABLE']['qf_rules']['numeric'],
                 $col['qf_label']
             );
-            
+
         }
-        
+
         // the element has a maximum length
-        if (! isset($col['qf_rules']['maxlength']) &&
-            isset($col['size'])) {
-        
+        if (!isset($col['qf_rules']['maxlength']) && isset($col['size'])) {
+
             $max = $col['size'];
-            
+
             $msg = sprintf(
                 $GLOBALS['_DB_TABLE']['qf_rules']['maxlength'],
                 $col['qf_label'],
                 $max
             );
-            
+
             $col['qf_rules']['maxlength'] = array($msg, $max);
         }
     }
