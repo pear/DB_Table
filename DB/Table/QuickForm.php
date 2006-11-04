@@ -556,6 +556,49 @@ class DB_Table_QuickForm {
 
             break;
 
+        case 'header':
+
+            $element =& HTML_QuickForm::createElement(
+                $col['qf_type'],
+                $elemname
+            );
+
+            if (isset($setval)) {
+                $element->setValue($setval);
+            }
+
+            break;
+
+        case 'static':
+
+            $element =& HTML_QuickForm::createElement(
+                $col['qf_type'],
+                $elemname,
+                $col['qf_label']
+            );
+
+            if (isset($setval)) {
+                $element->setValue($setval);
+            }
+
+            break;
+
+        case 'reset':
+        case 'submit':
+
+            $element =& HTML_QuickForm::createElement(
+                $col['qf_type'],
+                $elemname,
+                null,
+                $col['qf_attrs']
+            );
+
+            if (isset($setval)) {
+                $element->setValue($setval);
+            }
+
+            break;
+
         case 'callback':  // custom QF elements that need more than
                           // the standard parameters
                           // code from Arne Bippes <arne.bippes@brandao.de>
@@ -657,6 +700,44 @@ class DB_Table_QuickForm {
         }
         
         return $group;
+    }
+    
+    
+    /**
+    * 
+    * Adds static form elements like 'header', 'static', 'submit' or 'reset' to
+    * a pre-existing HTML_QuickForm object.
+    * 
+    * @static
+    * 
+    * @access public
+    * 
+    * @param object &$form An HTML_QuickForm object.
+    * 
+    * @param array $elements A sequential array of form element definitions.
+    * 
+    * @return void
+    * 
+    */
+    
+    function addStaticElements(&$form, $elements)
+    {
+        foreach ($elements as $name => $elemDef) {
+
+            DB_Table_QuickForm::fixColDef($elemDef, $name);
+
+            $element =& DB_Table_QuickForm::getElement($elemDef, $name);
+
+            if (!is_object($element)) {
+                continue;
+            }
+
+            if (isset($elemDef['before']) && !empty($elemDef['before'])) {
+                $form->insertElementBefore($element, $elemDef['before']);
+            } else {
+                $form->addElement($element);
+            }
+        }
     }
     
     

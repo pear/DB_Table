@@ -2469,8 +2469,33 @@ class DB_Table {
         DB_Table_QuickForm::addRules($form, $coldefs, $array_name,
             $clientValidate);
     }
-    
-    
+
+
+    /**
+    * 
+    * Adds static form elements like 'header', 'static', 'submit' or 'reset' to
+    * a pre-existing HTML_QuickForm object. The form elements needs to be
+    * defined in a property called $frm.
+    * 
+    * @access public
+    * 
+    * @param object &$form An HTML_QuickForm object.
+    * 
+    * @return void
+    * 
+    * @see HTML_QuickForm
+    * 
+    * @see DB_Table_QuickForm
+    * 
+    */
+
+    function addStaticFormElements(&$form)
+    {
+        include_once 'DB/Table/QuickForm.php';
+        DB_Table_QuickForm::addStaticElements($form, $this->frm);
+    }
+
+
     /**
     * 
     * Creates and returns an array of QuickForm elements based on an
