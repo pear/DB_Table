@@ -292,7 +292,7 @@ class DB_Table_QuickForm {
     * $arrayName, the column names will become keys in an array named
     * for this parameter.
     * 
-    * @return void
+    * @return array Form elements
     * 
     */
     

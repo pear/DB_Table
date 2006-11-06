@@ -2567,7 +2567,7 @@ class DB_Table {
     * 
     * @access public
     * 
-    * @param string $cols Array of DB_Table column names
+    * @param array $cols Array of DB_Table column names
     * 
     * @param string $array_name The name to use for the generated QuickForm
     * elements.
@@ -2582,8 +2582,7 @@ class DB_Table {
     function &getFormElements($cols, $array_name = null)
     {
         include_once 'DB/Table/QuickForm.php';
-        $elements =& DB_Table_QuickForm::getElements($cols,
-            $array_name);
+        $elements =& DB_Table_QuickForm::getElements($cols, $array_name);
         return $elements;
     }
     
