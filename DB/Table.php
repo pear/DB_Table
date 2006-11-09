@@ -756,13 +756,15 @@ class DB_Table {
             list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($this->db);
             $mode_supported = DB_Table::modeSupported($create, $phptype);
             if (PEAR::isError($mode_supported)) {
-                return $mode_supported;
+                $this->error =& $mode_supported;
+                return;
             }
             if (!$mode_supported) {
-                return $this->throwError(
+                $this->error =& $this->throwError(
                     DB_TABLE_ERR_CREATE_PHPTYPE,
                     "('$create', '$phptype')"
                 );
+                return;
             }
 
             include_once 'DB/Table/Manager.php';
