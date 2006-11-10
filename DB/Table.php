@@ -1223,6 +1223,9 @@ class DB_Table {
         // get the result
         if ($this->backend == 'mdb2') {
             $stmt =& $this->db->prepare($sql);
+            if (PEAR::isError($stmt)) { 
+                return $stmt;
+            }
             $result =& $stmt->execute($params);
         } else {
             $result =& $this->db->query($sql, $params);

@@ -20,10 +20,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2006-11-09</date>
- <time>21:55:00</time>
+ <date>?</date>
+ <time>?</time>
  <version>
-  <release>1.4.0</release>
+  <release>1.4.1</release>
   <api>1.4.0</api>
  </version>
  <stability>
@@ -32,36 +32,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
-- Static form elements like 'header', 'static', 'submit' or 'reset' can now
-  easily be added: define an array called $frm in your class, create a form
-  object (e.g. yourself, via $obj-&gt;getForm(), ...) and then call
-  $obj-&gt;addStaticFormElements($form);
-  The $frm array has a very similar format like the column definition format. The
-  key is the field name and the value is an array with details about the element.
-  There is a special key called 'before' in the details array. If it is not
-  given, or is empty (or null) the element will be appended at the end. If it is
-  given, the element is added before the element specified via 'before'.
-  Example:
-  var $frm = array('headline' =&gt; array('before'        =&gt; 'name',
-                                          'qf_type'       =&gt; 'header',
-                                          'qf_setvalue'   =&gt; 'Headline'
-                                         ),
-                   'submit'   =&gt; array('before'        =&gt; null,
-                                          'qf_type'       =&gt; 'submit',
-                                          'qf_setvalue'   =&gt; 'Save data'
-                                         ));
-  This example assumes that there is an element called 'name' in the form. The
-  header element will be placed before this 'name' element, and the submit button
-  will be placed at the end of the form.
-- added support for 'hierselect' and 'jscalendar' QuickForm elements as
-  'qf_type' values in the column definition arrays
-  (thanks to Arne Bippes and QDog for the patches)
-- fixes / optimizations for columns with 'qf_type' == 'file':
-  * if the column is marked as required, the 'uploadedfile' QF rule is now set
-    instead of the 'required' QF rule
-  * the 'numeric' and 'maxlength' QF rules are not set anymore (the corresponding
-    checks will still be done before inserting/updating data into the database)
-- fixed wrong handling of errors in the constructor
+- fixed error handling in selectResult() method for usage with MDB2 as backend
  </notes>
  <contents>
   <dir name="/">
