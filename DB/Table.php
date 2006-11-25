@@ -2716,5 +2716,166 @@ class DB_Table {
         return $coldefs;
     }
 
+
+    /**
+     *
+     * Returns XML string representation of the table
+     *
+     * @param  string $indent string of whitespace
+     * @return string XML string
+     * @access public
+     */
+
+    function toXML($indent = '') {
+        $s = array();
+        $s[] = DB_Table::_openXMLtag('table', $indent);
+        $s[] = DB_Table::_lineXMLelement('name', $this->table, $indent);
+        $s[] = DB_Table::_openXMLtag('declaration', $indent);
+        // Column declarations
+        foreach ($this->col as $name => $col) {
+            $type     = (isset($col['type'])) ? $col['type'] : null;
+            $size     = (isset($col['size'])) ? $col['size'] : null;
+            $scope    = (isset($col['scope'])) ? $col['scope'] : null;
+            $require  = (isset($col['require'])) ? $col['require'] : null;
+            $default  = (isset($col['set default'])) ? $col['set default'] : null;
+            $line = '   ' . $name . '  ' . $type;
+            $s[] = DB_Table::_openXMLtag('field', $indent);
+            $s[] = DB_Table::_lineXMLelement('name', $name, $indent);
+            $s[] = DB_Table::_lineXMLelement('type', $type, $indent);
+            if ($size) {
+                $s[] = DB_Table::_lineXMLelement('length', $size, $indent);
+            }
+            if ($require) {
+                $require = (int) $require;
+                $s[] = DB_Table::_lineXMLelement('notnull', $require, $indent);
+            }
+            if (!($default === null)) {
+               $s[] = DB_Table::_lineXMLelement('set default', $default, $indent);
+            }
+            if ($this->auto_inc_col == $name) {
+               $s[] = DB_Table::_lineXMLelement('autoinc', '1', $indent);
+            }
+            $s[] = DB_Table::_closeXMLtag('field', $indent);
+        }
+        // Index declarations
+        foreach ($this->idx as $name => $idx) {
+            $s[] = DB_Table::_openXMLtag('index', $indent);
+            $cols = $idx['cols'];
+            $type = $idx['type'];
+            if (is_string($name)) {
+                $s[] = DB_Table::_lineXMLelement('name', $name, $indent);
+            }
+            if ($type == 'primary') {
+                $s[] = DB_Table::_lineXMLelement('primary', '1', $indent);
+            } elseif ($type == 'unique') {
+                $s[] = DB_Table::_lineXMLelement('unique', '1', $indent);
+            }
+            if (is_string($cols)) {
+                $cols = array($cols);
+            }
+            foreach ($cols as $col) {
+                $s[] = DB_Table::_lineXMLelement('field', $col, $indent);
+            }
+            $s[] = DB_Table::_closeXMLtag('index', $indent);
+        }
+        // Foreign key references (if $this->_database is not null)
+        if ($this->_database) {
+            if (isset($this->_database->_ref[$this->table])) {
+                $refs = $this->_database->_ref[$this->table];
+                foreach ($refs as $rtable => $def) {
+                    $fkey = $def['fkey']; // foreign key of referencing table
+                    $rkey = $def['rkey']; // referenced/primary key
+                    if (is_string($fkey)) {
+                        $fkey = array($fkey);
+                    }
+                    if (is_string($rkey)) {
+                        $rkey = array($rkey);
+                    }
+                    $on_delete = $def['on_delete']; // on-delete action
+                    $on_update = $def['on_update']; // on-update action
+                    $s[] = DB_Table::_openXMLtag('index', $indent);
+                    foreach ($fkey as $fcol) {
+                        $s[] = DB_Table::_lineXMLelement('field', $fcol, $indent);
+                    }
+                    $s[] = DB_Table::_openXMLtag('foreign', $indent);
+                    $s[] = DB_Table::_openXMLtag('on', $indent);
+                    $s[] = DB_Table::_lineXMLelement('table', $rtable, $indent);
+                    if ($rkey) {
+                        foreach ($rkey as $rcol) {
+                            $s[] = DB_Table::_lineXMLelement('field', $rcol,
+                                                             $indent);
+                        }
+                    }
+                    $s[] = DB_Table::_closeXMLtag('on', $indent);
+                    if ($on_update) {
+                        $s[] = DB_Table::_lineXMLelement('update', $on_update,
+                                                         $indent);
+                    }
+                    if ($on_delete) {
+                        $s[] = DB_Table::_lineXMLelement('delete', $on_delete,
+                                                         $indent);
+                    }
+                    $s[] = DB_Table::_closeXMLtag('foreign', $indent);
+                    $s[] = DB_Table::_closeXMLtag('index', $indent);
+                }
+            }
+        }
+        $s[] = DB_Table::_closeXMLtag('declaration', $indent);
+        $s[] = DB_Table::_closeXMLtag('table', $indent);
+        return implode("\n", $s);
+    }
+
+
+    /**
+     * Returns XML closing tag <tag>, increases $indent by 3 spaces
+     *
+     * @static
+     * @param string $tag    XML element tag name
+     * @param string $indent current indentation, string of spaces
+     * @return string XML opening tag
+     * @access private
+     */
+
+    function _openXMLtag($tag, &$indent)
+    {
+        $old_indent = $indent;
+        $indent = $indent . '   ';
+        return $old_indent . "<$tag>";
+    }
+
+
+    /**
+     * Returns XML closing tag </tag>, decreases $indent by 3 spaces
+     *
+     * @static
+     * @param string $tag    XML element tag name
+     * @param string $indent current indentation, string of spaces
+     * @return string XML closing tag
+     * @access private
+     */
+
+    function _closeXMLtag($tag, &$indent)
+    {
+        $indent = substr($indent, 0, -3);
+        return $indent . "</$tag>";
+    }
+
+
+    /**
+     * Returns string single line XML element <tag>text</tag>
+     *
+     * @static
+     * @param string $tag    XML element tag name
+     * @param string $text   element contents
+     * @param string $indent current indentation, string of spaces
+     * @return string single-line XML element
+     * @access private
+     */
+
+    function _lineXMLelement($tag, $text, $indent)
+    {
+        return $indent . "<$tag>$text</$tag>";
+    }
+
 }
 ?>
