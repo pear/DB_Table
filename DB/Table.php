@@ -757,13 +757,6 @@ class DB_Table {
             return;
         }
         
-        // array with column definition may not be empty        
-        if (! isset($this->col) || is_null($this->col) ||
-                (is_array($this->col) && count($this->col) === 0)) {
-            $this->error =& DB_Table::throwError(DB_TABLE_ERR_NO_COLS);
-            return;
-        }
-
         // set the class properties
         $this->db =& $db;
         $this->table = $table;
