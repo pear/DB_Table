@@ -512,6 +512,19 @@ class DB_Table {
     
     /**
     * 
+    * DB_Table_Database instance that this table belongs to.
+    * 
+    * @access private
+    * 
+    * @var object
+    * 
+    */
+    
+    var $_database = null;
+
+
+    /**
+    * 
     * Associative array of column definitions.
     * 
     * @access public
@@ -1403,6 +1416,30 @@ class DB_Table {
     }
     
     
+    /**
+    * 
+    * Connect or disconnect a DB_Table_Database instance to this table
+    * instance.
+    * 
+    * @access public
+    * 
+    * @param object $database DB_Table_Database instance that this table
+    * belongs to (or null to indicate disconnection from the instance).
+    * 
+    * @return void
+    * 
+    */
+    
+    function setDatabaseInstance(&$database)
+    {
+        if (   is_subclass_of($db, 'db_table_database')
+            || is_null($database)
+           ) {
+            $this->_database = $database;
+        }
+    }
+
+
     /**
     * 
     * Builds the SQL command from a specified $this->sql element.
