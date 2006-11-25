@@ -550,6 +550,31 @@ class DB_Table {
     
     
     /**
+     * Name of an auto-increment column, if any. Null otherwise.
+     *
+     * A table can contain at most one auto-increment column. 
+     * Auto-incrementing is implemented in the insert method,
+     * using a sequences accessed by the nextID() method.
+     *
+     * @var string
+     */
+
+    var $auto_inc_col = null;
+
+
+    /**
+     * Boolean flag to turn on (true) or off (false) auto-incrementing.
+     * 
+     * Auto-increment column $auto_inc_col upon insertion only if $_auto_inc is
+     * true and the value of that column is null in the data to be inserted.
+     *
+     * @var bool
+     */
+
+    public $_auto_inc = true;
+
+
+    /**
     * 
     * Whether or not to automatically validate data at insert-time.
     * 
@@ -1516,6 +1541,19 @@ class DB_Table {
         
     function insert($data)
     {
+        // auto-increment if enabled and value is not given or null
+        if (   $this->_auto_inc
+            && !is_null($this->auto_inc_col)
+            && array_key_exists($this->auto_inc_col, $this->col)
+            && !isset($this->auto_inc_col, $data)
+           ) {
+            $id = $this->nextID();
+            if (PEAR::isError($id)) {
+                return $id;
+            }
+            $data[$this->auto_inc_col] = $id;
+        }
+
         // forcibly recast the data elements to their proper types?
         if ($this->_auto_recast) {
             $this->recast($data);
