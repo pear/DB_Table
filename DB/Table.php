@@ -584,7 +584,7 @@ class DB_Table {
      * @var bool
      */
 
-    public $_auto_inc = true;
+    var $_auto_inc = true;
 
 
     /**
