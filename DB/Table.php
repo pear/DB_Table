@@ -1575,7 +1575,7 @@ class DB_Table {
         if (   $this->_auto_inc
             && !is_null($this->auto_inc_col)
             && array_key_exists($this->auto_inc_col, $this->col)
-            && !isset($this->auto_inc_col, $data)
+            && !isset($data[$this->auto_inc_col])
            ) {
             $id = $this->nextID();
             if (PEAR::isError($id)) {
