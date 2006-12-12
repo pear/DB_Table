@@ -234,6 +234,12 @@ define('DB_TABLE_ERR_ALTER_TABLE_IMPOS', -34);
 define('DB_TABLE_ERR_ALTER_INDEX_IMPOS', -35);
 
 /**
+* Error code at insert() time due to invalid the auto-increment column
+* definition. This column must be an integer type and required.
+*/
+define('DB_TABLE_ERR_AUTO_INC_COL', -36);
+
+/**
 * The PEAR class for errors
 */
 require_once 'PEAR.php';
@@ -434,7 +440,8 @@ $GLOBALS['_DB_TABLE']['default_error'] = array(
     DB_TABLE_ERR_DECLARE_PRIMARY     => 'Only one primary key is allowed',
     DB_TABLE_ERR_DECLARE_PRIM_SQLITE => 'SQLite does not support primary keys',
     DB_TABLE_ERR_ALTER_TABLE_IMPOS   => 'Alter table failed: changing the field type not possible',
-    DB_TABLE_ERR_ALTER_INDEX_IMPOS   => 'Alter table failed: changing the index/constraint not possible'
+    DB_TABLE_ERR_ALTER_INDEX_IMPOS   => 'Alter table failed: changing the index/constraint not possible',
+    DB_TABLE_ERR_AUTO_INC_COL        => 'Illegal auto-increment column definition'
 );
 
 // merge default and user-defined error messages
@@ -563,14 +570,17 @@ class DB_Table {
     
     
     /**
-     * Name of an auto-increment column, if any. Null otherwise.
-     *
-     * A table can contain at most one auto-increment column. 
-     * Auto-incrementing is implemented in the insert method,
-     * using a sequences accessed by the nextID() method.
-     *
-     * @var string
-     */
+    * Name of an auto-increment column, if any. Null otherwise.
+    *
+    * A table can contain at most one auto-increment column. 
+    * Auto-incrementing is implemented in the insert method,
+    * using a sequence accessed by the nextID() method.
+    *
+    * @access private
+    * 
+    * @var string
+    * 
+    */
 
     var $auto_inc_col = null;
 
@@ -581,7 +591,10 @@ class DB_Table {
      * Auto-increment column $auto_inc_col upon insertion only if $_auto_inc is
      * true and the value of that column is null in the data to be inserted.
      *
+     * @access private
+     * 
      * @var bool
+     * 
      */
 
     var $_auto_inc = true;
@@ -656,6 +669,8 @@ class DB_Table {
     *     // ... error handling code here ...
     * }
     * </code>
+    * 
+    * @access public
     * 
     * @var object PEAR_Error
     * 
@@ -1425,10 +1440,10 @@ class DB_Table {
     
     function setDatabaseInstance(&$database)
     {
-        if (   is_subclass_of($db, 'db_table_database')
-            || is_null($database)
-           ) {
-            $this->_database = $database;
+        if (is_a($database, 'DB_Table_Database')) {
+            $this->_database =& $database;
+        } elseif (is_null($database)) {
+            $this->_database = null;
         }
     }
 
@@ -1550,14 +1565,23 @@ class DB_Table {
     
     /**
     *
-    * Inserts a single table row after validating through validInsert().
-    * 
+    * Inserts a single table row.
+    *
+    * Auto-increments column $this->auto_inc_col if it is not null,
+    * auto-incrementing is enabled (if $this->_auto_inc), and the
+    * value of this column in the $data array is null or not set.
+    *
+    * Recasts $data to proper column types with recast() if 
+    * auto-recasting is enabled (if $this->_auto_recast).
+    *
+    * Validates column types with validInsert() before insertion if 
+    * auto-validation is enabled (if $this->_valid_insert).
+    *
     * @access public
     * 
     * @param array $data An associative array of key-value pairs where
-    * the key is the column name and the value is the column value.  This
-    * is the data that will be inserted into the table.  Data is checked
-    * against the column data type for validity.
+    * the key is the column name and the value is the column value. 
+    * This is the data that will be inserted into the table.  
     * 
     * @return mixed Void on success, a PEAR_Error object on failure.
     *
@@ -1571,24 +1595,48 @@ class DB_Table {
         
     function insert($data)
     {
-        // auto-increment if enabled and value is not given or null
-        if (   $this->_auto_inc
-            && !is_null($this->auto_inc_col)
-            && array_key_exists($this->auto_inc_col, $this->col)
-            && !isset($data[$this->auto_inc_col])
+        // Auto-increment if enabled and input value is null or not set
+        if ($this->_auto_inc 
+            && !is_null($this->auto_inc_col) 
+            && !isset($data[$this->auto_inc_col]) 
            ) {
+            $column = $this->auto_inc_col;
+            // check that the auto-increment column exists
+            if (!array_key_exists($column, $this->col)) {
+                return $this->throwError(
+                        DB_TABLE_ERR_AUTO_INC_COL,
+                        ": $column does not exist");
+            }
+            // check that the column is integer 
+            if (!in_array($this->col[$column]['type'],
+                           array('integer','smallint','bigint'))) {
+                return $this->throwError(
+                        DB_TABLE_ERR_AUTO_INC_COL,
+                        ": $column is not an integer");
+            }
+            // check that the column is required
+            // Note: The insert method will replace a null input value 
+            // of $data[$column] with a sequence value. This makes 
+            // the column effectively 'not null'. This column must be
+            // 'required' for consistency, to make this explicit.
+            if (!$this->isRequired($column)) {
+                return $this->throwError(
+                        DB_TABLE_ERR_AUTO_INC_COL,
+                        ": $column is not required");
+            }
+            // set the value
             $id = $this->nextID();
             if (PEAR::isError($id)) {
                 return $id;
             }
-            $data[$this->auto_inc_col] = $id;
+            $data[$column] = $id;
         }
 
         // forcibly recast the data elements to their proper types?
         if ($this->_auto_recast) {
             $this->recast($data);
         }
-        
+
         // validate the data if auto-validation is turned on
         if ($this->_valid_insert) {
             $result = $this->validInsert($data);
@@ -1596,6 +1644,8 @@ class DB_Table {
                 return $result;
             }
         }
+
+        // Do insertion
         if ($this->backend == 'mdb2') {
             $result = $this->db->extended->autoExecute($this->table, $data,
                 MDB2_AUTOQUERY_INSERT);
@@ -1604,6 +1654,28 @@ class DB_Table {
                 DB_AUTOQUERY_INSERT);
         }
         return $result;
+    }
+    
+    
+    /**
+    * 
+    * Turns on or off auto-incrementing of $auto_inc_col column (if any)
+    * 
+    * @access public
+    * 
+    * @param bool $flag True to turn on auto-increment, false to turn off.
+    * 
+    * @return void
+    * 
+    */
+    
+    function setAutoInc($flag = true)
+    {
+        if ($flag) {
+            $this->_auto_inc = true;
+        } else {
+            $this->_auto_inc = false;
+        }
     }
     
     
@@ -2218,6 +2290,7 @@ class DB_Table {
     
     function create($flag)
     {
+        include_once 'DB/Table/Manager.php';
 
         // are we OK to create the table?
         $ok = false;
