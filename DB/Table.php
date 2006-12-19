@@ -2866,12 +2866,11 @@ class DB_Table {
                     }
                     $on_delete = $def['on_delete']; // on-delete action
                     $on_update = $def['on_update']; // on-update action
-                    $s[] = DB_Table::_openXMLtag('index', $indent);
+                    $s[] = DB_Table::_openXMLtag('foreign', $indent);
                     foreach ($fkey as $fcol) {
                         $s[] = DB_Table::_lineXMLelement('field', $fcol, $indent);
                     }
-                    $s[] = DB_Table::_openXMLtag('foreign', $indent);
-                    $s[] = DB_Table::_openXMLtag('on', $indent);
+                    $s[] = DB_Table::_openXMLtag('references', $indent);
                     $s[] = DB_Table::_lineXMLelement('table', $rtable, $indent);
                     if ($rkey) {
                         foreach ($rkey as $rcol) {
@@ -2879,17 +2878,16 @@ class DB_Table {
                                                              $indent);
                         }
                     }
-                    $s[] = DB_Table::_closeXMLtag('on', $indent);
-                    if ($on_update) {
-                        $s[] = DB_Table::_lineXMLelement('update', $on_update,
+                    $s[] = DB_Table::_closeXMLtag('references', $indent);
+                    if ($on_delete) {
+                        $s[] = DB_Table::_lineXMLelement('ondelete', $on_delete,
                                                          $indent);
                     }
-                    if ($on_delete) {
-                        $s[] = DB_Table::_lineXMLelement('delete', $on_delete,
+                    if ($on_update) {
+                        $s[] = DB_Table::_lineXMLelement('onupdate', $on_update,
                                                          $indent);
                     }
                     $s[] = DB_Table::_closeXMLtag('foreign', $indent);
-                    $s[] = DB_Table::_closeXMLtag('index', $indent);
                 }
             }
         }
