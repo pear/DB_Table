@@ -57,10 +57,16 @@ referentially triggered actions such as cascading deletes.
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
- New DB_Table_Database class added to package. The new class provides a model 
- of foreign key relationships between tables in a database, and various features 
- that require knowledge of these relationships. User documentation for this class 
- is provided in docs/database/manual.html. 
+ - New DB_Table_Database class added to package. The new class provides a model of
+   foreign key relationships between tables in a database, and various features 
+   that require knowledge of these relationships. User documentation for this class 
+   is provided in docs/database/manual.html. 
+ - Added auto-increment feature to DB_Table insert() method. The value of a new
+   $auto_inc_col property is the name of an auto-increment column (if any) or null. 
+ - added toXML() method to DB_Table, which emits the table schema in the MDB2 XML
+   DTD, with an extension to describe foreign key references. This method is called
+   by the toXML() method of DB_Table_Database, which emits an XML schema string for 
+   an entire database. 
  </notes>
  <contents>
    <dir name="/">
