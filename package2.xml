@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.9" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.5.0RC" version="2.0" 
+xmlns="http://pear.php.net/dtd/package-2.0" 
+xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_Table</name>
  <channel>pear.php.net</channel>
- <summary>Builds on PEAR DB and MDB2 to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.</summary>
- <description>Builds on PEAR DB and MDB2 to abstract datatypes and automate table creation, data validation, insert, update, delete, and select; combines these with PEAR HTML_QuickForm to automatically generate input forms that match the table column definitions.
+<summary>
+An object oriented interface to a database, which is a wrapper for PEAR DB or MDB2.
+It provides methods to help build insert, update, delete, and select SQL commands, 
+to create or verify database tables, and to automatically build input forms with 
+HTML_Quickform.
+</summary>
+<description>
+The DB_Table package provides an object oriented interfae to a database. Each instance 
+of the core DB_Table class contains the schema for a table, defined using abstract data 
+types. The class provides a portable api for building insert, update, delete, and select
+commands, and can validate data types upon insertion and updating. DB_Table also provides 
+methods to automatically create or verify a database table, and (using PEAR HTML_Quickform) 
+to generate input forms that match the column definitions. Each instance of the
+DB_Table_Database class contains a model of relationships between tables in a database, 
+in which each table is represented by an instance of DB_Table. DB_Table_Database provides
+automatic construction of join conditions for inner joins involving any number of tables, 
+optional php validation of foreign key validity, and optional php emulation of SQL 
+referentially triggered actions such as cascading deletes. 
  </description>
  <lead>
   <name>Paul M. Jones</name>
@@ -15,66 +35,76 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
  <lead>
+  <name>David Morse</name>
+  <user>morse</user>
+  <email>morse@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
   <name>Mark Wiesemann</name>
   <user>wiesemann</user>
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>?</date>
- <time>?</time>
+ <date>2007-02-06</date>
  <version>
-  <release>1.4.1</release>
-  <api>1.4.0</api>
+  <release>1.5.0RC1</release>
+  <api>1.5.0</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+   <release>beta</release>
+   <api>beta</api>
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
-- fixed error handling in selectResult() method for usage with MDB2 as backend
-- Bug #9593: fixed handling of attributes for hidden form elements
-  (thanks to mva, mvonarx at tiscali dot ch)
+ New DB_Table_Database class added to package. The new class provides a model 
+ of foreign key relationships between tables in a database, and various features 
+ that require knowledge of these relationships. User documentation for this class 
+ is provided in docs/database/manual.html. 
  </notes>
  <contents>
-  <dir name="/">
-   <dir name="DB">
-    <dir name="Table">
-     <dir name="Manager">
-      <file name="ibase.php" role="php" />
-      <file name="mysql.php" role="php" />
-      <file name="mysqli.php" role="php" />
-      <file name="oci8.php" role="php" />
-      <file name="pgsql.php" role="php" />
-      <file name="sqlite.php" role="php" />
-     </dir> <!-- /DB/Table/Manager -->
-     <file name="Date.php" role="php" />
-     <file name="Manager.php" role="php" />
-     <file name="QuickForm.php" role="php" />
-     <file name="Valid.php" role="php" />
-    </dir> <!-- /DB/Table -->
-    <file name="Table.php" role="php">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-   </dir> <!-- /DB -->
-   <dir name="docs">
-    <dir name="reserved_words">
-     <file name="all-words.txt" role="doc" />
-     <file name="mssql-words.txt" role="doc" />
-     <file name="mysql-words.txt" role="doc" />
-     <file name="oci8-words.txt" role="doc" />
-     <file name="pgsql-words.txt" role="doc" />
-     <file name="sql92-words.txt" role="doc" />
-     <file name="sql99-words.txt" role="doc" />
-     <file name="sqlite-words.txt" role="doc" />
-     <file name="_sources.txt" role="doc" />
-    </dir> <!-- /docs/reserved_words -->
-   </dir> <!-- /docs -->
-   <dir name="tests">
-    <file name="bogotest.php" role="test" />
-    <file name="setup.ini-dist" role="test" />
-   </dir> <!-- /tests -->
-  </dir> <!-- / -->
+   <dir name="/">
+     <dir name="DB">
+       <file name="Table.php" role="php">
+         <tasks:replace from="@package_version@" to="version" type="package-info" />
+       </file>
+       <dir name="Table">
+         <file name="Date.php" role="php" />
+         <file name="Manager.php" role="php" />
+         <file name="QuickForm.php" role="php" />
+         <file name="Valid.php" role="php" />
+         <file name="Database.php" role="php" />
+         <dir name="Manager">
+           <file name="ibase.php" role="php" />
+           <file name="mysql.php" role="php" />
+           <file name="mysqli.php" role="php" />
+           <file name="oci8.php" role="php" />
+           <file name="pgsql.php" role="php" />
+           <file name="sqlite.php" role="php" />
+         </dir> <!-- /DB/Table/Manager -->
+       </dir> <!-- /DB/Table -->
+     </dir> <!-- /DB -->
+     <dir name="docs">
+       <dir name="database">
+          <file name="manual.html" role="doc" />
+       </dir> <!-- /docs/database -->
+       <dir name="reserved_words">
+         <file name="all-words.txt" role="doc" />
+         <file name="mssql-words.txt" role="doc" />
+         <file name="mysql-words.txt" role="doc" />
+         <file name="oci8-words.txt" role="doc" />
+         <file name="pgsql-words.txt" role="doc" />
+         <file name="sql92-words.txt" role="doc" />
+         <file name="sql99-words.txt" role="doc" />
+         <file name="sqlite-words.txt" role="doc" />
+         <file name="_sources.txt" role="doc" />
+       </dir> <!-- /docs/reserved_words -->
+     </dir> <!-- /docs -->
+     <dir name="tests">
+       <file name="bogotest.php" role="test" />
+       <file name="setup.ini-dist" role="test" />
+     </dir> <!-- /tests -->
+   </dir> <!-- / -->
  </contents>
  <dependencies>
   <required>
