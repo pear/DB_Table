@@ -10,25 +10,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_Table</name>
  <channel>pear.php.net</channel>
 <summary>
-An object oriented interface to a database, which is a wrapper for PEAR DB or 
-MDB2. It provides methods to help build insert, update, delete, and select 
-SQL commands, to automate construction of join conditions, to create or verify
-database tables, and to automatically build input forms with HTML_Quickform.
+An object oriented interface to a database, which is a wrapper for PEAR DB or MDB2. It provides methods to help build insert, update, delete, and select SQL commands, to automate construction of join conditions, to create or verify database tables, and to automatically build input forms with HTML_QuickForm.
 </summary>
 <description>
-The DB_Table package provides an object oriented interface to a database. Each 
-instance of the core DB_Table class contains the schema for a table, defined 
-using abstract data types. The class provides a portable api for building insert, 
-update, delete, and select SQL commands, and can validate data types upon 
-insertion and updating. DB_Table also provides methods to automatically create 
-or verify a database table, and (using PEAR HTML_Quickform) to generate input 
-forms that match the column definitions. Each instance of the DB_Table_Database 
-class contains a model of relationships between tables in a database, in which 
-each table is represented by an instance of DB_Table. DB_Table_Database 
-provides automatic construction of join conditions for inner joins involving 
-any number of tables, optional php validation of foreign key validity, and 
-optional php emulation of actions triggered on delete or update of referenced
-rows, such as cascading deletes. 
+The DB_Table package provides an object oriented interface to a database. Each instance of the core DB_Table class contains the schema for a table, defined using abstract data types. The class provides a portable api for building insert, update, delete, and select SQL commands, and can validate data types upon insertion and updating. DB_Table also provides methods to automatically create or verify a database table, and (using PEAR HTML_QuickForm) to generate input forms that match the column definitions. Each instance of the DB_Table_Database class contains a model of relationships between tables in a database, in which each table is represented by an instance of DB_Table. DB_Table_Database provides automatic construction of join conditions for inner joins involving any number of tables, optional php validation of foreign key validity, and optional php emulation of actions triggered on delete or update of referenced rows, such as cascading deletes.
  </description>
  <lead>
   <name>Paul M. Jones</name>
