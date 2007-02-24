@@ -97,7 +97,7 @@ class DB_Table_Generator
     var $error = null;
 
     /**
-     * Numerical array of table names
+     * Numerical array of table name strings
      *
      * @var    array
      * @access public
@@ -105,7 +105,7 @@ class DB_Table_Generator
     var $tables = array();
 
     /**
-     * class being extended 
+     * Class being extended (DB_Table or generic subclass)
      *
      * @var    string
      * @access public
@@ -113,34 +113,34 @@ class DB_Table_Generator
     var $extends = 'DB_Table';
 
     /**
-     * line to use for require('DB/DataObject.php');
+     * Path to definition of $this->extends class 
      *
      * @var    string
      * @access public
      */
-    var $extends_file = "DB/Table.php";
+    var $extends_file = 'DB/Table.php';
 
     /**
-     * Suffix to add to end of table nams to obtain class names
+     * Suffix to add to table names to obtain corresponding class names
      *
      * @var    string
      * @access public
      */
-    var $class_suffix = "_Table";
+    var $class_suffix = "_DB_Table";
 
     /**
-     * Suffix to add to end of table nams to obtain class names
+     * Path to directory in which subclass definition should be written
      *
      * @var    string
      * @access public
      */
-    var $class_location = "/var/lib/DB_Table/project";
+    var $class_location = ".";
 
     /**
      * Array of column definitions
      *
-     * Array $this->columns[table][column] = column definition
-     * The column definition is as returned by tableInfo().
+     * Array $this->columns[table_name][column_name] = column definition.
+     * Column definition is the array returned by DB/MDB2::tableInfo().
      *
      * @var    array
      * @access public
@@ -148,9 +148,10 @@ class DB_Table_Generator
     var $columns = array();
 
     /**
-     * Array of column definitions, as returned by getConstraint
+     * Array of index/constraint definitions.
      *
-     * Array $this->indexes[table][index name] = column definition
+     * Array $this->indexes[table][index name] = Index definition. 
+     * Index definition is an array returned by getTable<Constraint|Index>()
      *
      * @var    array
      * @access public
@@ -158,8 +159,10 @@ class DB_Table_Generator
     var $indexes = array();
 
     /**
-     * MDB2 'idxname_format' option, format of index names, for use 
-     * in fstring().
+     * MDB2 'idxname_format' option, format of index names 
+     *
+     * For use in fprint() formatting. Use '%s' to use index names returned
+     * by getTableConstraints/Indexes, '%s_idx' to '_idx' suffix.
      */
     var $idxname_format = '%s';
 
@@ -172,7 +175,7 @@ class DB_Table_Generator
      * handling. 
      * 
      * @param  object $db   DB/MDB2 database connection object
-     * @param  string $name the database name
+     * @param  string $name database name string
      * @return object DB_Table_Generator
      * @access public
      */
@@ -234,7 +237,8 @@ class DB_Table_Generator
      * @return void
      * @access public
      */
-    function setErrorMessage($code, $message = null) {
+    function setErrorMessage($code, $message = null) 
+    {
         if (is_array($code)) {
             foreach ($code as $single_code => $single_message) {
                 $GLOBALS['_DB_TABLE_GENERATOR']['error'][$single_code] 
@@ -246,8 +250,9 @@ class DB_Table_Generator
     }
 
     /**
-     * Get a list of tables from the database
-     * and store it in $this->tables and $this->columns[tablename];
+     * Gets a list of tables from the database
+     * 
+     * Names are stored in the $this->tables array
      *
      * @access  public
      * @return  none
@@ -272,12 +277,28 @@ class DB_Table_Generator
             $this->_db->loadModule('Reverse');
             $this->tables = $this->_db->manager->listTables();
             $sequences = $this->_db->manager->listSequences();
-            foreach ($sequences as $k => $v) {
-                $this->tables[] = $this->_db->getSequenceName($v);
+            if (!PEAR::isError($sequences)) {
+                foreach ($sequences as $k => $v) {
+                    $sequence = $this->_db->getSequenceName($v);
+                    if (!PEAR::isError($sequence)) {
+                        $this->tables[] = $sequence;
+                    }
+                }
             }
         }
     }
 
+    /**
+     * Gets column and (if possible) index definitions by querying database
+     * 
+     * Column definitions are stored in this $this->columns and index
+     * definitions (if any) in $this->indexes. Calls DB/MDB2::tableInfo()
+     * to obtain column definitions. For MDB2 only, use Manager and 
+     * Reverse module functions to obtain index definitions.
+     *
+     * @access  public
+     * @return  none
+     */
     function getTableDefinition($table) 
     {
         #// postgres strip the schema bit from the
@@ -306,7 +327,7 @@ class DB_Table_Generator
             }
             $this->columns[$table] = $defs;
 
-            // Temporarily reset $idxname_format MDB2 option 
+            // Temporarily reset 'idxname_format' MDB2 option to $this->idx_format
             $idxname_format = $db->getOption('idxname_format');
             $db->setOption('idxname_format', $this->idxname_format);
 
@@ -337,22 +358,22 @@ class DB_Table_Generator
     }
 
     /**
-     * Returns skeleton DB_Table subclass definition, as php code
+     * Returns one skeleton DB_Table subclass definition, as php code
      *
      * @access public
      * @return skeleton subclass definition
      */
     function tableClass($table, $indent = '')
     {
-        $s = array();
-        $s[] = $indent . 'class ' . $table . 
+        $s   = array();
+        $idx = array();
+        $s[] = $indent . 'class ' . $this->className($table) . 
                ' extends ' . $this->extends . " {\n";
         $indent = $indent . '    ';
         $s[] = $indent . 'var $col = array(' . "\n";
         $u   = array(); 
         $indent = $indent . '    ';
        
-        $idx = array();
         // Begin loop over columns
         foreach($this->columns[$table] as $t) {
 
@@ -527,27 +548,10 @@ class DB_Table_Generator
         $s[] = $indent . ");\n";
 
         // Generate index definitions, if any, as php code
-        #if (count($idx) > 0) {
         if (count($this->indexes[$table]) > 0) {
             $s[] = $indent . 'var $idx = array(' . "\n";
             $indent = $indent . '    ';
             $u = array(); 
-            #foreach ($idx as $name => $def) {
-            #    $v = $indent . "'" . $name . "' => array(\n";
-            #    $indent = $indent . '    ';
-            #    $t = array();
-            #    foreach ($def as $key => $value) {
-            #        if (is_string($value)) {
-            #            $value = "'" . $value . "'";
-            #        }
-            #        $t[] = $indent . "'" . $key . "'" . 
-            #               ' => ' . $value ;
-            #    }
-            #    $v = $v . implode($t,",\n") . "\n";
-            #    $indent = substr($indent, 0, -4);
-            #    $v = $v . $indent . ")";
-            #    $u[] = $v;
-            #}
             foreach ($this->indexes[$table] as $name => $def) {
                  $v = $indent . "'" . $name . "' => array(\n";
                  $indent = $indent . '    ';
@@ -560,7 +564,6 @@ class DB_Table_Generator
                  } else {
                      $type = 'normal';
                  }
-
                  $v = $v . $indent . "'type' => '$type',\n";
                  $fields = $def['fields'];
                  if (count($fields) == 1) {
@@ -594,12 +597,12 @@ class DB_Table_Generator
         }
         $indent = substr($indent, 0, -4);
         $s[] = $indent . '}';
-        return implode($s,"\n") . "\n\n";
+        return implode($s,"\n") . "\n";
         
     }
 
     /**
-     * Returns string containing all table class definitions
+     * Returns a string containing all table class definitions
      *
      * The returned string contains the contents of a single php
      * file with definitions of DB_Table subclasses associated with 
@@ -612,8 +615,7 @@ class DB_Table_Generator
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
      *     $generator->getTableNames();
-     *     $generator->getTableDefinitions();
-     *     print $generator->allTablesClass();
+     *     print $generator->allTablesClasses();
      * <code>
      * 
      */
@@ -624,11 +626,46 @@ class DB_Table_Generator
         $s[] = "require_once '{$this->extends_file}';\n";
         foreach($this->tables as $table) {
             $this->getTableDefinition($table);
-            $s[] = $this->tableClass($table) ;
+            $s[] = $this->tableClass($table) . "\n";
         }
         $s[] = '?>';
         return implode($s,"\n");
     }
+
+
+    /**
+     * Writes all table class definitions to separate files
+     *
+     * Usage:
+     * <code>
+     *     $generator = DB_Table_Generator($db, $database);
+     *     $generator->getTableNames();
+     *     $generator->generateTableClasses();
+     * <code>
+     *
+     * @return void
+     * @access public 
+     */
+    function generateTableClasses() 
+    {
+        foreach($this->tables as $table) {
+            $classname = $this->className($table);
+            $filename  = $this->classFileName($classname);
+            if (!file_exists($filename)) {
+                $s = array();
+                $s[] = "<?php";
+                $s[] = "require_once '{$this->extends_file}';\n";
+                $this->getTableDefinition($table);
+                $s[] = $this->tableClass($table) ;
+                $s[] = '?>';
+                $out = implode($s,"\n");
+                $file = fopen($filename, "w");
+                fputs($file, $out);
+                fclose($file);
+            }
+        }
+    }
+
 
     /**
      * Convert a table name into a class name 
@@ -637,10 +674,11 @@ class DB_Table_Generator
      * letter, and adds $this->class_suffix to end. Override this if you 
      * want something else.
      *
-     * @access  public
+     * @param   string $class_name name of table
      * @return  string class name;
+     * @access  public
      */
-    function ClassName($table)
+    function className($table)
     {
         $name = preg_replace('/[^A-Z0-9]/i','_',ucfirst(trim($table)));
         return  $name . $this->class_suffix;
@@ -648,52 +686,22 @@ class DB_Table_Generator
     
     
     /**
-    * Returns the name of a file containing a class definition
-    *
-    * @access  public
-    * @return  string file name;
-    */
-    
-    
-    function ClassFileName($class_name)
+     * Returns the name of a file containing a class definition
+     *
+     * @param   string $class_name name of class
+     * @return  string file name   
+     * @access  public
+     */
+    function classFileName($class_name)
     {
         $base = $this->class_location;
         if (!file_exists($base)) {
             require_once 'System.php';
             System::mkdir(array('-p',$base));
         }
-        $outfilename = "{$base}/" . $class_name . ".php" ;
-        return $outfilename;
+        $filename = "{$base}/" . $class_name . ".php" ;
+        return $filename;
         
     }
     
-    
-    /*
-     * building the class files
-     * for each of the tables output a file!
-     */
-    function generateClasses()
-    {
-       
-        foreach($this->tables as $this->table) {
-            $this->table        = trim($this->table);
-            $this->classname    = $this->getClassNameFromTableName($this->table);
-            $i = '';
-            $outfilename        = $this->getFileNameFromTableName($this->table);
-            
-            $oldcontents = '';
-            if (file_exists($outfilename)) {
-                // file_get_contents???
-                $oldcontents = implode('',file($outfilename));
-            }
-            
-            $out = $this->_generateClassTable($oldcontents);
-            $this->debug( "writing $this->classname\n");
-            $fh = fopen($outfilename, "w");
-            fputs($fh,$out);
-            fclose($fh);
-        }
-        //echo $out;
-    }
-
 }
