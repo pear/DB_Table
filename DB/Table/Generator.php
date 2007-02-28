@@ -25,6 +25,11 @@ define('DB_TABLE_GENERATOR_ERR_DB_OBJECT', -301);
 require_once 'DB/Table.php';
 
 /**
+ * DB_Table_Manager class - used to reverse engineer indices
+ */
+require_once 'DB/Table/Manager.php';
+
+/**
  * The PEAR class for errors
  */
 require_once 'PEAR.php';
@@ -113,7 +118,7 @@ class DB_Table_Generator
     var $extends = 'DB_Table';
 
     /**
-     * Path to definition of $this->extends class 
+     * Path to definition of the class $this->extends 
      *
      * @var    string
      * @access public
@@ -129,7 +134,7 @@ class DB_Table_Generator
     var $class_suffix = "_DB_Table";
 
     /**
-     * Path to directory in which subclass definition should be written
+     * Path to directory in which subclass definitions should be written
      *
      * @var    string
      * @access public
@@ -150,8 +155,8 @@ class DB_Table_Generator
     /**
      * Array of index/constraint definitions.
      *
-     * Array $this->indexes[table][index name] = Index definition. 
-     * Index definition is an array returned by getTable<Constraint|Index>()
+     * Array $this->indexes[table][index name] = Index definition. Index
+     * definition is an array returned by getTable<Constraint|Index>()
      *
      * @var    array
      * @access public
@@ -255,7 +260,7 @@ class DB_Table_Generator
      * Names are stored in the $this->tables array
      *
      * @access  public
-     * @return  none
+     * @return  void
      */
     function getTableNames()
     {
@@ -332,25 +337,7 @@ class DB_Table_Generator
             $db->setOption('idxname_format', $this->idxname_format);
 
             // Constraints/Indexes
-            $this->indexes[$table] = array();
-            $constraints = $db->manager->listTableConstraints($table);
-            if (!PEAR::isError($constraints)) {
-                foreach ($constraints as $c_name) {
-                    $cdef = $db->reverse->getTableConstraintDefinition($table, $c_name);
-                    if (!PEAR::isError($cdef)) {
-                        $this->indexes[$table][$c_name] = $cdef;
-                    }
-                }
-            }
-            $indexes = $db->manager->listTableIndexes($table);
-            if (!PEAR::isError($indexes)) {
-                foreach ($indexes as $i_name) {
-                    $idef = $db->reverse->getTableIndexDefinition($table, $i_name);
-                    if (!PEAR::isError($idef)) {
-                        $this->indexes[$table][$i_name] = $idef;
-                    }
-                }
-            }
+            $this->indexes[$table] = DB_Table_Manager::getIndexes($db, $table);
 
             // Restore original MDB2 idxname_format
             $db->setOption('idxname_format', $idxname_format);
@@ -460,21 +447,23 @@ class DB_Table_Generator
                     $col['type'] = 'timestamp';
                     break;
                 default:     
-                    echo "**********************************************\n".
-                         "**               WARNING UNKNOWN TYPE       **\n".
-                         "** Column '{$t->name}' of type '{$t->type}' **\n".
-                         "** Please submit a bug, describe what type  **\n".
-                         "** you expect this column  to be            **\n".
-                         "**********************************************\n";
+                    $col['type'] = $t['type'] . ' (Unknown type)';
                     break;
             }
-         
+        
+            // Set length and scope if required 
             if (in_array($col['type'], array('char','varchar','decimal'))) { 
                 if (isset($t['len'])) {
                     $col['size'] = (int) $t['len'];
+                } elseif ($col['type'] == 'varchar') { 
+                    $col['size'] = 255; // default length
+                } elseif ($col['type'] == 'char') { 
+                    $col['size'] = 128; // default length
+                } elseif ($col['type'] == 'decimal') { 
+                    $col['size'] =  15; // default length
                 }
                 if ($col['type'] == 'decimal') { 
-                    $col['scope'] = 2;
+                    $col['scope'] =  2;
                 }
             }
             if (isset($t['notnull'])) {
@@ -548,48 +537,46 @@ class DB_Table_Generator
         $s[] = $indent . ");\n";
 
         // Generate index definitions, if any, as php code
-        if (count($this->indexes[$table]) > 0) {
-            $s[] = $indent . 'var $idx = array(' . "\n";
-            $indent = $indent . '    ';
-            $u = array(); 
-            foreach ($this->indexes[$table] as $name => $def) {
-                 $v = $indent . "'" . $name . "' => array(\n";
-                 $indent = $indent . '    ';
-                 $primary = isset($def['primary']) ? $def['primary'] : false;
-                 $unique  = isset($def['unique']) ? $def['unique'] : false;
-                 if ($primary) {
-                     $type = 'primary';
-                 } elseif ($unique) {
-                     $type = 'unique';
-                 } else {
-                     $type = 'normal';
-                 }
-                 $v = $v . $indent . "'type' => '$type',\n";
-                 $fields = $def['fields'];
-                 if (count($fields) == 1) {
-                     foreach ($fields as $key => $value) {
-                         $v = $v . $indent . "'cols' => $key\n";
-                     }
-                 } else {
-                     $v = $v . $indent . "'cols' => array(\n";
-                     $indent = $indent . '    ';
-                     $t = array();
-                     foreach ($fields as $key => $value) {
-                         $t[] = $indent . $key;
-                     }
-                     $v = $v . implode($t,",\n") . "\n";
-                     $indent = substr($indent, 0, -4);
-                     $v = $v . $indent . ")\n";
-                 }
-                 $indent = substr($indent, 0, -4);
-                 $v = $v . $indent . ")";
-                 $u[] = $v;
+        $n_idx = 0;
+        $u = array(); 
+        foreach ($this->indexes[$table] as $type => $indexes) {
+            if (count($indexes) > 0) {
+                foreach ($indexes as $name => $fields) {
+                    if ($n_idx == 0) {
+                        $s[] = $indent . 'var $idx = array(' . "\n";
+                        $indent = $indent . '    ';
+                    }
+                    $n_idx = $n_idx + 1;
+                    $v = $indent . "'" . $name . "' => array(\n";
+                    $indent = $indent . '    ';
+                    $v = $v . $indent . "'type' => '$type',\n";
+                    if (count($fields) == 1) {
+                        foreach ($fields as $key => $value) {
+                            $v = $v . $indent . "'cols' => '$value'\n";
+                        }
+                    } else {
+                        $v = $v . $indent . "'cols' => array(\n";
+                        $indent = $indent . '    ';
+                        $t = array();
+                        foreach ($fields as $key => $value) {
+                            $t[] = $indent . "'$value'";
+                        }
+                        $v = $v . implode($t,",\n") . "\n";
+                        $indent = substr($indent, 0, -4);
+                        $v = $v . $indent . ")\n";
+                    }
+                    $indent = substr($indent, 0, -4);
+                    $v = $v . $indent . ")";
+                    $u[] = $v;
+                }
             }
+        }
+        if ($n_idx == 0) {
+            $s[] = $indent . 'var $idx = array();' . "\n";
+        } else {
             $s[] = implode($u,",\n\n") . "\n";
             $indent = substr($indent, 0, -4);
             $s[] = $indent . ");\n";
-        } else {
-            $s[] = $indent . 'var $idx = array();' . "\n";
         }
 
         if (isset($auto_inc_col)) {
@@ -670,9 +657,9 @@ class DB_Table_Generator
     /**
      * Convert a table name into a class name 
      *
-     * Converts all non-alphanumeric characters to '_', capitalizes first 
-     * letter, and adds $this->class_suffix to end. Override this if you 
-     * want something else.
+     * Converts all non-alphanumeric characters to '_', capitalizes 
+     * first letter, and adds $this->class_suffix to end. Override 
+     * this if you want something else.
      *
      * @param   string $class_name name of table
      * @return  string class name;
@@ -686,7 +673,10 @@ class DB_Table_Generator
     
     
     /**
-     * Returns the name of a file containing a class definition
+     * Returns the path to a file containing a class definition
+     *
+     * Prepends $this->class_location and appends '.php' to class name.
+     * Creates directory $this->class_location if it does not exist.
      *
      * @param   string $class_name name of class
      * @return  string file name   
@@ -703,5 +693,5 @@ class DB_Table_Generator
         return $filename;
         
     }
-    
+
 }
