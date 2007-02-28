@@ -502,7 +502,7 @@ class DB_Table_Manager {
         }
 
         // check #4: do all indexes exist?
-        $table_indexes = DB_Table_Manager::_getIndexes($db, $table);
+        $table_indexes = DB_Table_Manager::getIndexes($db, $table);
         if (PEAR::isError($table_indexes)) {
             return $table_indexes;
         }
@@ -671,7 +671,7 @@ class DB_Table_Manager {
         }
 
         // get information about indexes / constraints
-        $table_indexes = DB_Table_Manager::_getIndexes($db, $table);
+        $table_indexes = DB_Table_Manager::getIndexes($db, $table);
         if (PEAR::isError($table_indexes)) {
             return $table_indexes;
         }
@@ -1501,7 +1501,7 @@ class DB_Table_Manager {
     * 
     * Return all indexes for a table.
     * 
-    * @access private
+    * @access public
     * 
     * @param object &$db A PEAR DB/MDB2 object.
     * 
@@ -1512,7 +1512,7 @@ class DB_Table_Manager {
     * 
     */
 
-    function _getIndexes(&$db, $table)
+    function getIndexes(&$db, $table)
     {
         if (is_subclass_of($db, 'db_common')) {
             $backend = 'db';
