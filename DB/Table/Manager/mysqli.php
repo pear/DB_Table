@@ -130,7 +130,7 @@ class DB_Table_Manager_mysqli {
         }
 
         $definition = array();
-        while (is_array($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC))) {
+        while (is_array($row = $result->fetchRow(DB_FETCHMODE_ASSOC))) {
             $row = array_change_key_case($row, CASE_LOWER);
             $key_name = $row['key_name'];
             $key_name = strtolower($key_name);
@@ -167,7 +167,7 @@ class DB_Table_Manager_mysqli {
         }
 
         $definition = array();
-        while (is_array($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC))) {
+        while (is_array($row = $result->fetchRow(DB_FETCHMODE_ASSOC))) {
             $row = array_change_key_case($row, CASE_LOWER);
             $key_name = $row['key_name'];
             $key_name = strtolower($key_name);
