@@ -129,7 +129,7 @@ class DB_Table_Manager_oci8 {
             if (PEAR::isError($result)) {
                 return $result;
             }
-            while ($colrow = $result->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+            while ($colrow = $result->fetchRow(DB_FETCHMODE_ASSOC)) {
                 $column_name = $colrow['column_name'];
                 $column_name = strtolower($column_name);
                 $definition['fields'][$column_name] = array();
