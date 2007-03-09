@@ -76,7 +76,7 @@ class DB_Table_Generator
     var $_db = null;
 
     /**
-     * The backend type, which may be 'db' or 'mdb2'
+     * The backend type, which may be 'DB' or 'MDB2'
      *
      * @var    string
      * @access private
@@ -131,7 +131,7 @@ class DB_Table_Generator
      * @var    string
      * @access public
      */
-    var $class_suffix = "_DB_Table";
+    var $class_suffix = "_Table";
 
     /**
      * Path to directory in which subclass definitions should be written
@@ -139,7 +139,19 @@ class DB_Table_Generator
      * @var    string
      * @access public
      */
-    var $class_location = ".";
+    var $class_write_path = '';
+
+    /**
+     * Include path to subclass definition files from database file
+     *
+     * Used to create require_once statements in the database file,
+     * which is in the same directory as the class definition files.
+     * Leave as empty string if the PHP include_path contains "."
+     *
+     * @var    string
+     * @access public
+     */
+    var $class_include_path = '';
 
     /**
      * Array of column definitions
@@ -318,12 +330,19 @@ class DB_Table_Generator
         if ($this->_backend == 'db') {
 
             $defs =  $db->tableInfo($table);
+            if (PEAR::isError($defs)) {
+                return $defs;
+            }   
             $this->columns[$table] = $defs;
 
         } else {
 
             // Columns
             $defs =  $db->reverse->tableInfo($table);
+            if (PEAR::isError($defs)) {
+                return $defs;
+            }   
+
             // rename the 'length' key, so it matches db's return.
             foreach ($defs as $k => $v) {
                 if (isset($defs[$k]['length'])) {
@@ -332,13 +351,19 @@ class DB_Table_Generator
             }
             $this->columns[$table] = $defs;
 
-            // Temporarily reset 'idxname_format' MDB2 option to $this->idx_format
+            // Temporarily set 'idxname_format' MDB2 option to $this->idx_format
             $idxname_format = $db->getOption('idxname_format');
             $db->setOption('idxname_format', $this->idxname_format);
+        }
 
-            // Constraints/Indexes
-            $this->indexes[$table] = DB_Table_Manager::getIndexes($db, $table);
+        // Constraints/Indexes
+        $indexes = DB_Table_Manager::getIndexes($db, $table);
+        if (PEAR::isError($indexes)) {
+            return $indexes;
+        }   
+        $this->indexes[$table] = $indexes;
 
+        if ($this->_backend == 'mdb2') {
             // Restore original MDB2 idxname_format
             $db->setOption('idxname_format', $idxname_format);
         }
@@ -348,9 +373,9 @@ class DB_Table_Generator
      * Returns one skeleton DB_Table subclass definition, as php code
      *
      * @access public
-     * @return skeleton subclass definition
+     * @return string skeleton subclass definition
      */
-    function tableClass($table, $indent = '')
+    function buildTableClass($table, $indent = '')
     {
         $s   = array();
         $idx = array();
@@ -589,31 +614,31 @@ class DB_Table_Generator
     }
 
     /**
-     * Returns a string containing all table class definitions
+     * Returns a string containing all table class definitions in one file
      *
-     * The returned string contains the contents of a single php
-     * file with definitions of DB_Table subclasses associated with 
-     * all of the tables in $this->tables. The string includes the 
-     * opening and closing <?php and ?> symbols and the require_once 
-     * line needed to include the DB_Table class that is being 
-     * extended. To use, write the string to a new php file. 
+     * The returned string contains the contents of a single php file
+     * with definitions of DB_Table subclasses associated with all of 
+     * the tables in $this->tables. The string includes the opening 
+     * and closing <?php and ?> script elements, and the require_once 
+     * line needed to include the class (DB_Table or a subclass) that 
+     * is being extended. To use, write the string to a new php file. 
      *
      * Usage:
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
      *     $generator->getTableNames();
-     *     print $generator->allTablesClasses();
+     *     print $generator->buildTablesClasses();
      * <code>
      * 
      */
-    function allTableClasses() 
+    function buildTableClasses() 
     {
         $s = array();
         $s[] = "<?php";
         $s[] = "require_once '{$this->extends_file}';\n";
         foreach($this->tables as $table) {
             $this->getTableDefinition($table);
-            $s[] = $this->tableClass($table) . "\n";
+            $s[] = $this->buildTableClass($table) . "\n";
         }
         $s[] = '?>';
         return implode($s,"\n");
@@ -627,32 +652,147 @@ class DB_Table_Generator
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
      *     $generator->getTableNames();
-     *     $generator->generateTableClasses();
+     *     $generator->generateTableClassFiles();
      * <code>
      *
      * @return void
      * @access public 
      */
-    function generateTableClasses() 
+    function generateTableClassFiles() 
     {
+        // Write all table class definitions to separate files
         foreach($this->tables as $table) {
             $classname = $this->className($table);
             $filename  = $this->classFileName($classname);
+            $base      = $this->class_write_path;
+            if ($base) {
+                if (!file_exists($base)) {
+                    require_once 'System.php';
+                    System::mkdir(array('-p', $base));
+                }
+                $filename = "$base/$filename";
+            }
             if (!file_exists($filename)) {
                 $s = array();
                 $s[] = "<?php";
                 $s[] = "require_once '{$this->extends_file}';\n";
                 $this->getTableDefinition($table);
-                $s[] = $this->tableClass($table) ;
+                $s[] = $this->buildTableClass($table) ;
                 $s[] = '?>';
                 $out = implode($s,"\n");
-                $file = fopen($filename, "w");
+                $file = fopen( $filename, "w");
                 fputs($file, $out);
                 fclose($file);
             }
         }
+
     }
 
+    /**
+     * Writes a file to instantiate Table and Database objects
+     *
+     * After this method completes, a file named 'Database.php' will be
+     * present in the $this->class_write_path directory. This file will
+     * normally be included in application php scripts.
+     *
+     * Usage:
+     * <code>
+     *     $generator = DB_Table_Generator($db, $database);
+     *     $generator->getTableNames();
+     *     $generator->generateTableClassFiles();
+     *     $generator->generateDatabaseFile();
+     * <code>
+     *
+     * @param  string variable name for DB_Table_Database object
+     * @return void
+     * @access public 
+     */
+    function generateDatabaseFile($object_name = null)
+    {
+        // Set name for DB_Table_Database object
+        if ($object_name) {
+            $object_name = '$' . $object_name;
+        } else {
+            $object_name = '$db'; //default
+        }
+        $backend = strtoupper($this->_backend); // 'DB' or 'MDB2'
+
+        // Create array d[] containing lines of database php file
+        $d = array();
+        $d[] = "<?php";
+        $d[] = "require_once '{$backend}.php';";
+        $d[] = "require_once 'DB/Table/Database.php';";
+
+        // Require_once statements for subclass definitions
+        foreach ($this->tables as $table) {
+            $classname = $this->className($table);
+            $class_filename  = $this->classFileName($classname);
+            if ($this->class_include_path) {
+                $d[] = 'require_once ' .
+                       "'{$this->class_include_path}/{$class_filename}';";
+            } else {
+                $d[] = "require_once '{$class_filename}';";
+            }
+        }
+        $d[] = "";
+
+        $d[] = '// NOTE: User must uncomment & edit code to create $dsn';
+        $d[] = '# $phptype  = ' . "'mysqli';";
+        $d[] = '# $username = ' . "'root';";
+        $d[] = '# $password = ' . "'password';";
+        $d[] = '# $hostname = ' . "'localhost';";
+        $d[] = '# $dsn = "$phptype://$username:$password@$hostname";';
+        $d[] = "";
+
+        $d[] = '// Instantiate DB/MDB2 connection object $conn';
+        $d[] = '$conn =& ' . $backend . '::connect($dsn);';
+        $d[] = "";
+
+        $d[] = '# NOTE: Add error handling code here, if desired';
+        $d[] = "";
+
+        $d[] = '// Create one instance of each DB_Table subclass';
+        foreach ($this->tables as $table) {
+            $classname = $this->className($table);
+            $d[] = '$' . $table . " = new $classname(" 
+                       . '$conn, ' . "'{$table}');";
+        }
+        $d[] = "";
+
+        $d[] = '// Instantiate a parent DB_Table_Database object';
+        $d[] = $object_name . ' = new DB_Table_Database($conn, ' 
+             . "'{$this->name}');";
+        $d[] = "";
+
+        $d[] = '// Add DB_Table objects to parent DB_Table_Database object';
+        foreach ($this->tables as $table) {
+            $classname = $this->className($table);
+            $d[] = $object_name . '->addTable($' . $table . ');';
+        }
+        $d[] = "";
+
+        $d[] = '// NOTE: Add any foreign references and linking tables';
+        $d[] = "";
+
+        // Closing script element
+        $d[] = "?>";
+
+        // Open and write file
+        $base = $this->class_write_path;
+        if ($base) {
+            if (!file_exists($base)) {
+                require_once 'System.php';
+                System::mkdir(array('-p', $base));
+            }
+            $filename = $base . "/Database.php";
+        } else {
+            $filename = "Database.php";
+        }
+        $file = fopen($filename, "w");
+        $out = implode("\n", $d);
+        fputs($file, $out);
+        fclose($file);
+    }
 
     /**
      * Convert a table name into a class name 
@@ -675,8 +815,7 @@ class DB_Table_Generator
     /**
      * Returns the path to a file containing a class definition
      *
-     * Prepends $this->class_location and appends '.php' to class name.
-     * Creates directory $this->class_location if it does not exist.
+     * Appends '.php' to class name.
      *
      * @param   string $class_name name of class
      * @return  string file name   
@@ -684,12 +823,7 @@ class DB_Table_Generator
      */
     function classFileName($class_name)
     {
-        $base = $this->class_location;
-        if (!file_exists($base)) {
-            require_once 'System.php';
-            System::mkdir(array('-p',$base));
-        }
-        $filename = "{$base}/" . $class_name . ".php" ;
+        $filename = $class_name . ".php" ;
         return $filename;
         
     }
