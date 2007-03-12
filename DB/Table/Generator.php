@@ -136,6 +136,8 @@ class DB_Table_Generator
     /**
      * Path to directory in which subclass definitions should be written
      *
+     * Value should not include a trailing "/".
+     *
      * @var    string
      * @access public
      */
@@ -144,9 +146,10 @@ class DB_Table_Generator
     /**
      * Include path to subclass definition files from database file
      *
-     * Used to create require_once statements in the database file,
+     * Used to create require_once statements in the Database.php file,
      * which is in the same directory as the class definition files.
-     * Leave as empty string if the PHP include_path contains "."
+     * Leave as empty string if your PHP include_path contains ".". 
+     * Value should not include a trailing "/", which is added automatically.
      *
      * @var    string
      * @access public
@@ -178,8 +181,9 @@ class DB_Table_Generator
     /**
      * MDB2 'idxname_format' option, format of index names 
      *
-     * For use in fprint() formatting. Use '%s' to use index names returned
-     * by getTableConstraints/Indexes, '%s_idx' to '_idx' suffix.
+     * For use in printf() formatting. Use '%s' to use index names as
+     * returned by getTableConstraints/Indexes, and '%s_idx' to add an
+     * '_idx' suffix. For MySQL, use the default value '%'. 
      */
     var $idxname_format = '%s';
 
@@ -269,10 +273,12 @@ class DB_Table_Generator
     /**
      * Gets a list of tables from the database
      * 
-     * Names are stored in the $this->tables array
+     * Upon successful completion, names are stored in the $this->tables 
+     * array. If an error is encountered, a PEAR Error is returned, and 
+     * $this->tables is reset to null. 
      *
      * @access  public
-     * @return  void
+     * @return  mixed  true on success, PEAR Error on failure
      */
     function getTableNames()
     {
@@ -283,7 +289,7 @@ class DB_Table_Generator
             $this->tables = $this->_db->getListOf('schema.tables');
             $this->_db->popExpect();
             if (PEAR::isError($this->tables)) {
-                // try getting a list of schema tables first. (postgres)
+                // try a list of tables, not qualified by 'schema'
                 $this->_db->expectError(DB_ERROR_UNSUPPORTED);
                 $this->tables = $this->_db->getListOf('tables');
                 $this->_db->popExpect();
@@ -292,7 +298,11 @@ class DB_Table_Generator
             $this->_db->setOption('portability', MDB2_PORTABILITY_ALL ^ MDB2_PORTABILITY_FIX_CASE);
             $this->_db->loadModule('Manager');
             $this->_db->loadModule('Reverse');
+
+            // Get list of tables
             $this->tables = $this->_db->manager->listTables();
+
+            // Add sequences
             $sequences = $this->_db->manager->listSequences();
             if (!PEAR::isError($sequences)) {
                 foreach ($sequences as $k => $v) {
@@ -303,18 +313,27 @@ class DB_Table_Generator
                 }
             }
         }
+        if (PEAR::isError($this->tables)) {
+            $error = $this->tables; 
+            $this->tables = null;
+            return $error; 
+        } else {
+            return true;
+        }
     }
 
     /**
      * Gets column and (if possible) index definitions by querying database
      * 
-     * Column definitions are stored in this $this->columns and index
-     * definitions (if any) in $this->indexes. Calls DB/MDB2::tableInfo()
-     * to obtain column definitions. For MDB2 only, use Manager and 
-     * Reverse module functions to obtain index definitions.
+     * Upon return, column definitions are stored in this $this->columns, and 
+     * index definitions (if any) in $this->indexes. 
      *
+     * Calls DB/MDB2::tableInfo() to obtain column definitions, and uses 
+     * DB_Table::Manager to obtain index definitions.
+     *
+     * @param   $table string name of table
+     * @return  void
      * @access  public
-     * @return  none
      */
     function getTableDefinition($table) 
     {
@@ -372,8 +391,14 @@ class DB_Table_Generator
     /**
      * Returns one skeleton DB_Table subclass definition, as php code
      *
+     * The returned subclass definition string contains values for the 
+     * $col (column), $idx (index) and $auto_inc_col properties, with
+     * no method definitions.
+     *
+     * @param  $table   string  name of table
+     * @param  $indent  string  string of whitespace for base indentation
+     * @return string skeleton DB_Table subclass definition
      * @access public
-     * @return string skeleton subclass definition
      */
     function buildTableClass($table, $indent = '')
     {
@@ -616,23 +641,34 @@ class DB_Table_Generator
     /**
      * Returns a string containing all table class definitions in one file
      *
-     * The returned string contains the contents of a single php file
-     * with definitions of DB_Table subclasses associated with all of 
-     * the tables in $this->tables. The string includes the opening 
-     * and closing <?php and ?> script elements, and the require_once 
-     * line needed to include the class (DB_Table or a subclass) that 
-     * is being extended. To use, write the string to a new php file. 
+     * The returned string contains the contents of a single php file with
+     * definitions of DB_Table subclasses associated with all of the tables
+     * in $this->tables. If $this->tables is initially null, method
+     * $this->getTableNames() is called internally to generate a list of 
+     * table names. 
+     *
+     * The returned string includes the opening and closing <?php and ?> 
+     * script elements, and the require_once line needed to include the 
+     * $this->extend_class (i.e., DB_Table or a subclass) that is being
+     * extended. To use, write this string to a new php file. 
      *
      * Usage:
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
-     *     $generator->getTableNames();
      *     print $generator->buildTablesClasses();
      * <code>
      * 
      */
     function buildTableClasses() 
     {
+        // If $this->tables is null, call getTableNames()
+        if (!$this->tables) {
+            $return = $this->getTableNames();
+            if (PEAR::isError($return)) {
+                return $return;
+            }
+        }
+
         $s = array();
         $s[] = "<?php";
         $s[] = "require_once '{$this->extends_file}';\n";
@@ -651,7 +687,6 @@ class DB_Table_Generator
      * Usage:
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
-     *     $generator->getTableNames();
      *     $generator->generateTableClassFiles();
      * <code>
      *
@@ -660,6 +695,14 @@ class DB_Table_Generator
      */
     function generateTableClassFiles() 
     {
+        // If $this->tables is null, call getTableNames()
+        if (!$this->tables) {
+            $return = $this->getTableNames();
+            if (PEAR::isError($return)) {
+                return $return;
+            }
+        }
+
         // Write all table class definitions to separate files
         foreach($this->tables as $table) {
             $classname = $this->className($table);
@@ -691,14 +734,14 @@ class DB_Table_Generator
     /**
      * Writes a file to instantiate Table and Database objects
      *
-     * After this method completes, a file named 'Database.php' will be
-     * present in the $this->class_write_path directory. This file will
-     * normally be included in application php scripts.
+     * After successful completion, a file named 'Database.php' will be
+     * have been created in the $this->class_write_path directory. This 
+     * file should normally be included in application php scripts. It
+     * can be renamed by the user.
      *
      * Usage:
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
-     *     $generator->getTableNames();
      *     $generator->generateTableClassFiles();
      *     $generator->generateDatabaseFile();
      * <code>
