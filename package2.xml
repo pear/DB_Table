@@ -7,10 +7,10 @@ xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
- <name>DB_Table</name>
- <channel>pear.php.net</channel>
+<name>DB_Table</name>
+<channel>pear.php.net</channel>
 <summary>
-An object oriented interface to a database, which is a wrapper for PEAR DB or MDB2. It provides methods to help build insert, update, delete, and select SQL commands, to automate construction of join conditions, to create or verify database tables, and to automatically build input forms with HTML_QuickForm.
+An object oriented interface to, and model of, a database. 
 </summary>
 <description>
 The DB_Table package provides an object oriented interface to a database. Each instance of the core DB_Table class contains the schema for a table, defined using abstract data types. The class provides a portable api for building insert, update, delete, and select SQL commands, and can validate data types upon insertion and updating. DB_Table also provides methods to automatically create or verify a database table, and (using PEAR HTML_QuickForm) to generate input forms that match the column definitions. Each instance of the DB_Table_Database class contains a model of relationships between tables in a database, in which each table is represented by an instance of DB_Table. DB_Table_Database provides automatic construction of join conditions for inner joins involving any number of tables, optional php validation of foreign key validity, and optional php emulation of actions triggered on delete or update of referenced rows, such as cascading deletes.
@@ -44,17 +44,7 @@ The DB_Table package provides an object oriented interface to a database. Each i
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
- - New DB_Table_Database class added to package. The new class provides a model 
-   of foreign key relationships between tables in a database, and features that 
-   depend on knowledge of these relationships. User documentation for this 
-   class is provided in docs/database/manual.html. 
- - Added auto-increment feature to DB_Table insert() method. The value of a new
-   $auto_inc_col property is the name of an auto-increment column (if any) or 
-   null. 
- - added toXML() method to DB_Table, which emits the table schema in the MDB2 
-   XML DTD, with an extension to describe foreign key references. This method 
-   is called by the toXML() method of DB_Table_Database, which emits an XML 
-   schema string for an entire database. 
+ - New DB_Table_Generator class added to package. The class generates DB_Table subclass definitions by reverse engineering an existing database.
  </notes>
  <contents>
    <dir name="/">
@@ -68,6 +58,7 @@ The DB_Table package provides an object oriented interface to a database. Each i
          <file name="QuickForm.php" role="php" />
          <file name="Valid.php" role="php" />
          <file name="Database.php" role="php" />
+         <file name="Generator.php" role="php" />
          <dir name="Manager">
            <file name="ibase.php" role="php" />
            <file name="mysql.php" role="php" />
@@ -97,6 +88,11 @@ The DB_Table package provides an object oriented interface to a database. Each i
      <dir name="tests">
        <file name="bogotest.php" role="test" />
        <file name="setup.ini-dist" role="test" />
+       <file name="config.php-dist" role="test" />
+       <dir name="generator">
+         <file name="test.php" role="test" />
+         <file name="README" role="doc" />
+       </dir> <!-- /tests/generator -->
      </dir> <!-- /tests -->
    </dir> <!-- / -->
  </contents>
