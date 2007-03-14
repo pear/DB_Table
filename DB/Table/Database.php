@@ -419,8 +419,9 @@ class DB_Table_Database
     /**
      * Associative array of DB_Table object references. Keys are table names.
      *
-     * Associative array( string table_name => DB_Table object ).
-     * Each DB_Table object represents one table in the database.
+     * Associative array in which keys are table names, values are references to
+     * DB_Table objects.  Each referenced DB_Table object represents one table in
+     * the database.
      *
      * @var    array
      * @access private
@@ -428,27 +429,9 @@ class DB_Table_Database
     var $_table = array();
 
     /**
-     * Array in which values are DB_Table subclass names, keys are table names.
+     * Array in which keys are table names, values are DB_Table subclass names.
      *
-     * Associative array( string table_name => string subclass_name ). If table
-     * $this->_table[$table_name] is an instance of a subclass $subclass_name
-     * of DB_Table, then $this->_table_subclass[$table_name] == $subclass_name.
-     * If $this->_table[$table_name] is an instance of DB_Table itself, then
-     * $this->_table_subclass[$table_name] is null. 
-     *
-     * Subclass names are obtained in the addTable method by applying the 
-     * built in get_class function to DB_Table object. The class names 
-     * returned by get_class are stored unmodified. In PHP 4, get_class
-     * converts all class names to lower case. In PHP 5, it preserves the 
-     * capitalization of the name used in the class definition. 
-     *
-     * In the __wakeup() method, for each table $table_name for which
-     * $subclass = $this->_table_subclass[$table_name] is not null, but
-     * class $subclass is not defined, the method attempts to include a
-     * file named "$subclass.php" in directory $this->table_subclass_path. 
-     * For this autoloading to work, the name of each subclass definition 
-     * file should thus also be lower case in PHP 4 or identical to the
-     * class name in PHP 5. 
+     * See the getTableSubclass() method docblock for further details. 
      * 
      * @var    array
      * @access private
@@ -458,17 +441,7 @@ class DB_Table_Database
     /**
      * Path to directory containing DB_Table subclass declaration files
      *
-     * The property value should be the path to the directory, in the 
-     * form required in a 'require_once' statement, without a trailing
-     * directory separator.  In __wakeup() function, the file containing
-     * the definition of a class $subclass_name that extends DB_Table is
-     * included, if the class is not already declared, as follows:
-     * <code>
-     *     $dir = $this->_table_subclass_path;
-     *     require_once $dir . '/' . $subclass . '.php';
-     * </code>
-     * See $_table_subclass docblock for a discusion of capitalization
-     * conventions in PHP 4 and 5 for subclass file names. 
+     * See the setTableSubclassPath() method docblock for further details. 
      * 
      * @var    string
      * @access private
@@ -476,11 +449,12 @@ class DB_Table_Database
     var $_table_subclass_path = '';
 
     /**
-     * Array in which values are primary keys, keys are table names.
+     * Array in which keys are table names, values are primary keys.
      *
-     * Associative array( string table_name => primary key ). Each primary
-     * key value may be a column name string, a sequential array of column
-     * name strings, or null.
+     * Each primary key value may be a column name string, a sequential array of
+     * column name strings, or null. 
+     *
+     * See the getPrimaryKey() method docblock for details. 
      *
      * @var    array
      * @access private
@@ -492,7 +466,9 @@ class DB_Table_Database
      *
      * Each key is the name string of a column in the database. Each value
      * is a numerical array containing the names of all tables that contain 
-     * a column with that name.
+     * a column with that name. 
+     *
+     * See the getCol() method docblock for details.
      *
      * @var    array
      * @access private
@@ -500,17 +476,13 @@ class DB_Table_Database
     var $_col = array();
 
     /**
-     * Associative array that maps foreign key columns name keys to table names
+     * Associative array that maps names of foreign key columns to table names
      *
      * Each key is the name string of a foreign key column. Each value is a
      * sequential array containing the names of all tables that contain a 
      * foreign key column with that name. 
      *
-     * If a column $column in a referencing table $ftable is part of the 
-     * foreign key for references to two or more different referencing 
-     * tables, the name $ftable will appear multiple times in the array 
-     * $this->_foreign_col[$column], once for each foreign key that contains
-     * a column $ftable.$column.
+     * See the getForeignCol() method docblock for further details. 
      *
      * @var    array
      * @access private
@@ -518,30 +490,14 @@ class DB_Table_Database
     var $_foreign_col = array();
 
     /**
-     * Array of foreign key references. Keys are pairs of table names.
+     * Two-dimensional associative array of foreign key references. 
      *
-     * A two dimensional associative array of the form
-     * $ref[$ftable][$rtable] = $reference. The keys $ftable and $rtable
-     * are the names of a foreign key (or referencing) table and a
-     * corresponding referenced table, respectively. The value is an array
-     * $reference = array($fkey, $rkey, $on_delete, $on_update) in which
-     * $fkey and $rkey are the foreign (or referencing) and referenced 
-     * keys, respectively: Foreign key $fkey of table $ftable references
-     * key $rkey (usually the primary key) of table $rtable. The values
-     * of $fkey and $rkey must either both be: i) valid column name 
-     * strings for columns of the same type or, ii) sequential arrays 
-     * of valid name column strings, with equal numbers of columns of 
-     * corresponding types, to represent multi-column keys.
+     * Keys are pairs of table names (referencing table first, referenced
+     * table second). Each value is an array containing information about 
+     * the referencing and referenced keys, and about any referentially 
+     * triggered actions (e.g., cascading delete). 
      *
-     * The $on_delete and $on_update values are strings that indicate 
-     * actions to be taken on rows in referencing $rtable upon deletion 
-     * or upon update that changes the $rkey column(s) of a row in the 
-     * referenced table $rtable, respectively.  The $on_delete and 
-     * $on_update parameters may each have values 'restrict', 'cascade', 
-     * 'set null', 'set default', or php null. A null value indicates that 
-     * nothing will be done by the class to ensure referential integrity 
-     * upon delete or update of the referenced columns of a row in the 
-     * referenced table. 
+     * See the getRef() docblock for further details. 
      *
      * @var    array
      * @access private
@@ -549,13 +505,10 @@ class DB_Table_Database
     var $_ref = array();
 
     /**
-     * Array in which keys are referenced tables, values are arrays of 
-     * referencing tables. 
+     * Array in which each key is the names of a referenced tables, each value 
+     * an sequential array containing names of referencing tables.
      *
-     * An array $_ref_to( $rtable => array($ftable1, $ftable2,...) ), in
-     * which each key $rtable is the name of the referenced table, and
-     * each value is a sequential array containing the names of all
-     * tables that contain foreign keys that reference $rtable. 
+     * See the docblock for the getRefTo() method for further discussion. 
      * 
      * @var    array
      * @access private
@@ -565,32 +518,16 @@ class DB_Table_Database
     /**
      * Two-dimensional associative array of linking tables. 
      *
-     * The $_link property array is used in the autoJoin method to join 
-     * tables that are related by a many-to-many relationship via a 
-     * linking table, than via a direct foreign key reference. A table 
-     * that links $table1 and $table2 must have foreign keys that reference
-     * both of these tables. A table with references to both $table1 and 
-     * $table2 need not, however, be identified in the $link property as 
-     * a linking table for these two tables. 
-     *
-     * Linking tables may be added to the $_link property by using the 
-     * addLink method or deleted using the delLink method. Alternatively, 
-     * all possible linking tables can be identified and added to the 
-     * $_link array at once by the addAllLinks() method.
-     *
-     * The $_link property is a two-dimensional associative array with the
-     * structure $this->_link[$table1][$table2] = array($link1, ...), in 
-     * which the value is an array containing the names of all tables that
-     * link tables named $table1 and $table2, and thereby create a
-     * many-to-many relationship between these two tables. 
-     *
-     * Each binary link in a database is listed twice in $_link, in
-     * $_link[$table1][$table2] and in $_link[$table2][$table1]. If a
-     * linking table contains foreign key references to N tables, with
-     * N > 2, each of the resulting binary links is listed separately.
-     * For example, a table with references to 3 tables A, B, and C can 
-     * create three binary links (AB, AC, and BC) and six entries in the 
-     * link property array (i.e., in $_link[A][B], $_link[B][A], ... ).
+     * Two-dimensional associative array in which pairs of keys are names
+     * of pairs of tables that are linked by one or more linking/association 
+     * table. Each value is an array containing the names of all table that
+     * link the tables specified by the pair of keys. A linking table is a 
+     * table that creates a many-to-many relationship between two linked
+     * tables, via foreign key references from the linking table to the two
+     * linked tables. The $_link property is used by the autoJoin() method 
+     * to join tables that are related only through such a linking table. 
+     * 
+     * See the getLink() method docblock for further details. 
      *
      * @var    array
      * @access private
@@ -839,11 +776,15 @@ class DB_Table_Database
      * If $name is a table name, return $this->_table[$name] DB_Table object
      * reference
      *
-     * Returns PEAR Error with the following DB_TABLE_DATABASE_* error codes
+     * Returns PEAR Error with the following DB_TABLE_DATABASE_ERR* codes
      * if:
-     *    - $name is not a string ( *_TBL_NOT_STRING )
-     *    - $name is not valid table name ( *_NO_TBL )
+     *    - $name is not a string ( _TBL_NOT_STRING )
+     *    - $name is not valid table name ( _NO_TBL )
      * 
+     * The $_table property is an associative array in which keys are table
+     * name strings and values are references to DB_Table objects. Each of 
+     * the referenced objects represents one table in the database.
+     *
      * @return mixed $_table property, one element of $_table, or Error
      * @access public
      */
@@ -877,6 +818,12 @@ class DB_Table_Database
      *    - $name is not a string ( _TBL_NOT_STRING )
      *    - $name is not valid table name ( _NO_TBL )
      * 
+     * The $_primary_key property is an associative array in which each key
+     * a table name, and each value is the primary key of that table. Each
+     * primary key value may be a column name string, a sequential array of 
+     * column name strings (for a multi-column key), or null (if no primary
+     * key has been declared).
+     *
      * @return mixed $primary_key array or $this->_primary_key[$name]
      * @access public
      */
@@ -910,6 +857,26 @@ class DB_Table_Database
      *    - $name is not a string ( _TBL_NOT_STRING )
      *    - $name is not valid table name ( _NO_TBL )
      *
+     * The $_table_subclass property is an associative array in which each key
+     * is a table name string, and each value is the name of the corresponding 
+     * subclass of DB_Table. The value is null if the table is an instance of 
+     * DB_Table itself. 
+     *
+     * Subclass names are set within the addTable method by applying the 
+     * built in get_class() function to a DB_Table object. The class names 
+     * returned by get_class() are stored unmodified. In PHP 4, get_class
+     * converts all class names to lower case. In PHP 5, it preserves the 
+     * capitalization of the name used in the class definition. 
+     *
+     * In the __wakeup() method, for each table $table_name for which
+     * $subclass = $this->_table_subclass[$table_name] is not null, but
+     * class $subclass is not defined, the method attempts to include a
+     * file named "$subclass.php" in directory $this->table_subclass_path. 
+     * For autoloading to work properly, the base name of each subclass 
+     * definition file (excluding the .php extension) should thus be a
+     * lower case version of the class name in PHP 4 or identical to the 
+     * class name in PHP 5. 
+     * 
      * @return mixed $_table_subclass array or $this->_table_subclass[$name]
      * @access public
      */
@@ -933,7 +900,6 @@ class DB_Table_Database
     }
 
     /**
-    /**
      * Returns all or part of the $_col property array
      *
      * If $column_name is null, return $_col property array
@@ -944,8 +910,14 @@ class DB_Table_Database
      *    - $column_name is not a string ( _COL_NOT_STRING )
      *    - $column_name is not valid column name ( _NO_COL )
      *
-     * @param string $column_name  a column name string
-     * @return mixed $col property array or a sub-array
+     * The $_col property is an associative array in which each key is the
+     * name of a column in the database, and each value is a numerical array 
+     * containing the names of all tables that contain a column with that 
+     * name.
+     *
+     * @var    array
+     * @param string $column_name a column name string
+     * @return mixed $this->_col property array or $this->_col[$column_name]
      * @access public
      */
     function getCol($column_name = null) 
@@ -978,6 +950,16 @@ class DB_Table_Database
      *    - $column_name is not a string ( _COL_NOT_STRING )
      *    - $column_name is not valid foreign column name ( _NO_FOREIGN_COL )
      *
+     * The $_foreign_col property is an associative array in which each 
+     * key is the name string of a foreign key column, and each value is a
+     * sequential array containing the names of all tables that contain a 
+     * foreign key column with that name. 
+     *
+     * If a column $column in a referencing table $ftable is part of the 
+     * foreign key for references to two or more different referenced tables
+     * tables, the name $ftable will also appear multiple times in the array 
+     * $this->_foreign_col[$column].
+     *
      * @param  string column name string for foreign key column
      * @return array  $_foreign_col property array
      * @access public
@@ -1002,7 +984,7 @@ class DB_Table_Database
     }
 
     /**
-     * Returns all or part of the $ref two-dimensional property array
+     * Returns all or part of the $_ref two-dimensional property array
      *
      * Returns $this->_ref 2D property array if $table1 and $table2 are null.
      * Returns $this->_ref[$table1] subarray if only $table2 is null.
@@ -1017,6 +999,28 @@ class DB_Table_Database
      *    - $table1 or $table2 is not a string ( _TBL_NOT_STRING )
      *    - $table1 or $table2 is not a valid table name ( _NO_TBL )
      *
+     * The $_ref property is a two-dimensional associative array in which
+     * the keys are pairs of table names, each value is an array containing 
+     * information about referenced and referencing keys, and referentially
+     * triggered actions (if any).  An element of the $_ref array is of the 
+     * form $ref[$ftable][$rtable] = $reference, where $ftable is the name 
+     * of a referencing (or foreign key) table and $rtable is the name of 
+     * a corresponding referenced table. The value $reference is an array 
+     * $reference = array($fkey, $rkey, $on_delete, $on_update) in which
+     * $fkey and $rkey are the foreign (or referencing) and referenced 
+     * keys, respectively: Foreign key $fkey of table $ftable references
+     * key $rkey of table $rtable. The values of $fkey and $rkey must either 
+     * both be valid column name strings for columns of the same type, or 
+     * they may both be sequential arrays of column name names, with equal 
+     * numbers of columns of corresponding types, for multi-column keys. The 
+     * $on_delete and $on_update values may be either null or string values 
+     * that indicate actions to be taken upon deletion or updating of a 
+     * referenced row (e.g., cascading deletes). A null value of $on_delete
+     * or $on_update indicates that no referentially triggered action will 
+     * be taken. See addRef() for further details about allowed values of
+     * these action strings. 
+     *
+     * @var    array
      * @param  string $table1 name of referencing table
      * @param  string $table2 name of referenced table
      * @return mixed $ref property array, sub-array, or value
@@ -1069,7 +1073,7 @@ class DB_Table_Database
     }
 
     /**
-     * Returns all or part of the $ref_to property array
+     * Returns all or part of the $_ref_to property array
      *
      * Returns $this->_ref_to property array if $table_name is null.
      * Returns $this->_ref_to[$table_name] if $table_name is not null.
@@ -1079,8 +1083,16 @@ class DB_Table_Database
      *    - $table_name is not a string ( _TBL_NOT_STRING )
      *    - $table_name is not a valid table name ( _NO_TBL )
      *
+     * The $_ref_to property is an associative array in which each key
+     * is the name of a referenced table, and each value is a sequential
+     * array containing the names of all tables that contain foreign keys
+     * that reference that table. Each element is thus of the form
+     * $_ref_to[$rtable] = array($ftable1, $ftable2,...), where
+     * $ftable1, $ftable2, ... are the names of tables that reference 
+     * the table named $rtable.
+     * 
      * @param string $table_name name of table
-     * @return mixed $ref_to property array or subarray
+     * @return mixed $_ref_to property array or subarray
      * @access public
      */
     function getRefTo($table_name = null)
@@ -1124,6 +1136,32 @@ class DB_Table_Database
      *    - $table1 or $table2 is not a string ( _TBL_NOT_STRING )
      *    - $table1 or $table2 is not a valid table name ( _NO_TBL )
      *
+     * The $_link property is a two-dimensional associative array with 
+     * elements of the form $this->_link[$table1][$table2] = array($link1, ...), 
+     * in which the value is an array containing the names of all tables 
+     * that `link' tables named $table1 and $table2, and thereby create a
+     * many-to-many relationship between these two tables. 
+     *
+     * The $_link property is used in the autoJoin method to join tables
+     * that are related by a many-to-many relationship via a linking table,
+     * rather than via a direct foreign key reference. A table that is
+     * declared to be linking table for tables $table1 and $table2 must 
+     * contain foreign keys that reference both of these tables. 
+     *
+     * Each binary link in a database is listed twice in $_link, in
+     * $_link[$table1][$table2] and in $_link[$table2][$table1]. If a
+     * linking table contains foreign key references to N tables, with
+     * N > 2, each of the resulting binary links is listed separately.
+     * For example, a table with references to 3 tables A, B, and C can 
+     * create three binary links (AB, AC, and BC) and six entries in the 
+     * link property array (i.e., in $_link[A][B], $_link[B][A], ... ).
+     *
+     * Linking tables may be added to the $_link property by using the 
+     * addLink method or deleted using the delLink method. Alternatively, 
+     * all possible linking tables can be identified and added to the 
+     * $_link array at once by the addAllLinks() method.
+     *
+     * @var    array
      * @param string $table1 name of linked table
      * @param string $table2 name of linked table
      * @return mixed $_link property array, sub-array, or value
@@ -1175,8 +1213,25 @@ class DB_Table_Database
     }
 
     /**
-     * Sets the $_table_subclass_path property string
+     * Sets the path to a the directory containing DB_Table subclass definitions.
      *
+     * This method sets the $_table_subclass_path string property. The value of
+     * this property is the path to the directory containing DB_Table subclass 
+     * definitions, without a trailing directory separator. 
+     *  
+     * This path may be used by the __wakeup(), if necessary, in an attempt to 
+     * autoload class definitions when unserializing a DB_Table_Database object 
+     * and its child DB_Table objects. If a DB_Table subclass named $subclass_name
+     * has not been defined when it is needed, within DB_Table_Database::__wakeup(), 
+     * to unserialize an instance of this class, the __wakeup() method attempts
+     * to include a class definition file from this directory, as follows:
+     * <code>
+     *     $dir = $this->_table_subclass_path;
+     *     require_once $dir . '/' . $subclass . '.php';
+     * </code>
+     * See the getTableSubclass() docblock for a discusion of capitalization
+     * conventions in PHP 4 and 5 for subclass file names. 
+     * 
      * @param string $path path to directory containing class definitions
      * @return void
      * @access public
@@ -1334,16 +1389,21 @@ class DB_Table_Database
      * Adds a reference from foreign key $fkey of table $ftable to
      * referenced key $rkey of table named $rtable to the $this->_ref
      * property. The values of $fkey and $rkey (if not null) may either 
-     * both be column name strings or they may both be numerically 
-     * indexed arrays of corresponding column names. If $rkey is null
-     * (the default), the referenced key taken to be the primary key of
-     * of $rtable. 
+     * both be column name strings (for single column keys) or they 
+     * may both be numerically indexed arrays of corresponding column 
+     * names (for multi-column keys). If $rkey is null (the default), 
+     * the referenced key taken to be the primary key of $rtable, if 
+     * any.
      *
-     * The $on_delete and $on_update actions may each have string values 
-     * 'restrict', 'cascade', 'set null', or 'set default', or (by default) 
-     * PHP null. PHP null value signifies that no action is taken on 
-     * deletion or updating of a referenced row to maintain foreign key 
-     * integrity.
+     * The $on_delete and $on_update parameters may be either be null, 
+     * or may have string values 'restrict', 'cascade', 'set null', or 
+     * 'set default' that indicate referentially triggered actions to be 
+     * taken deletion or updating of referenced row in $rtable. Each of 
+     * these actions corresponds to a standard SQL action (e.g., cascading 
+     * delete) that may be taken upon referencing rows of table $ftable 
+     * when a referenced row of $rtable is deleted or updated.  A PHP 
+     * null value for either parameter (the default) signifies that no
+     * such action will be taken upon deletion or updating. 
      *
      * There may no more than one reference from a table to another, though
      * reference may contain multiple columns. 
