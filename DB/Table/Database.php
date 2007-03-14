@@ -562,6 +562,36 @@ class DB_Table_Database
     var $fetchmode_object_class = null;
 
     /**
+     * If the column keys in associative array return sets are fixed case
+     * (all upper or lower case) this property should be set true. 
+     *
+     * The column keys in rows of associative array return sets may either 
+     * preserve capitalization of the column names or they may be fixed case,
+     * depending on the options set in the backend (DB/MDB2) and on phptype.
+     * If these column names are returned with a fixed case (either upper 
+     * or lower), $fix_case must be set true in order for php emulation of
+     * ON DELETE and ON UPDATE actions to work correctly. Otherwise, the
+     * $fix_case property should be false (the default).
+     *
+     * The choice between mixed or fixed case column keys may be made by using
+     * using the setFixCase() method, which resets both the behavior of the
+     * backend and the $fix_case property. It may also be changed by using the 
+     * setOption() method of the DB or MDB2 backend object to directly set the 
+     * DB_PORTABILITY_LOWERCASE or MDB2_PORTABILITY_FIX_CASE bits of the 
+     * DB/MDB2 'portability' option.
+     *
+     * By default, DB returns mixed case and MDB2 returns lower case. 
+     * 
+     * @see DB_Table_Database::setFixCase()
+     * @see DB::setOption()
+     * @see MDB2::setOption()
+     *
+     * @var    boolean
+     * @access public
+     */
+    var $fix_case = false;
+
+    /**
      * Take on_update actions if $_act_on_update is true
      *
      * @var    boolean
@@ -619,6 +649,7 @@ class DB_Table_Database
         $this->_db  =& $db;
         $this->name = $name;
 
+        $this->setFixCase(false);
     }
 
     /**
@@ -756,6 +787,31 @@ class DB_Table_Database
         } else {
             $this->_check_fkey = false;
         }
+    }
+
+    /**
+     * Sets backend option such that column keys in associative array return
+     * sets are converted to fixed case, if true, or mixed case, if false.
+     * 
+     * Sets the DB/MDB2 'portability' option, and sets $this->fix_case = $flag.
+     */
+    function setFixCase($flag = false) 
+    {
+        $flag = (bool) $flag;
+        $option = $this->_db->getOption('portability');
+        if ($this->_backend == 'db') {
+            $option = $option | DB_PORTABILITY_LOWERCASE;
+            if (!$flag) {
+                $option = $option ^ DB_PORTABILITY_LOWERCASE;
+            }
+        } else {
+            $option = $option | MDB2_PORTABILITY_FIX_CASE;
+            if (!$flag) {
+                $option = $option ^ MDB2_PORTABILITY_FIX_CASE;
+            }
+        } 
+        $this->_db->setOption('portability', $option);
+        $this->fix_case = $flag;
     }
     
     /**
@@ -2286,7 +2342,13 @@ class DB_Table_Database
 
                     // Loop over rows to be updated from $table
                     foreach ($update_rows as $update_row) {
-    
+
+                        // If necessary, restore case of column names
+                        if ($this->fix_case) {
+                            $cols = array_keys($table_obj->col);
+                            $update_row = $this->_replaceKeys($update_row, $cols);
+                        }
+
                         // Construct filter for rows that reference $update_row
                         $filter = $this->buildFilter($update_row, $rkey, $fkey);
     
@@ -2462,6 +2524,12 @@ class DB_Table_Database
                 // Loop over rows to be deleted from $table_name
                 foreach ($delete_rows as $delete_row) {
 
+                    // If necessary, restore case of $delete_row column names
+                    if ($this->fix_case) {
+                        $cols = array_keys($table_obj->col);
+                        $delete_row = $this->_replaceKeys($delete_row, $cols);
+                    }
+
                     // Construct filter for referencing rows in $ftable_name
                     $filter = $this->buildFilter($delete_row, $rkey, $fkey);
 
@@ -2521,6 +2589,33 @@ class DB_Table_Database
             return true;
         }
 
+    }
+
+    /**
+     * Returns array in which keys of $data are replaced by values of $keys.
+     *
+     * This function is used by the insert() and update() methods to restore
+     * the case of column names in associative arrays that are returned from 
+     * an automatically generated query "SELECT * FROM $table WHERE ...", when
+     * these column name keys are returned with a fixed case. In this usage, 
+     * $keys is a sequential array of the names of all columns in $table. 
+     *
+     * @param  array $data associative array
+     * @param  array $key  numerical array of replacement key names
+     * @return array associative array in which keys of $data have been replaced
+     *               by the values of array $keys.
+     * @access private
+     */
+    function _replaceKeys($data, $keys) 
+    {
+        $new_data = array();
+        $i = 0;
+        foreach ($data as $old_key => $value) {
+            $new_key = $keys[$i];
+            $new_data[$new_key] = $value;
+            $i = $i + 1;
+        }
+        return $new_data;
     }
 
     /**
