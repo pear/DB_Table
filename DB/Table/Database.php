@@ -2552,8 +2552,15 @@ class DB_Table_Database
 
         // Construct SQL command from parts
         $s = array();
-        $s[] = 'SELECT ' . $sql_array['select'];
+        if (isset($sql_array['select'])) {
+            $s[] = 'SELECT ' . $sql_array['select'];
+        } else {
+            $s[] = 'SELECT *';
+        }
         $s[] = 'FROM ' . $sql_array['from'];
+        if (isset($sql_array['join'])) {
+            $s[] = $sql_array['join'];
+        }
         if (isset($sql_array['where'])) {
             $s[] = 'WHERE ' . $sql_array['where'];
             if ($filter) {
@@ -2580,7 +2587,7 @@ class DB_Table_Database
                 $db->setLimit($count, $start);
             } else {
                 $cmd = $db->modifyLimitQuery(
-                    $cmd, $start, $count);
+                            $cmd, $start, $count);
             }
         }
 
