@@ -1,8 +1,62 @@
 <?php
+// vim: set et ts=4 sw=4 fdm=marker:
 
 /**
  * DB_Table_Generator - Generates DB_Table subclass skeleton code
  *
+ * This class may be used to generate the php code necessary to use
+ * DB_Table to interact with an existing database. This requires the
+ * generation of a skeleton subclass definition be generated for each 
+ * table in the database, in which the $col, $idx, and $auto_inc_col
+ * properties are constructed using a table schema that is obtained
+ * by querying the database. 
+ *
+ * The generator class can also generate a file, named 'Database.php' 
+ * by default, that includes (require_once) each of the table subclass 
+ * definitions, instantiates one instance of each DB_Table subclass 
+ * (i.e., one object per table), instantiates a parent DB_Table_Database 
+ * object, adds all the tables to that parent, and attempts to guess 
+ * foreign key relationships between tables based on the column names. 
+ *
+ * All of the code is written to a directory whose path is given by
+ * the property $class_write_path. By default, this is the current
+ * directory.  By default, the name of the class constructed for a 
+ * table named 'thing' is "Thing_Table". That is, the class name is 
+ * the table name, with the first letter upper case, with a suffix 
+ * '_Table'.  The suffix can be changed by setting the $class_suffix 
+ * property. The file containing the subclass definition is the 
+ * subclass name with a php extension, e.g., 'Thing_Table.php'. The 
+ * object instantiated from that subclass is the same as the table 
+ * name, with no suffix, e.g., 'thing'.
+ * 
+ * To generate the code for all of the tables in a database named 
+ * $database, instantiate a MDB2 or DB object named $db that connects 
+ * to the database of interest, and execute the following code:
+ * <code>
+ *     $generator = DB_Table_Generator($db, $database);
+ *     $generator->class_write_path = $class_write_path;
+ *     $generator->generateTableClassFiles();
+ *     $generator->generateDatabaseFile();
+ * <code>
+ * Here $class_write_path should be the path (without a trailing separator)
+ * to a directory in which all of the code should be written. It will be
+ * created if it does not exist. If this directory does exist, existing 
+ * files will not be overwritten.
+ *
+ * By default, generateTableClassFiles and generateDatabaseFiles generate
+ * code for all of the tables in the current database.  To generate code 
+ * only for a specified set of tables, set the value of the $tables 
+ * property to a sequential list of table names before calling either of
+ * these methods. To generate code for a datase containing three tables 
+ * named 'table1', 'table2', and 'table3':
+ * <code>
+ *     $generator = DB_Table_Generator($db, $database);
+ *     $generator->class_write_path = $class_write_path;
+ *     $generator->tables = array('table1', 'table2', 'table3');
+ *     $generator->generateTableClassFiles();
+ *     $generator->generateDatabaseFile();
+ * <code>
+ * 
  * PHP version 4 and 5
  *
  * @category Database
@@ -12,6 +66,24 @@
  * @version  $Id$
  */
 
+// {{{ Includes
+
+/**
+ * The PEAR class (used for errors)
+ */
+require_once 'PEAR.php';
+
+/**
+ * DB_Table table abstraction class
+ */
+require_once 'DB/Table.php';
+
+/**
+ * DB_Table_Manager class (used to reverse engineer indices)
+ */
+require_once 'DB/Table/Manager.php';
+
+// }}}
 // {{{ Error code constants
 
 /**
@@ -24,21 +96,8 @@ define('DB_TABLE_GENERATOR_ERR_DB_OBJECT', -301);
  */
 define('DB_TABLE_GENERATOR_ERR_INDEX_COL', -302);
 
-/**
- * DB_Table table abstraction class
- */
-require_once 'DB/Table.php';
-
-/**
- * DB_Table_Manager class - used to reverse engineer indices
- */
-require_once 'DB/Table/Manager.php';
-
-/**
- * The PEAR class for errors
- */
-require_once 'PEAR.php';
-
+// }}}
+// {{{ GLOBAL error message and associated code
 /** 
  * US-English default error messages. 
  */
@@ -59,6 +118,7 @@ foreach ($GLOBALS['_DB_TABLE_GENERATOR']['default_error'] as $code => $message) 
     }
 }
 
+// }}}
 // {{{ DB_Table_Generator
 
 class DB_Table_Generator
@@ -214,6 +274,10 @@ class DB_Table_Generator
      */
     var $idxname_format = '%s';
 
+// }}}
+
+// {{{    function DB_Table_Generator(&$db, $name)
+
     /**
      * Constructor
      *
@@ -245,6 +309,9 @@ class DB_Table_Generator
 
     }
 
+// }}}
+// {{{    function &throwError($code, $extra = null)
+
     /**
      * Specialized version of throwError() modeled on PEAR_Error.
      * 
@@ -274,6 +341,9 @@ class DB_Table_Generator
         return $error;
     }
    
+// }}}
+// {{{    function setErrorMessage($code, $message = null) 
+
     /**
      * Overwrites one or more error messages, e.g., to internationalize them.
      * 
@@ -296,6 +366,9 @@ class DB_Table_Generator
             $GLOBALS['_DB_TABLE_GENERATOR']['error'][$code] = $message;
         }
     }
+
+// }}}
+// {{{    function getTableNames()
 
     /**
      * Gets a list of tables from the database
@@ -338,6 +411,9 @@ class DB_Table_Generator
             return true;
         }
     }
+
+// }}}
+// {{{    function getTableDefinition($table) 
 
     /**
      * Gets column and index definitions by querying database
@@ -610,6 +686,9 @@ class DB_Table_Generator
         }
     }
 
+// }}}
+// {{{ function buildTableClass($table, $indent = '')
+
     /**
      * Returns one skeleton DB_Table subclass definition, as php code
      *
@@ -706,6 +785,9 @@ class DB_Table_Generator
         
     }
 
+// }}}
+// {{{    function buildTableClasses() 
+
     /**
      * Returns a string containing all table class definitions in one file
      *
@@ -748,6 +830,8 @@ class DB_Table_Generator
         return implode($s,"\n");
     }
 
+// }}}
+// {{{    function generateTableClassFiles() 
 
     /**
      * Writes all table class definitions to separate files
@@ -798,6 +882,9 @@ class DB_Table_Generator
         }
 
     }
+
+// }}}
+// {{{    function generateDatabaseFile($object_name = null)
 
     /**
      * Writes a file to instantiate Table and Database objects
@@ -954,6 +1041,9 @@ class DB_Table_Generator
         fclose($file);
     }
 
+// }}}
+// {{{    function className($table)
+
     /**
      * Convert a table name into a class name 
      *
@@ -971,6 +1061,8 @@ class DB_Table_Generator
         return  $name . $this->class_suffix;
     }
     
+// }}}
+// {{{    function classFileName($class_name)
     
     /**
      * Returns the path to a file containing a class definition
@@ -988,4 +1080,7 @@ class DB_Table_Generator
         
     }
 
+// }}}
+
 }
+// }}}
