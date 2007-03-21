@@ -20,6 +20,11 @@
 define('DB_TABLE_GENERATOR_ERR_DB_OBJECT', -301);
 
 /**
+ * Parameter is not a DB/MDB2 object
+ */
+define('DB_TABLE_GENERATOR_ERR_INDEX_COL', -302);
+
+/**
  * DB_Table table abstraction class
  */
 require_once 'DB/Table.php';
@@ -39,7 +44,9 @@ require_once 'PEAR.php';
  */
 $GLOBALS['_DB_TABLE_GENERATOR']['default_error'] = array(
         DB_TABLE_GENERATOR_ERR_DB_OBJECT =>
-        'Invalid DB/MDB2 object parameter. Function'
+        'Invalid DB/MDB2 object parameter. Function',
+        DB_TABLE_GENERATOR_ERR_INDEX_COL =>
+        'Index column is not a valid column name. Index column'
     );
 
 // merge default and user-defined error messages
@@ -73,15 +80,15 @@ class DB_Table_Generator
      * @var    object
      * @access private
      */
-    var $_db = null;
+    var $db = null;
 
     /**
-     * The backend type, which may be 'DB' or 'MDB2'
+     * The backend type. May have values 'db' or 'mdb2'
      *
      * @var    string
      * @access private
      */
-    var $_backend = null;
+    var $backend = null;
 
     /**
     * If there is an error on instantiation, this captures that error.
@@ -159,24 +166,44 @@ class DB_Table_Generator
     /**
      * Array of column definitions
      *
-     * Array $this->columns[table_name][column_name] = column definition.
-     * Column definition is the array returned by DB/MDB2::tableInfo().
+     * Array $this->col[table_name][column_name] = column definition.
+     * Column definition is an array with the same format as the $col 
+     * property of a DB_Table object
      *
      * @var    array
      * @access public
      */
-    var $columns = array();
+    var $col          = array();
 
     /**
      * Array of index/constraint definitions.
      *
-     * Array $this->indexes[table][index name] = Index definition. Index
-     * definition is an array returned by getTable<Constraint|Index>()
+     * Array $this->idx[table_table][index_name] = Index definition. 
+     * The index definition is an array with the same format as the
+     * DB_Table $idx property property array.
      *
      * @var    array
      * @access public
      */
-    var $indexes = array();
+     var $idx = array();
+
+    /**
+     * Array of auto_increment column names
+     *
+     * Array $this->auto_inc_col[table_name] = auto-increment column
+     *
+     * @var    array
+     * @access public
+     */
+     var $auto_inc_col = array();
+
+    /**
+     * Array of primary keys
+     *
+     * @var    array
+     * @access public
+     */
+     var $primary_key = array();
 
     /**
      * MDB2 'idxname_format' option, format of index names 
@@ -204,16 +231,16 @@ class DB_Table_Generator
     {
         // Is $db an DB/MDB2 object or null?
         if (is_a($db, 'db_common')) {
-            $this->_backend = 'db';
+            $this->backend = 'db';
         } elseif (is_a($db, 'mdb2_driver_common')) {
-            $this->_backend = 'mdb2';
+            $this->backend = 'mdb2';
         } else {
             $this->error =& DB_Table_Generator::throwError(
                             DB_TABLE_GENERATOR_ERR_DB_OBJECT,
                             "DB_Table_Generator");
             return;
         }
-        $this->_db  =& $db;
+        $this->db  =& $db;
         $this->name = $name;
 
     }
@@ -283,35 +310,25 @@ class DB_Table_Generator
     function getTableNames()
     {
 
-        if ($this->_backend == 'db') {
+        if ($this->backend == 'db') {
             // try getting a list of schema tables first. (postgres)
-            $this->_db->expectError(DB_ERROR_UNSUPPORTED);
-            $this->tables = $this->_db->getListOf('schema.tables');
-            $this->_db->popExpect();
+            $this->db->expectError(DB_ERROR_UNSUPPORTED);
+            $this->tables = $this->db->getListOf('schema.tables');
+            $this->db->popExpect();
             if (PEAR::isError($this->tables)) {
                 // try a list of tables, not qualified by 'schema'
-                $this->_db->expectError(DB_ERROR_UNSUPPORTED);
-                $this->tables = $this->_db->getListOf('tables');
-                $this->_db->popExpect();
+                $this->db->expectError(DB_ERROR_UNSUPPORTED);
+                $this->tables = $this->db->getListOf('tables');
+                $this->db->popExpect();
             }
         } else {
-            $this->_db->setOption('portability', MDB2_PORTABILITY_ALL ^ MDB2_PORTABILITY_FIX_CASE);
-            $this->_db->loadModule('Manager');
-            $this->_db->loadModule('Reverse');
+            $this->db->setOption('portability', MDB2_PORTABILITY_ALL ^ MDB2_PORTABILITY_FIX_CASE);
+            $this->db->loadModule('Manager');
+            $this->db->loadModule('Reverse');
 
             // Get list of tables
-            $this->tables = $this->_db->manager->listTables();
+            $this->tables = $this->db->manager->listTables();
 
-            // Add sequences
-            $sequences = $this->_db->manager->listSequences();
-            if (!PEAR::isError($sequences)) {
-                foreach ($sequences as $k => $v) {
-                    $sequence = $this->_db->getSequenceName($v);
-                    if (!PEAR::isError($sequence)) {
-                        $this->tables[] = $sequence;
-                    }
-                }
-            }
         }
         if (PEAR::isError($this->tables)) {
             $error = $this->tables; 
@@ -323,13 +340,13 @@ class DB_Table_Generator
     }
 
     /**
-     * Gets column and (if possible) index definitions by querying database
+     * Gets column and index definitions by querying database
      * 
-     * Upon return, column definitions are stored in this $this->columns, and 
-     * index definitions (if any) in $this->indexes. 
+     * Upon return, column definitions are stored in $this->col[$table], 
+     * and index definitions in $this->idx[$table].
      *
-     * Calls DB/MDB2::tableInfo() to obtain column definitions, and uses 
-     * DB_Table::Manager to obtain index definitions.
+     * Calls DB/MDB2::tableInfo() for column definitions, and uses 
+     * the DB_Table_Manager class to obtain index definitions.
      *
      * @param   $table string name of table
      * @return  void
@@ -345,8 +362,8 @@ class DB_Table_Generator
         #        $table = $bits[1];
         #    }
         #}
-        $db =& $this->_db;
-        if ($this->_backend == 'db') {
+        $db =& $this->db;
+        if ($this->backend == 'db') {
 
             $defs =  $db->tableInfo($table);
             if (PEAR::isError($defs)) {
@@ -368,6 +385,7 @@ class DB_Table_Generator
                     $defs[$k]['len'] = $defs[$k]['length'];
                 }
             }
+
             $this->columns[$table] = $defs;
 
             // Temporarily set 'idxname_format' MDB2 option to $this->idx_format
@@ -375,44 +393,12 @@ class DB_Table_Generator
             $db->setOption('idxname_format', $this->idxname_format);
         }
 
-        // Constraints/Indexes
-        $indexes = DB_Table_Manager::getIndexes($db, $table);
-        if (PEAR::isError($indexes)) {
-            return $indexes;
-        }   
-        $this->indexes[$table] = $indexes;
+        // Default - no auto increment column 
+        $this->auto_inc_col[$table] = null;
 
-        if ($this->_backend == 'mdb2') {
-            // Restore original MDB2 idxname_format
-            $db->setOption('idxname_format', $idxname_format);
-        }
-    }
-
-    /**
-     * Returns one skeleton DB_Table subclass definition, as php code
-     *
-     * The returned subclass definition string contains values for the 
-     * $col (column), $idx (index) and $auto_inc_col properties, with
-     * no method definitions.
-     *
-     * @param  $table   string  name of table
-     * @param  $indent  string  string of whitespace for base indentation
-     * @return string skeleton DB_Table subclass definition
-     * @access public
-     */
-    function buildTableClass($table, $indent = '')
-    {
-        $s   = array();
-        $idx = array();
-        $s[] = $indent . 'class ' . $this->className($table) . 
-               ' extends ' . $this->extends . " {\n";
-        $indent = $indent . '    ';
-        $s[] = $indent . 'var $col = array(' . "\n";
-        $u   = array(); 
-        $indent = $indent . '    ';
-       
-        // Begin loop over columns
-        foreach($this->columns[$table] as $t) {
+        // Loop over columns to create $this->col[$table]
+        $this->col[$table] = array();
+        foreach($defs as $t) {
 
             $name = $t['name'];
             $col  = array();
@@ -474,6 +460,16 @@ class DB_Table_Generator
                 case 'LONGTEXT':
                     $col['type'] = 'clob';
                     break;
+                case 'DATE':    
+                    $col['type'] = 'date';
+                    break;
+                case 'TIME':    
+                    $col['type'] = 'time';
+                    break;
+                case 'DATETIME':   // mysql
+                case 'TIMESTAMP':
+                    $col['type'] = 'timestamp';
+                    break;
                 case 'ENUM':
                 case 'SET':         // not really but oh well
                 case 'TIMESTAMPTZ': // postgres
@@ -485,16 +481,6 @@ class DB_Table_Generator
                 case 'INTEGER[]':   // postgres type
                 case 'BOOLEAN[]':   // postgres type
                     $col['type'] = 'varchar';
-                    break;
-                case 'DATE':    
-                    $col['type'] = 'date';
-                    break;
-                case 'TIME':    
-                    $col['type'] = 'time';
-                    break;
-                case 'DATETIME':   // mysql
-                case 'TIMESTAMP':
-                    $col['type'] = 'timestamp';
                     break;
                 default:     
                     $col['type'] = $t['type'] . ' (Unknown type)';
@@ -522,7 +508,7 @@ class DB_Table_Generator
                 }
             }
             if (isset($t['autoincrement'])) {
-                $auto_inc_col = $name;
+                $this->auto_inc_col[$table] = $name;
             }
             if (isset($t['flags'])){ 
                 $flags = $t['flags'];
@@ -530,20 +516,8 @@ class DB_Table_Generator
                     $col['required'] = true;
                 }
                 if (preg_match("/(auto_increment|nextval\()/i", $flags)) {
-                    $auto_inc_col = $name;
+                    $this->auto_inc_col[$table] = $name;
                 } 
-                if (preg_match("/(primary)/i", $flags)) {
-                    $idx[$name] = array(
-                        'type' => 'primary', 
-                        'cols' => $name
-                    );
-                }
-                elseif (preg_match("/(unique)/i", $flags)) {
-                    $idx[$name] = array(
-                        'type' => 'unique', 
-                        'cols' => $name
-                    );
-                }
             }
             $required = isset($col['required']) ? $col['required'] : false;
             if ($required) {
@@ -551,9 +525,9 @@ class DB_Table_Generator
                     $default = $t['default'];
                     $type    = $col['type'];
                     if (in_array($type, 
-                                 array('smallint','integer','bigint'))) {
+                                 array('smallint', 'integer', 'bigint'))) {
                         $default = (int) $default;
-                    } elseif (in_array($type, array('single','double'))) {
+                    } elseif (in_array($type, array('single', 'double'))) {
                         $default = (float) $default;
                     } elseif ($type == 'boolean') {
                         $default = (int) $default ? 1 : 0;
@@ -561,6 +535,106 @@ class DB_Table_Generator
                     $col['default'] = $default;
                 }
             }
+            $this->col[$table][$name] = $col;
+
+        }
+
+        // Make array with lower case column array names as keys
+        $col_lc = array();
+        foreach ($this->col[$table] as $name => $def) {
+            $name_lc = strtolower($name);
+            $col_lc[$name_lc] = $name;
+        }
+
+        // Constraints/Indexes
+        $DB_indexes = DB_Table_Manager::getIndexes($db, $table);
+        if (PEAR::isError($DB_indexes)) {
+            return $DB_indexes;
+        }   
+
+        // Check that index columns correspond to valid column names.
+        // Try to correct problems with capitalization, if necessary.
+        foreach ($DB_indexes as $type => $indexes) {
+            foreach ($indexes as $name => $fields) {
+                foreach ($fields as $key => $field) {
+
+                    // If index column is not a valid column name
+                    if (!array_key_exists($field, $this->col[$table])) {
+
+                        // Try a case-insensitive match
+                        $field_lc = strtolower($field);
+                        if (isset($col_lc[$field_lc])) {
+                            $correct = $col_lc[$field_lc];
+                            $DB_indexes[$type][$name][$key] 
+                                 = $correct;
+                        } else {
+                            $return =& DB_Table_Generator::throwError(
+                                          DB_TABLE_GENERATOR_ERR_INDEX_COL,
+                                          "$field");
+                        }
+
+                    }
+                }
+            }
+        }
+
+        // Generate index definitions, if any, as php code
+        $n_idx = 0;
+        $u = array();
+        $this->idx[$table] = array(); 
+        $this->primary_key[$table] = null; 
+        foreach ($DB_indexes as $type => $indexes) {
+            if (count($indexes) > 0) {
+                foreach ($indexes as $name => $fields) {
+                    $this->idx[$table][$name] = array();
+                    $this->idx[$table][$name]['type'] = $type;
+                    if (count($fields) == 1) {
+                        $key = $fields[0];
+                    } else {
+                        $key = array();
+                        foreach ($fields as $value) {
+                            $key[] = $value;
+                        }
+                    }
+                    $this->idx[$table][$name]['cols'] = $key;
+                    if ($type == 'primary') {
+                        $this->primary_key[$table] = $key;
+                    }
+                }
+            }
+        }
+
+        if ($this->backend == 'mdb2') {
+            // Restore original MDB2 idxname_format
+            $db->setOption('idxname_format', $idxname_format);
+        }
+    }
+
+    /**
+     * Returns one skeleton DB_Table subclass definition, as php code
+     *
+     * The returned subclass definition string contains values for the 
+     * $col (column), $idx (index) and $auto_inc_col properties, with
+     * no method definitions.
+     *
+     * @param  $table   string  name of table
+     * @param  $indent  string  string of whitespace for base indentation
+     * @return string skeleton DB_Table subclass definition
+     * @access public
+     */
+    function buildTableClass($table, $indent = '')
+    {
+        $s   = array();
+        $idx = array();
+        $s[] = $indent . 'class ' . $this->className($table) . 
+               ' extends ' . $this->extends . " {\n";
+        $indent = $indent . '    ';
+        $s[] = $indent . 'var $col = array(' . "\n";
+        $u   = array(); 
+        $indent = $indent . '    ';
+       
+        // Begin loop over columns
+        foreach($this->col[$table] as $name => $col) {
 
             // Generate DB_Table column definitions as php code
             $v = $indent . "'" . $name . "' => array(\n";
@@ -587,53 +661,47 @@ class DB_Table_Generator
         $s[] = $indent . ");\n";
 
         // Generate index definitions, if any, as php code
-        $n_idx = 0;
-        $u = array(); 
-        foreach ($this->indexes[$table] as $type => $indexes) {
-            if (count($indexes) > 0) {
-                foreach ($indexes as $name => $fields) {
-                    if ($n_idx == 0) {
-                        $s[] = $indent . 'var $idx = array(' . "\n";
-                        $indent = $indent . '    ';
-                    }
-                    $n_idx = $n_idx + 1;
-                    $v = $indent . "'" . $name . "' => array(\n";
+        if (count($this->idx[$table]) > 0) {
+            $u = array(); 
+            $s[] = $indent . 'var $idx = array(' . "\n";
+            $indent = $indent . '    ';
+            foreach ($this->idx[$table] as $name => $def) {
+                $type = $def['type'];
+                $cols = $def['cols'];
+                $v = $indent . "'" . $name . "' => array(\n";
+                $indent = $indent . '    ';
+                $v = $v . $indent . "'type' => '$type',\n";
+                if (is_array($cols)) {
+                    $v = $v . $indent . "'cols' => array(\n";
                     $indent = $indent . '    ';
-                    $v = $v . $indent . "'type' => '$type',\n";
-                    if (count($fields) == 1) {
-                        foreach ($fields as $key => $value) {
-                            $v = $v . $indent . "'cols' => '$value'\n";
-                        }
-                    } else {
-                        $v = $v . $indent . "'cols' => array(\n";
-                        $indent = $indent . '    ';
-                        $t = array();
-                        foreach ($fields as $key => $value) {
-                            $t[] = $indent . "'$value'";
-                        }
-                        $v = $v . implode($t,",\n") . "\n";
-                        $indent = substr($indent, 0, -4);
-                        $v = $v . $indent . ")\n";
+                    $t = array();
+                    foreach ($cols as $value) {
+                        $t[] = $indent . "'{$value}'";
                     }
+                    $v = $v . implode($t,",\n") . "\n";
                     $indent = substr($indent, 0, -4);
-                    $v = $v . $indent . ")";
-                    $u[] = $v;
+                    $v = $v . $indent . ")\n";
+                } else {
+                    $v = $v . $indent . "'cols' => '$cols'\n";
                 }
+                $indent = substr($indent, 0, -4);
+                $v = $v . $indent . ")";
+                $u[] = $v;
             }
-        }
-        if ($n_idx == 0) {
-            $s[] = $indent . 'var $idx = array();' . "\n";
-        } else {
             $s[] = implode($u,",\n\n") . "\n";
             $indent = substr($indent, 0, -4);
             $s[] = $indent . ");\n";
         }
 
-        if (isset($auto_inc_col)) {
-           $s[] = $indent . 'var $auto_inc_col = ' . "'$auto_inc_col';\n";
+        // Write auto_inc_col
+        if (isset($this->auto_inc_col[$table])) {
+           $s[] = $indent . 'var $auto_inc_col = ' 
+                          . "'{$this->auto_inc_col[$table]}';\n";
         }
         $indent = substr($indent, 0, -4);
         $s[] = $indent . '}';
+
+        // Implode and return lines of class definition
         return implode($s,"\n") . "\n";
         
     }
@@ -758,7 +826,7 @@ class DB_Table_Generator
         } else {
             $object_name = '$db'; //default
         }
-        $backend = strtoupper($this->_backend); // 'DB' or 'MDB2'
+        $backend = strtoupper($this->backend); // 'DB' or 'MDB2'
 
         // Create array d[] containing lines of database php file
         $d = array();
@@ -789,9 +857,11 @@ class DB_Table_Generator
 
         $d[] = '// Instantiate DB/MDB2 connection object $conn';
         $d[] = '$conn =& ' . $backend . '::connect($dsn);';
-        $d[] = "";
-
-        $d[] = '# NOTE: Add error handling code here, if desired';
+        $d[] = 'if (PEAR::isError($conn)) {';
+        $d[] = '    print "Error connecting to database server\n";';
+        $d[] = '    print $conn->getMessage();';
+        $d[] = '    die;';
+        $d[] = '}';
         $d[] = "";
 
         $d[] = '// Create one instance of each DB_Table subclass';
@@ -814,7 +884,54 @@ class DB_Table_Generator
         }
         $d[] = "";
 
-        $d[] = '// NOTE: Add any foreign references and linking tables';
+        // Add foreign key references: If the name of an integer column 
+        // matches "/id$/i" (i.e., the names ends with id, ID, or Id), the
+        // remainder of the name matches the name $rtable of another table,
+        // and $rtable has an integer primary key, then the column is
+        // assumed to be a foreign key that references $rtable.
+
+        $d[] = '// Add auto-guessed foreign references';
+        foreach ($this->col as $table => $col) {
+            foreach ($col as $col_name => $def) {
+
+                 // Only consider integer columns
+                 $ftype = $def['type'];
+                 if (!in_array($ftype, array('integer','smallint','bigint'))) {
+                     continue;
+                 }
+                 if (preg_match("/id$/i", $col_name)) {
+                     $column_base = preg_replace('/_?id$/i', '', $col_name);
+                     foreach ($this->tables as $rtable) {
+                         if (!preg_match("/^{$rtable}$/i", $column_base)) {
+                             continue;
+                         }
+                         if (preg_match("/^{$table}$/i", $column_base)) {
+                             continue;
+                         }
+                         if (!isset($this->primary_key[$rtable])) {
+                             continue;
+                         }
+                         $rkey = $this->primary_key[$rtable];
+                         if (is_array($rkey)) {
+                             continue;
+                         }
+                         $rtype = $this->col[$rtable][$rkey]['type'];
+                         if (!in_array($rtype, 
+                                       array('integer','smallint','bigint'))) {
+                             continue;
+                         }
+                         $d[] = $object_name 
+                              . "->addRef('$table', '$col_name', '$rtable');";
+                     }
+                 }
+            }
+        }
+        $d[] = "";
+        $d[] = '// Add any additional foreign key references here';
+        $d[] = "";
+        $d[] = '// Add any linking table declarations here';
+        $d[] = '// Uncomment next line to add all possible linking tables;';
+        $d[] = '# ' . $object_name . '->addAllLinks();';
         $d[] = "";
 
         // Closing script element
