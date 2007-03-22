@@ -4,59 +4,6 @@
 /**
  * DB_Table_Generator - Generates DB_Table subclass skeleton code
  *
- * This class may be used to generate the php code necessary to use
- * DB_Table to interact with an existing database. This requires the
- * generation of a skeleton subclass definition be generated for each 
- * table in the database, in which the $col, $idx, and $auto_inc_col
- * properties are constructed using a table schema that is obtained
- * by querying the database. 
- *
- * The generator class can also generate a file, named 'Database.php' 
- * by default, that includes (require_once) each of the table subclass 
- * definitions, instantiates one instance of each DB_Table subclass 
- * (i.e., one object per table), instantiates a parent DB_Table_Database 
- * object, adds all the tables to that parent, and attempts to guess 
- * foreign key relationships between tables based on the column names. 
- *
- * All of the code is written to a directory whose path is given by
- * the property $class_write_path. By default, this is the current
- * directory.  By default, the name of the class constructed for a 
- * table named 'thing' is "Thing_Table". That is, the class name is 
- * the table name, with the first letter upper case, with a suffix 
- * '_Table'.  The suffix can be changed by setting the $class_suffix 
- * property. The file containing the subclass definition is the 
- * subclass name with a php extension, e.g., 'Thing_Table.php'. The 
- * object instantiated from that subclass is the same as the table 
- * name, with no suffix, e.g., 'thing'.
- * 
- * To generate the code for all of the tables in a database named 
- * $database, instantiate a MDB2 or DB object named $db that connects 
- * to the database of interest, and execute the following code:
- * <code>
- *     $generator = DB_Table_Generator($db, $database);
- *     $generator->class_write_path = $class_write_path;
- *     $generator->generateTableClassFiles();
- *     $generator->generateDatabaseFile();
- * <code>
- * Here $class_write_path should be the path (without a trailing separator)
- * to a directory in which all of the code should be written. It will be
- * created if it does not exist. If this directory does exist, existing 
- * files will not be overwritten.
- *
- * By default, generateTableClassFiles and generateDatabaseFiles generate
- * code for all of the tables in the current database.  To generate code 
- * only for a specified set of tables, set the value of the $tables 
- * property to a sequential list of table names before calling either of
- * these methods. To generate code for a datase containing three tables 
- * named 'table1', 'table2', and 'table3':
- * <code>
- *     $generator = DB_Table_Generator($db, $database);
- *     $generator->class_write_path = $class_write_path;
- *     $generator->tables = array('table1', 'table2', 'table3');
- *     $generator->generateTableClassFiles();
- *     $generator->generateDatabaseFile();
- * <code>
- * 
  * PHP version 4 and 5
  *
  * @category Database
@@ -121,6 +68,78 @@ foreach ($GLOBALS['_DB_TABLE_GENERATOR']['default_error'] as $code => $message) 
 // }}}
 // {{{ DB_Table_Generator
 
+/**
+ * class DB_Table_Generator - Generates DB_Table subclass skeleton code
+ *
+ * This class generates the php code necessary to use the DB_Table
+ * package to interact with an existing database. This requires the
+ * generation of a skeleton subclass definition be generated for each 
+ * table in the database, in which the $col, $idx, and $auto_inc_col
+ * properties are constructed using a table schema that is obtained
+ * by querying the database. 
+ *
+ * The class can also generate a file, named 'Database.php' by default,
+ * that includes (require_once) each of the table subclass definitions,
+ * instantiates one object of each DB_Table subclass (i.e., one object 
+ * for each table), instantiates a parent DB_Table_Database object, 
+ * adds all the tables to that parent, attempts to guess foreign key 
+ * relationships between tables based on the column names, and adds
+ * the inferred references to the parent object.
+ *
+ * All of the code is written to a directory whose path is given by
+ * the property $class_write_path. By default, this is the current
+ * directory.  By default, the name of the class constructed for a 
+ * table named 'thing' is "Thing_Table". That is, the class name is 
+ * the table name, with the first letter upper case, with a suffix 
+ * '_Table'.  This suffix can be changed by setting the $class_suffix 
+ * property. The file containing a subclass definition is the 
+ * subclass name with a php extension, e.g., 'Thing_Table.php'. The 
+ * object instantiated from that subclass is the same as the table 
+ * name, with no suffix, e.g., 'thing'.
+ * 
+ * To generate the code for all of the tables in a database named 
+ * $database, instantiate a MDB2 or DB object named $db that connects 
+ * to the database of interest, and execute the following code:
+ * <code>
+ *     $generator = DB_Table_Generator($db, $database);
+ *     $generator->class_write_path = $class_write_path;
+ *     $generator->generateTableClassFiles();
+ *     $generator->generateDatabaseFile();
+ * <code>
+ * Here $class_write_path should be the path (without a trailing 
+ * separator) to a directory in which all of the code should be 
+ * written. It will be created if it does not exist. If this directory 
+ * does already exist, existing files will not be overwritten. If
+ * ->generateDatabaseFile is called, it must be called after the
+ * ->generateTableClassFiles() method. If this line is omitted,
+ * all the code will be written to the current directory.
+ *
+ * By default, ->generateTableClassFiles() and ->generateDatabaseFiles()
+ * generate code for all of the tables in the current database. To 
+ * generate code for a specified list of tables, set the value of the 
+ * public $tables property to a sequential list of table names before 
+ * calling either of these methods. Code can be generated for three 
+ * tables named 'table1', 'table2', and 'table3' as follows:
+ * <code>
+ *     $generator = DB_Table_Generator($db, $database);
+ *     $generator->class_write_path = $class_write_path;
+ *     $generator->tables = array('table1', 'table2', 'table3');
+ *     $generator->generateTableClassFiles();
+ *     $generator->generateDatabaseFile();
+ * <code>
+ * If the $tables property is not set to a non-null value prior to
+ * calling ->generateTableClassFiles() then, by default, the database
+ * is queried for a list of all of all table names, by calling the
+ * ->getTableNames() method from within ->generateTableClassFiles().
+ * 
+ * PHP version 4 and 5
+ *
+ * @category Database
+ * @package  DB_Table
+ * @author   David C. Morse <morse@php.net>
+ * @license  http://www.gnu.org/copyleft/lesser.html LGPL
+ * @version  $Id$
+ */
 class DB_Table_Generator
 {
 
@@ -214,9 +233,10 @@ class DB_Table_Generator
      * Include path to subclass definition files from database file
      *
      * Used to create require_once statements in the Database.php file,
-     * which is in the same directory as the class definition files.
-     * Leave as empty string if your PHP include_path contains ".". 
-     * Value should not include a trailing "/", which is added automatically.
+     * which is in the same directory as the class definition files. Leave
+     * as empty string if your PHP include_path contains ".". The value 
+     * should not include a trailing "/", which is added automatically 
+     * to values other than the empty string.
      *
      * @var    string
      * @access public
