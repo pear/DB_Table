@@ -3,7 +3,7 @@
 * 
 * DB_Table_QuickForm creates HTML_QuickForm objects from DB_Table properties.
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 *
