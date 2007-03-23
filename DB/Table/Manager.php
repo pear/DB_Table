@@ -7,7 +7,7 @@
 * DB_Table_Manager provides database automated table creation
 * facilities.
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 *
