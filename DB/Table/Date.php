@@ -25,8 +25,9 @@
 /**
  * Generic date handling class for DB_Table.
  *
+ * @category Database
+ * @package DB_Table
  * @author Baba Buehler <baba@babaz.com>
- * @package Date
  * @access public
  */
 class DB_Table_Date {
