@@ -10,7 +10,7 @@
 * and automated creation of QuickForm elements based on the column
 * definitions.
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 *
