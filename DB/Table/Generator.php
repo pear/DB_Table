@@ -44,7 +44,7 @@ define('DB_TABLE_GENERATOR_ERR_DB_OBJECT', -301);
 define('DB_TABLE_GENERATOR_ERR_INDEX_COL', -302);
 
 // }}}
-// {{{ GLOBAL error message and associated code
+// {{{ Error messages
 /** 
  * US-English default error messages. 
  */
@@ -66,7 +66,7 @@ foreach ($GLOBALS['_DB_TABLE_GENERATOR']['default_error'] as $code => $message) 
 }
 
 // }}}
-// {{{ DB_Table_Generator
+// {{{ class DB_Table_Generator
 
 /**
  * class DB_Table_Generator - Generates DB_Table subclass skeleton code
@@ -105,14 +105,15 @@ foreach ($GLOBALS['_DB_TABLE_GENERATOR']['default_error'] as $code => $message) 
  *     $generator->class_write_path = $class_write_path;
  *     $generator->generateTableClassFiles();
  *     $generator->generateDatabaseFile();
- * <code>
+ * </code>
  * Here $class_write_path should be the path (without a trailing 
  * separator) to a directory in which all of the code should be 
- * written. It will be created if it does not exist. If this directory 
- * does already exist, existing files will not be overwritten. If
- * ->generateDatabaseFile is called, it must be called after the
- * ->generateTableClassFiles() method. If this line is omitted,
- * all the code will be written to the current directory.
+ * written. If this directory does not exist, it will be created. 
+ * If the directory does already exist, exising files will not 
+ * be overwritten. If $class_write_path is not set (i.e., if this
+ * line is omitted) all the code will be written to the current 
+ * directory.  If ->generateDatabaseFile() is called, it must be 
+ * called after ->generateTableClassFiles(). 
  *
  * By default, ->generateTableClassFiles() and ->generateDatabaseFiles()
  * generate code for all of the tables in the current database. To 
@@ -126,10 +127,10 @@ foreach ($GLOBALS['_DB_TABLE_GENERATOR']['default_error'] as $code => $message) 
  *     $generator->tables = array('table1', 'table2', 'table3');
  *     $generator->generateTableClassFiles();
  *     $generator->generateDatabaseFile();
- * <code>
- * If the $tables property is not set to a non-null value prior to
- * calling ->generateTableClassFiles() then, by default, the database
- * is queried for a list of all of all table names, by calling the
+ * </code>
+ * If the $tables property is not set to a non-null value prior 
+ * to calling ->generateTableClassFiles() then, by default, the 
+ * database is queried for a list of all table names, by calling the
  * ->getTableNames() method from within ->generateTableClassFiles().
  * 
  * PHP version 4 and 5
