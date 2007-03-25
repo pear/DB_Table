@@ -2851,6 +2851,9 @@ class DB_Table_Database
         // get the result
         if ($this->_backend == 'mdb2') {
             $stmt =& $db->prepare($sql);
+            if (PEAR::isError($stmt)) {
+                return $stmt;
+            }
             $result =& $stmt->execute($params);
         } else {
             $result =& $db->query($sql, $params);
