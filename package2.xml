@@ -10,7 +10,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
 <name>DB_Table</name>
 <channel>pear.php.net</channel>
 <summary>
-An object oriented interface to, and model of, a database. 
+An object oriented interface to, and model of, a database. Integrates with HTML_QuickForm.
 </summary>
 <description>
 The DB_Table package provides an object oriented interface to a database. 
