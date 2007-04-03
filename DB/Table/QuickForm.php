@@ -50,7 +50,7 @@ if (!isset($GLOBALS['_DB_TABLE']['qf_class_name'])) {
 * DB_Table_QuickForm provides HTML form creation facilities based on
 * DB_Table column definitions transformed into HTML_QuickForm elements.
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 *
