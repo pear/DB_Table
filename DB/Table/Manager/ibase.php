@@ -5,7 +5,7 @@
 * Index, constraint and alter methods for DB_Table usage with
 * PEAR::DB as backend. (Code adopted from PEAR::MDB2)
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 *
@@ -25,7 +25,7 @@ require_once 'DB/Table.php';
 * Index, constraint and alter methods for DB_Table usage with
 * PEAR::DB as backend. (Code adopted from PEAR::MDB2)
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 *
