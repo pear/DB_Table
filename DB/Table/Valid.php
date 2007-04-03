@@ -39,7 +39,7 @@ if (! isset($GLOBALS['_DB_TABLE']['valid'])) {
 * 
 * DB_Table_Valid validates values against DB_Table column types.
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 * 
