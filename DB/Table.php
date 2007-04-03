@@ -11,9 +11,7 @@
 * definitions.
 * 
 * @category Database
-* 
 * @package DB_Table
-*
 * @author Paul M. Jones <pmjones@php.net>
 * @author Mark Wiesemann <wiesemann@php.net>
 * 
@@ -464,10 +462,8 @@ foreach ($GLOBALS['_DB_TABLE']['default_error'] as $code => $message) {
 * and automated creation of QuickForm elemnts based on the column
 * definitions.
 * 
-* @category DB
-* 
+* @category Database
 * @package DB_Table
-* 
 * @author Paul M. Jones <pmjones@php.net>
 * @author Mark Wiesemann <wiesemann@php.net>
 * 
