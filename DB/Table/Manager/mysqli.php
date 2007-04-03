@@ -1,39 +1,30 @@
 <?php
 
 /**
-* 
-* Index, constraint and alter methods for DB_Table usage with
-* PEAR::DB as backend. (Code adopted from PEAR::MDB2)
-* 
-* @category Database
-* 
-* @package DB_Table
-*
-* @author Mark Wiesemann <wiesemann@php.net>
-* 
-* @license http://www.gnu.org/copyleft/lesser.html LGPL
-* 
-* @version $Id$
-*
-*/
+ * Index, constraint and alter methods for DB_Table usage with
+ * PEAR::DB as backend. (Code adopted from PEAR::MDB2)
+ * 
+ * @category Database
+ * @package DB_Table
+ * @author Mark Wiesemann <wiesemann@php.net>
+ * @license http://www.gnu.org/copyleft/lesser.html LGPL
+ * @version $Id$
+ */
 
+/**
+ * require DB_Table class
+ */
 require_once 'DB/Table.php';
 
 
 /**
-* 
-* Index, constraint and alter methods for DB_Table usage with
-* PEAR::DB as backend. (Code adopted from PEAR::MDB2)
-* 
-* @category Database
-* 
-* @package DB_Table
-*
-* @author Mark Wiesemann <wiesemann@php.net>
-*
-*/
-
-
+ * Index, constraint and alter methods for DB_Table usage with
+ * PEAR::DB as backend. (Code adopted from PEAR::MDB2)
+ * 
+ * @category Database
+ * @package DB_Table
+ * @author Mark Wiesemann <wiesemann@php.net>
+ */
 class DB_Table_Manager_mysqli {
 
     /**
