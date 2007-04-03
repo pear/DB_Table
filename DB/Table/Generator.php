@@ -827,7 +827,7 @@ class DB_Table_Generator
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
      *     print $generator->buildTablesClasses();
-     * <code>
+     * </code>
      * 
      */
     function buildTableClasses() 
@@ -861,7 +861,7 @@ class DB_Table_Generator
      * <code>
      *     $generator = DB_Table_Generator($db, $database);
      *     $generator->generateTableClassFiles();
-     * <code>
+     * </code>
      *
      * @return void
      * @access public 
@@ -920,7 +920,7 @@ class DB_Table_Generator
      *     $generator = DB_Table_Generator($db, $database);
      *     $generator->generateTableClassFiles();
      *     $generator->generateDatabaseFile();
-     * <code>
+     * </code>
      *
      * @param  string variable name for DB_Table_Database object
      * @return void
