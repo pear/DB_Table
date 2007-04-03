@@ -365,6 +365,7 @@ foreach ($GLOBALS['_DB_TABLE_DATABASE']['default_error'] as $code => $message) {
  *   - Serialization and unserialization of the database schema via 
  *     either php serialization or XML, using the MDB2 XML schema. 
  *
+ * @category Database
  * @package  DB_Table
  * @author   David C. Morse <morse@php.net>
  *
