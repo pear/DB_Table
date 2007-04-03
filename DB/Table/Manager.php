@@ -30,7 +30,7 @@ require_once 'DB/Table.php';
 * DB_Table_Manager provides database automated table creation
 * facilities.
 * 
-* @category DB
+* @category Database
 * 
 * @package DB_Table
 *
