@@ -24,22 +24,6 @@ require_once 'DB/Table.php';
 
 
 /**
-* 
-* Creates, checks or alters tables from DB_Table definitions.
-* 
-* DB_Table_Manager provides database automated table creation
-* facilities.
-* 
-* @category Database
-* 
-* @package DB_Table
-*
-* @author Paul M. Jones <pmjones@php.net>
-* @author Mark Wiesemann <wiesemann@php.net>
-*
-*/
-
-/**
 * Valid types for the different data types in the different DBMS.
 */
 $GLOBALS['_DB_TABLE']['valid_type'] = array(
@@ -184,7 +168,19 @@ $GLOBALS['_DB_TABLE']['mdb2_type'] = array(
     'timestamp' => 'timestamp'
 );
 
-
+/**
+* 
+* Creates, checks or alters tables from DB_Table definitions.
+* 
+* DB_Table_Manager provides database automated table creation
+* facilities.
+* 
+* @category Database
+* @package DB_Table
+* @author Paul M. Jones <pmjones@php.net>
+* @author Mark Wiesemann <wiesemann@php.net>
+*
+*/
 class DB_Table_Manager {
 
 
