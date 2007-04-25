@@ -773,7 +773,8 @@ class DB_Table {
         $this->table = $table;
         
         // is the RDBMS supported?
-        list($phptype, $dbsyntax) = DB_Table::getPHPTypeAndDBSyntax($db);
+        $phptype = $db->phptype;
+        $dbsyntax = $db->dbsyntax;
         if (! DB_Table::supported($phptype, $dbsyntax)) {
             $this->error =& DB_Table::throwError(
                 DB_TABLE_ERR_PHPTYPE,
@@ -795,7 +796,6 @@ class DB_Table {
             }
 
             // check whether the chosen mode is supported
-            list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($this->db);
             $mode_supported = DB_Table::modeSupported($create, $phptype);
             if (PEAR::isError($mode_supported)) {
                 $this->error =& $mode_supported;
@@ -910,35 +910,6 @@ class DB_Table {
                     "('$mode')"
                 );
         }
-    }
-
-
-    /**
-    * 
-    * Detect values of 'phptype' and 'dbsyntax' keys of DSN.
-    * 
-    * @static
-    * 
-    * @access public
-    * 
-    * @param object &$db A PEAR DB/MDB2 object.
-    * 
-    * @return array Values of 'phptype' and 'dbsyntax' keys of DSN.
-    * 
-    */
-
-    function getPHPTypeAndDBSyntax(&$db) {
-        $phptype = '';
-        $dbsyntax = '';
-        if (is_subclass_of($db, 'db_common')) {
-            $phptype = $db->phptype;
-            $dbsyntax = $db->dbsyntax;
-        } elseif (is_subclass_of($db, 'mdb2_driver_common')) {
-            $dsn = MDB2::parseDSN($db->getDSN());
-            $phptype = $dsn['phptype'];
-            $dbsyntax = $dsn['dbsyntax'];
-        }
-        return array($phptype, $dbsyntax);
     }
 
 

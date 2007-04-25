@@ -214,7 +214,7 @@ class DB_Table_Manager {
             $backend = 'mdb2';
             $db->loadModule('Manager');
         }
-        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
+        $phptype = $db->phptype;
 
         // columns to be created
         $column = array();
@@ -437,7 +437,7 @@ class DB_Table_Manager {
             $table_info_mode = MDB2_TABLEINFO_FULL;
             $table_info_error = MDB2_ERROR_NEED_MORE_DATA;
         }
-        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
+        $phptype = $db->phptype;
 
         // check #1: does the table exist?
 
@@ -558,7 +558,8 @@ class DB_Table_Manager {
 
     function alter(&$db, $table, $column_set, $index_set)
     {
-        list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
+        $phptype = $db->phptype;
+
         if (is_subclass_of($db, 'db_common')) {
             $backend = 'db';
             $reverse =& $db;
@@ -1514,9 +1515,8 @@ class DB_Table_Manager {
             $backend = 'db';
             // workaround for missing index and constraint information methods
             // in PEAR::DB ==> use adopted code from MDB2's driver classes
-            list($phptype,) = DB_Table::getPHPTypeAndDBSyntax($db);
-            require_once 'DB/Table/Manager/' . $phptype . '.php';
-            $classname = 'DB_Table_Manager_' . $phptype;
+            require_once 'DB/Table/Manager/' . $db->phptype . '.php';
+            $classname = 'DB_Table_Manager_' . $db->phptype;
             $dbtm =& new $classname();
             $dbtm->_db =& $db;  // pass database instance to the 'workaround' class
             $manager =& $dbtm;
