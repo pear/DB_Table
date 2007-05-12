@@ -1,258 +1,258 @@
 <?php
 
 /**
-* 
-* DB_Table is a database API and data type SQL abstraction class.
-* 
-* DB_Table provides database API abstraction, data type abstraction,
-* automated SELECT, INSERT, and UPDATE queries, automated table
-* creation, automated validation of inserted/updated column values,
-* and automated creation of QuickForm elements based on the column
-* definitions.
-* 
-* @category Database
-* @package DB_Table
-* @author Paul M. Jones <pmjones@php.net>
-* @author Mark Wiesemann <wiesemann@php.net>
-* 
-* @license http://www.gnu.org/copyleft/lesser.html LGPL
-* 
-* @version $Id$
-*
-*/
+ * 
+ * DB_Table is a database API and data type SQL abstraction class.
+ * 
+ * DB_Table provides database API abstraction, data type abstraction,
+ * automated SELECT, INSERT, and UPDATE queries, automated table
+ * creation, automated validation of inserted/updated column values,
+ * and automated creation of QuickForm elements based on the column
+ * definitions.
+ * 
+ * @category Database
+ * @package DB_Table
+ * @author Paul M. Jones <pmjones@php.net>
+ * @author Mark Wiesemann <wiesemann@php.net>
+ * 
+ * @license http://www.gnu.org/copyleft/lesser.html LGPL
+ * 
+ * @version $Id$
+ *
+ */
 
 /**
-* Error code at instantiation time when the first parameter to the
-* constructor is not a PEAR DB object.
-*/
+ * Error code at instantiation time when the first parameter to the
+ * constructor is not a PEAR DB object.
+ */
 define('DB_TABLE_ERR_NOT_DB_OBJECT',    -1);
 
 /**
-* Error code at instantiation time when the PEAR DB/MDB2 $phptype is not
-* supported by DB_Table.
-*/
+ * Error code at instantiation time when the PEAR DB/MDB2 $phptype is not
+ * supported by DB_Table.
+ */
 define('DB_TABLE_ERR_PHPTYPE',          -2);
 
 /**
-* Error code when you call select() or selectResult() and the first
-* parameter does not match any of the $this->sql keys.
-*/
+ * Error code when you call select() or selectResult() and the first
+ * parameter does not match any of the $this->sql keys.
+ */
 define('DB_TABLE_ERR_SQL_UNDEF',        -3);
 
 /**
-* Error code when you try to insert data to a column that is not in the
-* $this->col array.
-*/
+ * Error code when you try to insert data to a column that is not in the
+ * $this->col array.
+ */
 define('DB_TABLE_ERR_INS_COL_NOMAP',    -4);
 
 /**
-* Error code when you try to insert data, and that data does not have a
-* column marked as 'require' in the $this->col array.
-*/
+ * Error code when you try to insert data, and that data does not have a
+ * column marked as 'require' in the $this->col array.
+ */
 define('DB_TABLE_ERR_INS_COL_REQUIRED', -5);
 
 /**
-* Error code when auto-validation fails on data to be inserted.
-*/
+ * Error code when auto-validation fails on data to be inserted.
+ */
 define('DB_TABLE_ERR_INS_DATA_INVALID', -6);
 
 /**
-* Error code when you try to update data to a column that is not in the
-* $this->col array.
-*/
+ * Error code when you try to update data to a column that is not in the
+ * $this->col array.
+ */
 define('DB_TABLE_ERR_UPD_COL_NOMAP',    -7);
 
 /**
-* Error code when you try to update data, and that data does not have a
-* column marked as 'require' in the $this->col array.
-*/
+ * Error code when you try to update data, and that data does not have a
+ * column marked as 'require' in the $this->col array.
+ */
 define('DB_TABLE_ERR_UPD_COL_REQUIRED', -8);
 
 /**
-* Error code when auto-validation fails on update data.
-*/
+ * Error code when auto-validation fails on update data.
+ */
 define('DB_TABLE_ERR_UPD_DATA_INVALID', -9);
 
 /**
-* Error code when you use a create() flag that is not recognized (must
-* be 'safe', 'drop', 'verify' or boolean false.
-*/
+ * Error code when you use a create() flag that is not recognized (must
+ * be 'safe', 'drop', 'verify' or boolean false.
+ */
 define('DB_TABLE_ERR_CREATE_FLAG',      -10);
 
 /**
-* Error code at create() time when you define an index in $this->idx
-* that has no columns.
-*/
+ * Error code at create() time when you define an index in $this->idx
+ * that has no columns.
+ */
 define('DB_TABLE_ERR_IDX_NO_COLS',      -11);
 
 /**
-* Error code at create() time when you define an index in $this->idx
-* that refers to a column that does not exist in the $this->col array.
-*/
+ * Error code at create() time when you define an index in $this->idx
+ * that refers to a column that does not exist in the $this->col array.
+ */
 define('DB_TABLE_ERR_IDX_COL_UNDEF',    -12);
 
 /**
-* Error code at create() time when you define a $this->idx index type
-* that is not recognized (must be 'normal' or 'unique').
-*/
+ * Error code at create() time when you define a $this->idx index type
+ * that is not recognized (must be 'normal' or 'unique').
+ */
 define('DB_TABLE_ERR_IDX_TYPE',         -13);
 
 /**
-* Error code at create() time when you have an error in a 'char' or
-* 'varchar' definition in $this->col (usually because 'size' is wrong).
-*/
+ * Error code at create() time when you have an error in a 'char' or
+ * 'varchar' definition in $this->col (usually because 'size' is wrong).
+ */
 define('DB_TABLE_ERR_DECLARE_STRING',   -14);
 
 /**
-* Error code at create() time when you have an error in a 'decimal'
-* definition (usually becuase the 'size' or 'scope' are wrong).
-*/
+ * Error code at create() time when you have an error in a 'decimal'
+ * definition (usually becuase the 'size' or 'scope' are wrong).
+ */
 define('DB_TABLE_ERR_DECLARE_DECIMAL',  -15);
 
 /**
-* Error code at create() time when you define a column in $this->col
-* with an unrecognized 'type'.
-*/
+ * Error code at create() time when you define a column in $this->col
+ * with an unrecognized 'type'.
+ */
 define('DB_TABLE_ERR_DECLARE_TYPE',     -16);
 
 /**
-* Error code at validation time when a column in $this->col has an
-* unrecognized 'type'.
-*/
+ * Error code at validation time when a column in $this->col has an
+ * unrecognized 'type'.
+ */
 define('DB_TABLE_ERR_VALIDATE_TYPE',    -17);
 
 /**
-* Error code at create() time when you define a column in $this->col
-* with an invalid column name (usually because it's a reserved keyword).
-*/
+ * Error code at create() time when you define a column in $this->col
+ * with an invalid column name (usually because it's a reserved keyword).
+ */
 define('DB_TABLE_ERR_DECLARE_COLNAME',  -18);
 
 /**
-* Error code at create() time when you define an index in $this->idx
-* with an invalid index name (usually because it's a reserved keyword).
-*/
+ * Error code at create() time when you define an index in $this->idx
+ * with an invalid index name (usually because it's a reserved keyword).
+ */
 define('DB_TABLE_ERR_DECLARE_IDXNAME',  -19);
 
 /**
-* Error code at create() time when you define an index in $this->idx
-* that refers to a CLOB column.
-*/
+ * Error code at create() time when you define an index in $this->idx
+ * that refers to a CLOB column.
+ */
 define('DB_TABLE_ERR_IDX_COL_CLOB',     -20);
 
 /**
-* Error code at create() time when you define a column name that is
-* more than 30 chars long (an Oracle restriction).
-*/
+ * Error code at create() time when you define a column name that is
+ * more than 30 chars long (an Oracle restriction).
+ */
 define('DB_TABLE_ERR_DECLARE_STRLEN',   -21);
 
 /**
-* Error code at create() time when the index name ends up being more
-* than 30 chars long (an Oracle restriction).
-*/
+ * Error code at create() time when the index name ends up being more
+ * than 30 chars long (an Oracle restriction).
+ */
 define('DB_TABLE_ERR_IDX_STRLEN',       -22);
 
 /**
-* Error code at create() time when the table name is more than 30 chars
-* long (an Oracle restriction).
-*/
+ * Error code at create() time when the table name is more than 30 chars
+ * long (an Oracle restriction).
+ */
 define('DB_TABLE_ERR_TABLE_STRLEN',     -23);
 
 /**
-* Error code at nextID() time when the sequence name is more than 30
-* chars long (an Oracle restriction).
-*/
+ * Error code at nextID() time when the sequence name is more than 30
+ * chars long (an Oracle restriction).
+ */
 define('DB_TABLE_ERR_SEQ_STRLEN',       -24);
 
 /**
-* Error code at verify() time when the table does not exist in the
-* database.
-*/
+ * Error code at verify() time when the table does not exist in the
+ * database.
+ */
 define('DB_TABLE_ERR_VER_TABLE_MISSING', -25);
 
 /**
-* Error code at verify() time when the column does not exist in the
-* database table.
-*/
+ * Error code at verify() time when the column does not exist in the
+ * database table.
+ */
 define('DB_TABLE_ERR_VER_COLUMN_MISSING', -26);
 
 /**
-* Error code at verify() time when the column type does not match the
-* type specified in the column declaration.
-*/
+ * Error code at verify() time when the column type does not match the
+ * type specified in the column declaration.
+ */
 define('DB_TABLE_ERR_VER_COLUMN_TYPE',  -27);
 
 /**
-* Error code at instantiation time when the column definition array
-* does not contain at least one column.
-*/
+ * Error code at instantiation time when the column definition array
+ * does not contain at least one column.
+ */
 define('DB_TABLE_ERR_NO_COLS',          -28);
 
 /**
-* Error code at verify() time when an index cannot be found in the
-* database table.
-*/
+ * Error code at verify() time when an index cannot be found in the
+ * database table.
+ */
 define('DB_TABLE_ERR_VER_IDX_MISSING',   -29);
 
 /**
-* Error code at verify() time when an index does not contain all
-* columns that it should contain.
-*/
+ * Error code at verify() time when an index does not contain all
+ * columns that it should contain.
+ */
 define('DB_TABLE_ERR_VER_IDX_COL_MISSING', -30);
 
 /**
-* Error code at instantiation time when a creation mode
-* is not available for a phptype.
-*/
+ * Error code at instantiation time when a creation mode
+ * is not available for a phptype.
+ */
 define('DB_TABLE_ERR_CREATE_PHPTYPE', -31);
 
 /**
-* Error code at create() time when you define more than one primary key
-* in $this->idx.
-*/
+ * Error code at create() time when you define more than one primary key
+ * in $this->idx.
+ */
 define('DB_TABLE_ERR_DECLARE_PRIMARY', -32);
 
 /**
-* Error code at create() time when a primary key is defined in $this->idx
-* and SQLite is used (SQLite does not support primary keys).
-*/
+ * Error code at create() time when a primary key is defined in $this->idx
+ * and SQLite is used (SQLite does not support primary keys).
+ */
 define('DB_TABLE_ERR_DECLARE_PRIM_SQLITE', -33);
 
 /**
-* Error code at alter() time when altering a table field is not possible
-* (e.g. because MDB2 has no support for the change or because the DBMS
-* does not support the change).
-*/
+ * Error code at alter() time when altering a table field is not possible
+ * (e.g. because MDB2 has no support for the change or because the DBMS
+ * does not support the change).
+ */
 define('DB_TABLE_ERR_ALTER_TABLE_IMPOS', -34);
 
 /**
-* Error code at alter() time when altering a(n) index/constraint is not possible
-* (e.g. because MDB2 has no support for the change or because the DBMS
-* does not support the change).
-*/
+ * Error code at alter() time when altering a(n) index/constraint is not possible
+ * (e.g. because MDB2 has no support for the change or because the DBMS
+ * does not support the change).
+ */
 define('DB_TABLE_ERR_ALTER_INDEX_IMPOS', -35);
 
 /**
-* Error code at insert() time due to invalid the auto-increment column
-* definition. This column must be an integer type and required.
-*/
+ * Error code at insert() time due to invalid the auto-increment column
+ * definition. This column must be an integer type and required.
+ */
 define('DB_TABLE_ERR_AUTO_INC_COL', -36);
 
 /**
-* The PEAR class for errors
-*/
+ * The PEAR class for errors
+ */
 require_once 'PEAR.php';
 
 /**
-* The Date class for recasting date and time values
-*/
+ * The Date class for recasting date and time values
+ */
 require_once 'DB/Table/Date.php';
 
 
 /**
-* DB_Table supports these RDBMS engines and their various native data
-* types; we need these here instead of in Manager.php because the
-* initial array key tells us what databases are supported.
-*/
+ * DB_Table supports these RDBMS engines and their various native data
+ * types; we need these here instead of in Manager.php because the
+ * initial array key tells us what databases are supported.
+ */
 $GLOBALS['_DB_TABLE']['type'] = array(
     'fbsql' => array(
         'boolean'   => 'DECIMAL(1,0)',
@@ -378,30 +378,30 @@ $GLOBALS['_DB_TABLE']['type'] = array(
 
 
 /** 
-  * US-English default error messages. If you want to internationalize, you can
-  * set the translated messages via $GLOBALS['_DB_TABLE']['error']. You can also
-  * use DB_Table::setErrorMessage(). Examples:
-  * 
-  * <code>
-  * (1) $GLOBALS['_DB_TABLE]['error'] = array(DB_TABLE_ERR_PHPTYPE   => '...',
-  *                                           DB_TABLE_ERR_SQL_UNDEF => '...');
-  * (2) DB_Table::setErrorMessage(DB_TABLE_ERR_PHPTYPE,   '...');
-  *     DB_Table::setErrorMessage(DB_TABLE_ERR_SQL_UNDEF, '...');
-  * (3) DB_Table::setErrorMessage(array(DB_TABLE_ERR_PHPTYPE   => '...');
-  *                                     DB_TABLE_ERR_SQL_UNDEF => '...');
-  * (4) $obj =& new DB_Table();
-  *     $obj->setErrorMessage(DB_TABLE_ERR_PHPTYPE,   '...');
-  *     $obj->setErrorMessage(DB_TABLE_ERR_SQL_UNDEF, '...');
-  * (5) $obj =& new DB_Table();
-  *     $obj->setErrorMessage(array(DB_TABLE_ERR_PHPTYPE   => '...');
-  *                                 DB_TABLE_ERR_SQL_UNDEF => '...');
-  * </code>
-  * 
-  * For errors that can occur with-in the constructor call (i.e. e.g. creating
-  * or altering the database table), only the code from examples (1) to (3)
-  * will alter the default error messages early enough. For errors that can
-  * occur later, examples (4) and (5) are also valid.
-  */
+ * US-English default error messages. If you want to internationalize, you can
+ * set the translated messages via $GLOBALS['_DB_TABLE']['error']. You can also
+ * use DB_Table::setErrorMessage(). Examples:
+ * 
+ * <code>
+ * (1) $GLOBALS['_DB_TABLE]['error'] = array(DB_TABLE_ERR_PHPTYPE   => '...',
+ *                                           DB_TABLE_ERR_SQL_UNDEF => '...');
+ * (2) DB_Table::setErrorMessage(DB_TABLE_ERR_PHPTYPE,   '...');
+ *     DB_Table::setErrorMessage(DB_TABLE_ERR_SQL_UNDEF, '...');
+ * (3) DB_Table::setErrorMessage(array(DB_TABLE_ERR_PHPTYPE   => '...');
+ *                                     DB_TABLE_ERR_SQL_UNDEF => '...');
+ * (4) $obj =& new DB_Table();
+ *     $obj->setErrorMessage(DB_TABLE_ERR_PHPTYPE,   '...');
+ *     $obj->setErrorMessage(DB_TABLE_ERR_SQL_UNDEF, '...');
+ * (5) $obj =& new DB_Table();
+ *     $obj->setErrorMessage(array(DB_TABLE_ERR_PHPTYPE   => '...');
+ *                                 DB_TABLE_ERR_SQL_UNDEF => '...');
+ * </code>
+ * 
+ * For errors that can occur with-in the constructor call (i.e. e.g. creating
+ * or altering the database table), only the code from examples (1) to (3)
+ * will alter the default error messages early enough. For errors that can
+ * occur later, examples (4) and (5) are also valid.
+ */
 $GLOBALS['_DB_TABLE']['default_error'] = array(
     DB_TABLE_ERR_NOT_DB_OBJECT       => 'First parameter must be a DB/MDB2 object',
     DB_TABLE_ERR_PHPTYPE             => 'DB/MDB2 phptype (or dbsyntax) not supported',
@@ -453,130 +453,130 @@ foreach ($GLOBALS['_DB_TABLE']['default_error'] as $code => $message) {
 }
 
 /**
-* 
-* DB_Table is a database API and data type SQL abstraction class.
-* 
-* DB_Table provides database API abstraction, data type abstraction,
-* automated SELECT, INSERT, and UPDATE queries, automated table
-* creation, automated validation of inserted/updated column values,
-* and automated creation of QuickForm elemnts based on the column
-* definitions.
-* 
-* @category Database
-* @package DB_Table
-* @author Paul M. Jones <pmjones@php.net>
-* @author Mark Wiesemann <wiesemann@php.net>
-* 
-* @version @package_version@
-*
-*/
+ * 
+ * DB_Table is a database API and data type SQL abstraction class.
+ * 
+ * DB_Table provides database API abstraction, data type abstraction,
+ * automated SELECT, INSERT, and UPDATE queries, automated table
+ * creation, automated validation of inserted/updated column values,
+ * and automated creation of QuickForm elemnts based on the column
+ * definitions.
+ * 
+ * @category Database
+ * @package DB_Table
+ * @author Paul M. Jones <pmjones@php.net>
+ * @author Mark Wiesemann <wiesemann@php.net>
+ * 
+ * @version @package_version@
+ *
+ */
 
 class DB_Table {
     
     
     /**
-    * 
-    * The PEAR DB/MDB2 object that connects to the database.
-    * 
-    * @access public
-    * 
-    * @var object
-    * 
-    */
+     * 
+     * The PEAR DB/MDB2 object that connects to the database.
+     * 
+     * @access public
+     * 
+     * @var object
+     * 
+     */
     
     var $db = null;
     
     
     /**
-    * 
-    * The backend type
-    * 
-    * @access public
-    * 
-    * @var string
-    * 
-    */
+     * 
+     * The backend type
+     * 
+     * @access public
+     * 
+     * @var string
+     * 
+     */
     
     var $backend = null;
     
     
     /**
-    * 
-    * The table or view in the database to which this object binds.
-    * 
-    * @access public
-    * 
-    * @var string
-    * 
-    */
+     * 
+     * The table or view in the database to which this object binds.
+     * 
+     * @access public
+     * 
+     * @var string
+     * 
+     */
     
     var $table = null;
     
     
     /**
-    * 
-    * DB_Table_Database instance that this table belongs to.
-    * 
-    * @access private
-    * 
-    * @var object
-    * 
-    */
+     * 
+     * DB_Table_Database instance that this table belongs to.
+     * 
+     * @access private
+     * 
+     * @var object
+     * 
+     */
     
     var $_database = null;
 
 
     /**
-    * 
-    * Associative array of column definitions.
-    * 
-    * @access public
-    * 
-    * @var array
-    * 
-    */
+     * 
+     * Associative array of column definitions.
+     * 
+     * @access public
+     * 
+     * @var array
+     * 
+     */
     
     var $col = array();
     
     
     /**
-    * 
-    * Associative array of index definitions.
-    * 
-    * @access public
-    * 
-    * @var array
-    * 
-    */
+     * 
+     * Associative array of index definitions.
+     * 
+     * @access public
+     * 
+     * @var array
+     * 
+     */
     
     var $idx = array();
     
     
     /**
-    * 
-    * Baseline SELECT maps for select(), selectResult(), selectCount().
-    * 
-    * @access public
-    * 
-    * @var array
-    * 
-    */
+     * 
+     * Baseline SELECT maps for select(), selectResult(), selectCount().
+     * 
+     * @access public
+     * 
+     * @var array
+     * 
+     */
     
     var $sql = array();
     
     
     /**
-    * Name of an auto-increment column, if any. Null otherwise.
-    *
-    * A table can contain at most one auto-increment column. 
-    * Auto-incrementing is implemented in the insert method,
-    * using a sequence accessed by the nextID() method.
-    *
-    * @access private
-    * 
-    * @var string
-    * 
-    */
+     * Name of an auto-increment column, if any. Null otherwise.
+     *
+     * A table can contain at most one auto-increment column. 
+     * Auto-incrementing is implemented in the insert method,
+     * using a sequence accessed by the nextID() method.
+     *
+     * @access private
+     * 
+     * @var string
+     * 
+     */
 
     var $auto_inc_col = null;
 
@@ -597,116 +597,116 @@ class DB_Table {
 
 
     /**
-    * 
-    * Whether or not to automatically validate data at insert-time.
-    * 
-    * @access private
-    * 
-    * @var bool
-    * 
-    */
+     * 
+     * Whether or not to automatically validate data at insert-time.
+     * 
+     * @access private
+     * 
+     * @var bool
+     * 
+     */
     
     var $_valid_insert = true;
     
     
     /**
-    * 
-    * Whether or not to automatically validate data at update-time.
-    * 
-    * @access private
-    * 
-    * @var bool
-    * 
-    */
+     * 
+     * Whether or not to automatically validate data at update-time.
+     * 
+     * @access private
+     * 
+     * @var bool
+     * 
+     */
     
     var $_valid_update = true;
     
     
     /**
-    * 
-    * When calling select() and selectResult(), use this fetch mode (usually
-    * a DB_FETCHMODE_* constant).  If null, uses whatever is set in the $db
-    * PEAR DB/MDB2 object.
-    * 
-    * @access public
-    * 
-    * @var int
-    * 
-    */
+     * 
+     * When calling select() and selectResult(), use this fetch mode (usually
+     * a DB_FETCHMODE_* constant).  If null, uses whatever is set in the $db
+     * PEAR DB/MDB2 object.
+     * 
+     * @access public
+     * 
+     * @var int
+     * 
+     */
     
     var $fetchmode = null;
     
     
     /**
-    * 
-    * When fetchmode is DB_FETCHMODE_OBJECT, use this class for each
-    * returned row.  If null, uses whatever is set in the $db
-    * PEAR DB/MDB2 object.
-    * 
-    * @access public
-    * 
-    * @var string
-    * 
-    */
+     * 
+     * When fetchmode is DB_FETCHMODE_OBJECT, use this class for each
+     * returned row.  If null, uses whatever is set in the $db
+     * PEAR DB/MDB2 object.
+     * 
+     * @access public
+     * 
+     * @var string
+     * 
+     */
     
     var $fetchmode_object_class = null;
     
     
     /**
-    * 
-    * If there is an error on instantiation, this captures that error.
-    *
-    * This property is used only for errors encountered in the constructor
-    * at instantiation time.  To check if there was an instantiation error...
-    *
-    * <code>
-    * $obj =& new DB_Table();
-    * if ($obj->error) {
-    *     // ... error handling code here ...
-    * }
-    * </code>
-    * 
-    * @access public
-    * 
-    * @var object PEAR_Error
-    * 
-    */
+     * 
+     * If there is an error on instantiation, this captures that error.
+     *
+     * This property is used only for errors encountered in the constructor
+     * at instantiation time.  To check if there was an instantiation error...
+     *
+     * <code>
+     * $obj =& new DB_Table();
+     * if ($obj->error) {
+     *     // ... error handling code here ...
+     * }
+     * </code>
+     * 
+     * @access public
+     * 
+     * @var object PEAR_Error
+     * 
+     */
     
     var $error = null;
 
 
     /**
-    * 
-    * Whether or not to automatically recast data at insert- and update-time.
-    * 
-    * @access private
-    * 
-    * @var bool
-    * 
-    */
+     * 
+     * Whether or not to automatically recast data at insert- and update-time.
+     * 
+     * @access private
+     * 
+     * @var bool
+     * 
+     */
     
     var $_auto_recast = true;
     
     
     /**
-    * 
-    * Specialized version of throwError() modeled on PEAR_Error.
-    * 
-    * Throws a PEAR_Error with a DB_Table error message based on a
-    * DB_Table constant error code.
-    * 
-    * @static
-    * 
-    * @access public
-    * 
-    * @param string $code A DB_Table error code constant.
-    * 
-    * @param string $extra Extra text for the error (in addition to the 
-    * regular error message).
-    * 
-    * @return object PEAR_Error
-    * 
-    */
+     * 
+     * Specialized version of throwError() modeled on PEAR_Error.
+     * 
+     * Throws a PEAR_Error with a DB_Table error message based on a
+     * DB_Table constant error code.
+     * 
+     * @static
+     * 
+     * @access public
+     * 
+     * @param string $code A DB_Table error code constant.
+     * 
+     * @param string $extra Extra text for the error (in addition to the 
+     * regular error message).
+     * 
+     * @return object PEAR_Error
+     * 
+     */
     
     function &throwError($code, $extra = null)
     {
@@ -725,33 +725,39 @@ class DB_Table {
     
     
     /**
-    * 
-    * Constructor.
-    * 
-    * If there is an error on instantiation, $this->error will be 
-    * populated with the PEAR_Error.
-    * 
-    * @access public
-    * 
-    * @param object &$db A PEAR DB/MDB2 object.
-    * 
-    * @param string $table The table name to connect to in the database.
-    * 
-    * @param mixed $create The automatic table creation mode to pursue:
-    * - boolean false to not attempt creation
-    * - 'safe' to create the table only if it does not exist
-    * - 'drop' to drop any existing table with the same name and re-create it
-    * - 'verify' to check whether the table exists, whether all the columns
-    *   exist, whether the columns have the right type, and whether the indexes
-    *   exist and have the right type
-    * - 'alter' does the same as 'safe' if the table does not exist; if it
-    *   exists, a verification for columns existence, the column types, the
-    *   indexes existence, and the indexes types will be performed and the
-    *   table schema will be modified if needed
-    * 
-    * @return object DB_Table
-    * 
-    */
+     * 
+     * Constructor.
+     *
+     * The constructor returns a DB_Table object that wraps an
+     * instance $db DB or MDB2, and that binds to a specific database
+     * table named $table. It can optionally create the database table
+     * or verify that its schema matches that declared in the $col and
+     * $idx parameters, depending on the value of the $create parameter.
+     *
+     * If there is an error on instantiation, $this->error will be 
+     * populated with the PEAR_Error.
+     * 
+     * @access public
+     * 
+     * @param object &$db A PEAR DB/MDB2 object.
+     * 
+     * @param string $table The table name to connect to in the database.
+     * 
+     * @param mixed $create The automatic table creation mode to pursue:
+     * - boolean false to not attempt creation
+     * - 'safe' to create the table only if it does not exist
+     * - 'drop' to drop any existing table with the same name and re-create it
+     * - 'verify' to check whether the table exists, whether all the columns
+     *   exist, whether the columns have the right type, and whether the indexes
+     *   exist and have the right type
+     * - 'alter' does the same as 'safe' if the table does not exist; if it
+     *   exists, a verification for columns existence, the column types, the
+     *   indexes existence, and the indexes types will be performed and the
+     *   table schema will be modified if needed
+     * 
+     * @return object DB_Table
+     * 
+     */
     
     function DB_Table(&$db, $table, $create = false)
     {
@@ -837,20 +843,20 @@ class DB_Table {
     
     
     /**
-    * 
-    * Is a particular RDBMS supported by DB_Table?
-    * 
-    * @static
-    * 
-    * @access public
-    * 
-    * @param string $phptype The RDBMS type for PHP.
-    * 
-    * @param string $dbsyntax The chosen database syntax.
-    * 
-    * @return bool True if supported, false if not.
-    * 
-    */
+     * 
+     * Is a particular RDBMS supported by DB_Table?
+     * 
+     * @static
+     * 
+     * @access public
+     * 
+     * @param string $phptype The RDBMS type for PHP.
+     * 
+     * @param string $dbsyntax The chosen database syntax.
+     * 
+     * @return bool True if supported, false if not.
+     * 
+     */
     
     function supported($phptype, $dbsyntax = '')
     {
@@ -864,19 +870,21 @@ class DB_Table {
 
 
     /**
-    * 
-    * Is a creation mode supported for a RDBMS by DB_Table?
-    * 
-    * @access public
-    * 
-    * @param string $mode The chosen creation mode.
-    * 
-    * @param string $phptype The RDBMS type for PHP.
-    * 
-    * @return bool|object True if supported, false if not, or a PEAR_Error
-    * if an unknown mode is specified.
-    * 
-    */
+     * 
+     * Is a creation mode supported for a RDBMS by DB_Table?
+     * 
+     * @access public
+     * 
+     * @param string $mode The chosen creation mode.
+     * 
+     * @param string $phptype The RDBMS type for PHP.
+     * 
+     * @return bool True if supported, false if not (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if
+     *     Unknown creation mode is specified (DB_TABLE_ERR_CREATE_FLAG)
+     * 
+     */
     
     function modeSupported($mode, $phptype)
     {
@@ -914,20 +922,20 @@ class DB_Table {
 
 
     /**
-    * 
-    * Overwrite one or more error messages, e.g. to internationalize them.
-    * 
-    * @access public
-    * 
-    * @param mixed $code If string, the error message with code $code will
-    * be overwritten by $message. If array, the error messages with code
-    * of each array key will be overwritten by the key's value.
-    * 
-    * @param string $message Only used if $key is not an array.
-    *
-    * @return void
-    * 
-    */
+     * 
+     * Overwrite one or more error messages, e.g. to internationalize them.
+     * 
+     * @access public
+     * 
+     * @param mixed $code If string, the error message with code $code will
+     * be overwritten by $message. If array, the error messages with code
+     * of each array key will be overwritten by the key's value.
+     * 
+     * @param string $message Only used if $key is not an array.
+     *
+     * @return void
+     * 
+     */
 
     function setErrorMessage($code, $message = null) {
         if (is_array($code)) {
@@ -941,20 +949,20 @@ class DB_Table {
 
 
     /**
-    * 
-    * Returns all or part of the $this->col property array.
-    * 
-    * @access public
-    * 
-    * @param mixed $col If null, returns the $this->col property array
-    * as it is.  If string, returns that column name from the $this->col
-    * array. If an array, returns those columns named as the array
-    * values from the $this->col array as an array.
-    *
-    * @return mixed All or part of the $this->col property array, or
-    * boolean false if no matching column names are found.
-    * 
-    */
+     * 
+     * Returns all or part of the $this->col property array.
+     * 
+     * @access public
+     * 
+     * @param mixed $col If null, returns the $this->col property array
+     * as it is.  If string, returns that column name from the $this->col
+     * array. If an array, returns those columns named as the array
+     * values from the $this->col array as an array.
+     *
+     * @return mixed All or part of the $this->col property array, or
+     * boolean false if no matching column names are found.
+     * 
+     */
     
     function getColumns($col = null)
     {
@@ -994,17 +1002,18 @@ class DB_Table {
     
     
     /**
-    * 
-    * Returns all or part of the $this->idx property array.
-    * 
-    * @access public
-    * 
-    * @param string $col If specified, returns only this index key
-    * from the $this->col property array.
-    * 
-    * @return array All or part of the $this->idx property array.
-    * 
-    */
+     * 
+     * Returns all or part of the $this->idx property array.
+     * 
+     * @access public
+     * 
+     * @param mixed $idx Index name (key in $this->idx), or array of
+     *      index name strings.
+     * 
+     * @return mixed All or part of the $this->idx property array, 
+     *               or boolean false if $idx is not null but invalid
+     * 
+     */
     
     function getIndexes($idx = null)
     {
@@ -1044,54 +1053,71 @@ class DB_Table {
     
     
     /**
-    *
-    * Selects rows from the table using one of the DB/MDB2 get*() methods.
-    * 
-    * @access public
-    * 
-    * @param string $sqlkey The name of the SQL SELECT to use from the
-    * $this->sql property array.
-    * 
-    * @param string $filter Ad-hoc SQL snippet to AND with the default
-    * SELECT WHERE clause.
-    * 
-    * @param string $order Ad-hoc SQL snippet to override the default
-    * SELECT ORDER BY clause.
-    * 
-    * @param int $start The row number to start listing from in the
-    * result set.
-    * 
-    * @param int $count The number of rows to list in the result set.
-    *
-    * @param array $params Parameters to use in placeholder substitutions (if
-    * any).
-    * 
-    * @return mixed An array of records from the table (if anything but
-    * 'getOne'), a single value (if 'getOne'), or a PEAR_Error object.
-    *
-    * @see DB::getAll()
-    * 
-    * @see MDB2::getAll()
-    *
-    * @see DB::getAssoc()
-    * 
-    * @see MDB2::getAssoc()
-    *
-    * @see DB::getCol()
-    * 
-    * @see MDB2::getCol()
-    *
-    * @see DB::getOne()
-    *
-    * @see MDB2::getOne()
-    * 
-    * @see DB::getRow()
-    * 
-    * @see MDB2::getRow()
-    *
-    * @see DB_Table::_swapModes()
-    *
-    */
+     *
+     * Selects rows from the table using one of the DB/MDB2 get*() methods.
+     * 
+     * Submits and SQL SELECT command constructed from a query stored as an an array
+     * in the $sql property array. Optional arguments can usd to add extra conditions,
+     * defined in the $filter parameter, to the default WHERE clause, add or override
+     * an ORDER BY clause, add $start and $count parameters to limit the number of rows,
+     * or provide $parameter values for prepared parameterized queries.
+     *
+     * The DB_Table::select() method calls one of the DB or MDB2 method "get$method',
+     * where $method can be 'All' (the default), 'Assoc', Col', 'Row' or 'One. The
+     * $method suffix is obtained from the 'get' element of the query array, by 
+     * converting the first character of one of the  allowed values 'all', 'assoc', 
+     * 'col', 'row', or 'one' to upper case. That is, 
+     * $method = ucwords(strtolower(trim($this->sql[$sqlkey]['get'])).
+     *
+     * @access public
+     * 
+     * @param string $sqlkey The name of the SQL SELECT to use from the
+     * $this->sql property array.
+     * 
+     * @param string $filter Ad-hoc SQL snippet to AND with the default
+     * SELECT WHERE clause.
+     * 
+     * @param string $order Ad-hoc SQL snippet to override the default
+     * SELECT ORDER BY clause.
+     * 
+     * @param int $start The row number to start listing from in the
+     * result set.
+     * 
+     * @param int $count The number of rows to list in the result set.
+     *
+     * @param array $params Parameters to use in placeholder substitutions (if
+     * any).
+     * 
+     * @return mixed The return value of the corresponding DB/MDB2 get* method. 
+     * This is a sequential array of records if $method is anything but 'One', a 
+     * single value if $method is One, or a PEAR_Error object on failure.
+     *
+     * @throws PEAR_Error if
+     *     The underlying DB/MDB2::get*() method returns a PEAR_Error (bubbles up)
+     *
+     * @see DB::getAll()
+     * 
+     * @see MDB2::getAll()
+     *
+     * @see DB::getAssoc()
+     * 
+     * @see MDB2::getAssoc()
+     *
+     * @see DB::getCol()
+     * 
+     * @see MDB2::getCol()
+     *
+     * @see DB::getOne()
+     *
+     * @see MDB2::getOne()
+     * 
+     * @see DB::getRow()
+     * 
+     * @see MDB2::getRow()
+     *
+     * @see DB_Table::_swapModes()
+     *
+     */
     
     function select($sqlkey, $filter = null, $order = null,
         $start = null, $count = null, $params = array())
@@ -1167,34 +1193,41 @@ class DB_Table {
     
     
     /**
-    *
-    * Selects rows from the table as a DB_Result/MDB2_Result_* object.
-    * 
-    * @access public
-    * 
-    * @param string $sqlkey The name of the SQL SELECT to use from the
-    * $this->sql property array.
-    * 
-    * @param string $filter Ad-hoc SQL snippet to add to the default
-    * SELECT WHERE clause.
-    * 
-    * @param string $order Ad-hoc SQL snippet to override the default
-    * SELECT ORDER BY clause.
-    * 
-    * @param int $start The record number to start listing from in the
-    * result set.
-    * 
-    * @param int $count The number of records to list in the result set.
-    * 
-    * @param array $params Parameters to use in placeholder substitutions (if
-    * any).
-    * 
-    * @return mixed A PEAR_Error on failure, or a DB_Result/MDB2_Result_*
-    * object on success.
-    *
-    * @see DB_Table::_swapModes()
-    *
-    */
+     *
+     * Selects rows from the table as a DB_Result/MDB2_Result_* object.
+     * 
+     * This function works similarly to {@link select()}, but returns the
+     * result set as a DB_Result or MDB2_Result_* object, rather than as an
+     * array. The interface is identical to that of DB_Table::select().
+     *
+     * @access public
+     * 
+     * @param string $sqlkey The name of the SQL SELECT to use from the
+     * $this->sql property array.
+     * 
+     * @param string $filter Ad-hoc SQL snippet to add to the default
+     * SELECT WHERE clause.
+     * 
+     * @param string $order Ad-hoc SQL snippet to override the default
+     * SELECT ORDER BY clause.
+     * 
+     * @param int $start The record number to start listing from in the
+     *            result set.
+     * 
+     * @param int $count The number of records to list in the result set.
+     * 
+     * @param array $params Parameters to use in placeholder substitutions 
+     *              (if any).
+     * 
+     * @return object DB_Result/MDB2_Result_* object 
+     *                (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if
+     *     DB/MDB2 method returns Error (bubbles up)
+     *
+     * @see DB_Table::_swapModes()
+     *
+     */
     
     function selectResult($sqlkey, $filter = null, $order = null, 
         $start = null, $count = null, $params = array())
@@ -1253,44 +1286,47 @@ class DB_Table {
     
     
     /**
-    *
-    * Counts the number of rows which will be returned by a query.
-    *
-    * This function works identically to {@link select()}, but it
-    * returns the number of rows returned by a query instead of the
-    * query results themselves.
-    *
-    * This makes using DB_Table with Pager easier, since you can pass the
-    * return value of this to Pager as totalItems, then select only the
-    * rows you need to display on a page.
-    *
-    * @author Ian Eure <ian@php.net>
-    * 
-    * @access public
-    * 
-    * @param string $sqlkey The name of the SQL SELECT to use from the
-    * $this->sql property array.
-    * 
-    * @param string $filter Ad-hoc SQL snippet to AND with the default
-    * SELECT WHERE clause.
-    * 
-    * @param string $order Ad-hoc SQL snippet to override the default
-    * SELECT ORDER BY clause.
-    * 
-    * @param int $start The row number to start listing from in the
-    * result set.
-    * 
-    * @param int $count The number of rows to list in the result set.
-    * 
-    * @param array $params Parameters to use in placeholder substitutions (if
-    * any).
-    * 
-    * @return mixed An integer number of records from the table, or a
-    * PEAR_Error object.
-    *
-    * @see DB_Table::select()
-    *
-    */
+     *
+     * Counts the number of rows which will be returned by a query.
+     *
+     * This function works identically to {@link select()}, but it returns
+     * the number of rows returned by a query instead of the query results
+     * themselves.
+     *
+     * This makes using DB_Table with Pager easier, since you can pass the
+     * return value of this to Pager as totalItems, then select only the
+     * rows you need to display on a page.
+     *
+     * @author Ian Eure <ian@php.net>
+     * 
+     * @access public
+     * 
+     * @param string $sqlkey The name of the SQL SELECT to use from the
+     * $this->sql property array.
+     * 
+     * @param string $filter Ad-hoc SQL snippet to AND with the default
+     * SELECT WHERE clause.
+     * 
+     * @param string $order Ad-hoc SQL snippet to override the default
+     * SELECT ORDER BY clause.
+     * 
+     * @param int $start The row number to start listing from in the
+     * result set.
+     * 
+     * @param int $count The number of rows to list in the result set.
+     * 
+     * @param array $params Parameters to use in placeholder substitutions (if
+     * any).
+     * 
+     * @return integer Number of records selected (or PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if
+     *     -Incorrect key $sqlkey of $this->sql (DB_TABLE_ERR_SQL_UNDEF)
+     *     -Error thrown by $this->select() (bubbles up)
+     *
+     * @see DB_Table::select()
+     *
+     */
     
     function selectCount($sqlkey, $filter = null, $order = null,
         $start = null, $count = null, $params = array())
@@ -1337,27 +1373,27 @@ class DB_Table {
     
     
     /**
-    * 
-    * Changes the $this->db PEAR DB/MDB2 object fetchmode and
-    * fetchmode_object_class.
-    * 
-    * Because DB_Table objects tend to use the same PEAR DB/MDB2 object, it
-    * may sometimes be useful to have one object return results in one
-    * mode, and have another object return results in a different mode. 
-    * This method allows us to switch DB/MDB2 fetch modes on the fly.
-    * 
-    * @access private
-    * 
-    * @param string $new_mode A DB_FETCHMODE_* constant.  If null,
-    * defaults to whatever the DB/MDB2 object is currently using.
-    * 
-    * @param string $new_class The object class to use for results when
-    * the $db object is in DB_FETCHMODE_OBJECT fetch mode.  If null,
-    * defaults to whatever the the DB/MDB2 object is currently using.
-    * 
-    * @return void
-    * 
-    */
+     * 
+     * Changes the $this->db PEAR DB/MDB2 object fetchmode and
+     * fetchmode_object_class.
+     * 
+     * Because DB_Table objects tend to use the same PEAR DB/MDB2 object, it
+     * may sometimes be useful to have one object return results in one
+     * mode, and have another object return results in a different mode. 
+     * This method allows us to switch DB/MDB2 fetch modes on the fly.
+     * 
+     * @access private
+     * 
+     * @param string $new_mode A DB_FETCHMODE_* constant.  If null,
+     * defaults to whatever the DB/MDB2 object is currently using.
+     * 
+     * @param string $new_class The object class to use for results when
+     * the $db object is in DB_FETCHMODE_OBJECT fetch mode.  If null,
+     * defaults to whatever the the DB/MDB2 object is currently using.
+     * 
+     * @return void
+     * 
+     */
     
     function _swapModes($new_mode, $new_class)
     {
@@ -1392,18 +1428,23 @@ class DB_Table {
     
     
     /**
-    * 
-    * Connect or disconnect a DB_Table_Database instance to this table
-    * instance.
-    * 
-    * @access public
-    * 
-    * @param object $database DB_Table_Database instance that this table
-    * belongs to (or null to indicate disconnection from the instance).
-    * 
-    * @return void
-    * 
-    */
+     * 
+     * Connect or disconnect a DB_Table_Database instance to this table
+     * instance.
+     * 
+     * Used to re-connect this DB_Table object to a parent DB_Table_Database
+     * object during unserialization. Can also disconnect if the $database 
+     * is null. Use the DB_Table_Database::addTable method instead to add a 
+     * table to a new DB_Table_Database.
+     * 
+     * @access public
+     * 
+     * @param object &$database DB_Table_Database instance that this table
+     * belongs to (or null to indicate disconnection from the instance).
+     * 
+     * @return void
+     * 
+     */
     
     function setDatabaseInstance(&$database)
     {
@@ -1416,29 +1457,34 @@ class DB_Table {
 
 
     /**
-    * 
-    * Builds the SQL command from a specified $this->sql element.
-    * 
-    * @access public
-    * 
-    * @param string $sqlkey The $this->sql key to use as the basis for the
-    * SQL query string.
-    * 
-    * @param string $filter A filter to add to the WHERE clause of the
-    * defined SELECT in $this->sql.
-    * 
-    * @param string $order An ORDER clause to override the defined order
-    * in $this->sql.
-    * 
-    * @param int $start The row number to start listing from in the
-    * result set.
-    * 
-    * @param int $count The number of rows to list in the result set.
-    * 
-    * @return mixed A PEAR_Error on failure, or an SQL command string on
-    * success.
-    * 
-    */
+     * 
+     * Builds the SQL command from a specified $this->sql element.
+     * 
+     * Returns the SQL command string based on a query array stored in the $sqlkey element
+     * of the the $this->sql property array. Interface is identical to that of all of the 
+     * DB_Table::select*() methods.
+     * 
+     * @access public
+     * 
+     * @param string $sqlkey The $this->sql key to use as the basis for the
+     * SQL query string.
+     * 
+     * @param string $filter A filter to add to the WHERE clause of the
+     * defined SELECT in $this->sql.
+     * 
+     * @param string $order An ORDER clause to override the defined order
+     * in $this->sql.
+     * 
+     * @param int $start The row number to start listing from in the
+     * result set.
+     * 
+     * @param int $count The number of rows to list in the result set.
+     * 
+     * @return string SQL command string, or PEAR_Error on failure
+     * 
+     * @throws PEAR_Error if
+     *     Incorrect key $sqlkey of $this->sql (DB_TABLE_ERR_SQL_UNDEF)
+     */
     
     function buildSQL($sqlkey, $filter = null, $order = null,
         $start = null, $count = null)
@@ -1531,34 +1577,43 @@ class DB_Table {
     
     
     /**
-    *
-    * Inserts a single table row.
-    *
-    * Auto-increments column $this->auto_inc_col if it is not null,
-    * auto-incrementing is enabled (if $this->_auto_inc), and the
-    * value of this column in the $data array is null or not set.
-    *
-    * Recasts $data to proper column types with recast() if 
-    * auto-recasting is enabled (if $this->_auto_recast).
-    *
-    * Validates column types with validInsert() before insertion if 
-    * auto-validation is enabled (if $this->_valid_insert).
-    *
-    * @access public
-    * 
-    * @param array $data An associative array of key-value pairs where
-    * the key is the column name and the value is the column value. 
-    * This is the data that will be inserted into the table.  
-    * 
-    * @return mixed Void on success, a PEAR_Error object on failure.
-    *
-    * @see validInsert()
-    * 
-    * @see DB::autoExecute()
-    * 
-    * @see MDB2::autoExecute()
-    * 
-    */
+     *
+     * Inserts a single table row.
+     *
+     * Inserts data from associative array $data, in which keys are column
+     * names and values are column values. All required columns (except an
+     * auto-increment column) must be included in the data array. Columns
+     * values that are not set or null are inserted as SQL NULL values. 
+     *
+     * If an auto-increment column is declared (by setting $this->auto_inc_col),
+     * and the value of that column in $data is not set or null, then a new
+     * sequence value will be generated and inserted.
+     *
+     * If auto-recasting is enabled (if $this->_auto_recast), the method will
+     * try, if necessary to recast $data to proper column types, with recast().
+     *
+     * If auto-validation is enabled (if $this->_valid_insert), the method
+     * will validates column types with validInsert() before insertion.
+     *
+     * @access public
+     * 
+     * @param array $data An associative array of key-value pairs where
+     * the key is the column name and the value is the column value. 
+     * This is the data that will be inserted into the table.  
+     * 
+     * @return mixed Void on success (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if:
+     *     - Error in auto_inc_col declaration (DB_TABLE_ERR_AUTO_INC_COL)
+     *     - Error returned by DB/MDB2::autoExecute() (Error bubbled up)
+     *
+     * @see validInsert()
+     * 
+     * @see DB::autoExecute()
+     * 
+     * @see MDB2::autoExecute()
+     * 
+     */
         
     function insert($data)
     {
@@ -1625,16 +1680,21 @@ class DB_Table {
     
     
     /**
-    * 
-    * Turns on or off auto-incrementing of $auto_inc_col column (if any)
-    * 
-    * @access public
-    * 
-    * @param bool $flag True to turn on auto-increment, false to turn off.
-    * 
-    * @return void
-    * 
-    */
+     * 
+     * Turns on or off auto-incrementing of $auto_inc_col column (if any)
+     * 
+     * For auto-incrementing to work, an $auto_inc_col column must be declared,
+     * auto-incrementing must be enabled (by this method), and the value of
+     * the $auto_inc_col column must be not set or null in the $data passed to
+     * the insert method. 
+     * 
+     * @access public
+     * 
+     * @param bool $flag True to turn on auto-increment, false to turn off.
+     * 
+     * @return void
+     * 
+     */
     
     function setAutoInc($flag = true)
     {
@@ -1647,16 +1707,20 @@ class DB_Table {
     
     
     /**
-    * 
-    * Turns on (or off) automatic validation of inserted data.
-    * 
-    * @access public
-    * 
-    * @param bool $flag True to turn on auto-validation, false to turn it off.
-    * 
-    * @return void
-    * 
-    */
+     * 
+     * Turns on (or off) automatic validation of inserted data.
+     * 
+     * Enables (if $flag is true) or disables (if $flag is false) automatic 
+     * validation of data types prior to actual insertion into the database 
+     * by the DB_Table::insert() method.
+     *
+     * @access public
+     * 
+     * @param bool $flag True to turn on auto-validation, false to turn it off.
+     * 
+     * @return void
+     * 
+     */
     
     function autoValidInsert($flag = true)
     {
@@ -1669,22 +1733,26 @@ class DB_Table {
     
     
     /**
-    *
-    * Validates an array for insertion into the table.
-    * 
-    * @access public
-    * 
-    * @param array $data An associative array of key-value pairs where
-    * the key is the column name and the value is the column value.  This
-    * is the data that will be inserted into the table.  Data is checked
-    * against the column data type for validity.
-    * 
-    * @return mixed Boolean true on success, a PEAR_Error object on
-    * failure.
-    *
-    * @see insert()
-    * 
-    */
+     *
+     * Validates an array for insertion into the table.
+     * 
+     * @access public
+     * 
+     * @param array $data An associative array of key-value pairs where
+     * the key is the column name and the value is the column value.  This
+     * is the data that will be inserted into the table.  Data is checked
+     * against the column data type for validity.
+     * 
+     * @return boolean true on success (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if:
+     *     - Invalid column name key in $data (DB_TABLE_ERR_INS_COL_NOMAP)
+     *     - Missing required column value    (DB_TABLE_ERR_INS_COL_NOMAP)
+     *     - Column value doesn't match type  (DB_TABLE_ERR_INS_DATA_INVALID)
+     *
+     * @see insert()
+     * 
+     */
         
     function validInsert(&$data)
     {
@@ -1730,28 +1798,40 @@ class DB_Table {
     
     
     /**
-    *
-    * Updates table row(s) matching a custom WHERE clause, after checking
-    * against validUpdate().
-    * 
-    * @access public
-    * 
-    * @param array $data An associative array of key-value pairs where
-    * the key is the column name and the value is the column value.  These
-    * are the columns that will be updated with new values.
-    * 
-    * @param string $where An SQL WHERE clause limiting which records
-    * are to be updated.
-    * 
-    * @return mixed Void on success, a PEAR_Error object on failure.
-    *
-    * @see validUpdate()
-    *
-    * @see DB::autoExecute()
-    * 
-    * @see MDB2::autoExecute()
-    * 
-    */
+     * Update table row or rows that match a custom WHERE clause
+     *
+     * Constructs and submits an SQL UPDATE command to update columns whose
+     * names are keys in the $data array parameter, in all rows that match
+     * the logical condition given by the $where string parameter.
+     * 
+     * If auto-recasting is enabled (if $this->_auto_recast), update() will
+     * try, if necessary, to recast $data to proper column types, with recast().
+     *
+     * If auto-validation is enabled (if $this->_valid_insert), update() 
+     * validates column types with validUpdate() before insertion.
+     *
+     * @access public
+     * 
+     * @param array $data An associative array of key-value pairs where the
+     * key is the column name and the value is the column value. These are
+     * the columns that will be updated with new values.
+     * 
+     * @param string $where An SQL WHERE clause limiting which records are
+     * are to be updated.
+     * 
+     * @return mixed Void on success, a PEAR_Error object on failure.
+     *
+     * @throws PEAR_Error if:
+     *     - Data fails type validation (bubbles error returned by validUpdate)
+     *     - Error thrown by DB/MDB2::autoexecute()
+     *
+     * @see validUpdate()
+     *
+     * @see DB::autoExecute()
+     * 
+     * @see MDB2::autoExecute()
+     * 
+     */
     
     function update($data, $where)
     {
@@ -1781,16 +1861,19 @@ class DB_Table {
     
     
     /**
-    * 
-    * Turns on (or off) automatic validation of updated data.
-    * 
-    * @access public
-    * 
-    * @param bool $flag True to turn on auto-validation, false to turn it off.
-    * 
-    * @return void
-    * 
-    */
+     * 
+     * Turns on (or off) automatic validation of updated data.
+     * 
+     * Enables (if $flag is true) or disables (if $flag is false) automatic 
+     * validation of data types prior to updating rows in the database by
+     * the {@link update()} method.
+     * @access public
+     * 
+     * @param bool $flag True to turn on auto-validation, false to turn it off.
+     * 
+     * @return void
+     * 
+     */
     
     function autoValidUpdate($flag = true)
     {
@@ -1803,22 +1886,27 @@ class DB_Table {
     
     
     /**
-    *
-    * Validates an array for updating the table.
-    * 
-    * @access public
-    * 
-    * @param array $data An associative array of key-value pairs where
-    * the key is the column name and the value is the column value.  This
-    * is the data that will be inserted into the table.  Data is checked
-    * against the column data type for validity.
-    * 
-    * @return mixed Boolean true on success, a PEAR_Error object on
-    * failure.
-    *
-    * @see update()
-    * 
-    */
+     *
+     * Validates an array for updating the table.
+     * 
+     * @access public
+     * 
+     * @param array $data An associative array of key-value pairs where
+     * the key is the column name and the value is the column value.  This
+     * is the data that will be inserted into the table.  Data is checked
+     * against the column data type for validity.
+     * 
+     * @return mixed Boolean true on success, a PEAR_Error object on
+     * failure.
+     *
+     * @throws PEAR_Error if
+     *     - Invalid column name key in $data (DB_TABLE_ERR_UPD_COL_NOMAP)
+     *     - Missing required column value    (DB_TABLE_ERR_UPD_COL_NOMAP)
+     *     - Column value doesn't match type  (DB_TABLE_ERR_UPD_DATA_INVALID)
+     *
+     * @see update()
+     * 
+     */
         
     function validUpdate(&$data)
     {
@@ -1862,20 +1950,26 @@ class DB_Table {
     
     
     /**
-    *
-    * Deletes table rows matching a custom WHERE clause.
-    * 
-    * @access public
-    * 
-    * @param string $where The WHERE clause for the delete command.
-    *
-    * @return mixed Void on success or a PEAR_Error object on failure.
-    *
-    * @see DB::query()
-    * 
-    * @see MDB2::exec()
-    * 
-    */
+     *
+     * Deletes table rows matching a custom WHERE clause.
+     * 
+     * Constructs and submits and SQL DELETE command with the specified WHERE clause.
+     * Command is submitted by DB::query() or MDB2::exec()
+     *
+     * @access public
+     * 
+     * @param string $where Logical condition in the WHERE clause of the delete command.
+     *
+     * @return mixed void on success (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if
+     *     DB::query() or MDB2::exec() returns error (bubbles up)
+     *
+     * @see DB::query()
+     * 
+     * @see MDB2::exec()
+     * 
+     */
     
     function delete($where)
     {
@@ -1889,20 +1983,26 @@ class DB_Table {
     
     
     /**
-    *
-    * Generates a sequence value; sequence name defaults to the table name.
-    * 
-    * @access public
-    * 
-    * @param string $seq_name The sequence name; defaults to table_id.
-    * 
-    * @return integer The next value in the sequence.
-    *
-    * @see DB::nextID()
-    * 
-    * @see MDB2::nextID()
-    *
-    */
+     *
+     * Generates and returns a sequence value.
+     *
+     * Generates a sequence value by calling the DB or MDB2::nextID() method. The
+     * sequence name defaults to the table name, or may be specified explicitly.
+     * 
+     * @access public
+     * 
+     * @param string $seq_name The sequence name; defaults to table_id.
+     * 
+     * @return integer The next value in the sequence (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if
+     *     Sequence name too long (>26 char + _seq) (DB_TABLE_ERR_SEQ_STRLEN)
+     *
+     * @see DB::nextID()
+     * 
+     * @see MDB2::nextID()
+     *
+     */
     
     function nextID($seq_name = null)
     {
@@ -1928,20 +2028,26 @@ class DB_Table {
     
     
     /**
-    * 
-    * Escapes and enquotes a value for use in an SQL query.
-    * 
-    * Helps makes user input safe against SQL injection attack.
-    * 
-    * @access public
-    * 
-    * @return string The value with quotes escaped, and inside single quotes.
-    * 
-    * @see DB_Common::quoteSmart()
-    * 
-    * @see MDB2::quote()
-    * 
-    */
+     * 
+     * Escapes and enquotes a value for use in an SQL query.
+     * 
+     * Simple wrapper for DB_Common::quoteSmart() or MDB2::quote(), which returns the value
+     * of one of these functions. Helps makes user input safe against SQL injection attack.
+     * 
+     * @access public
+     * 
+     * @param mixed $val The value to be quoted
+     *
+     * @return string The value with quotes escaped, inside single quotes if non-numeric.
+     *
+     * @throws PEAR_Error if
+     *     DB_Common::quoteSmart() or MDB2::quote() returns Error (bubbled up)
+     * 
+     * @see DB_Common::quoteSmart()
+     * 
+     * @see MDB2::quote()
+     * 
+     */
     
     function quote($val)
     {
@@ -1955,17 +2061,17 @@ class DB_Table {
     
     
     /**
-    * 
-    * Returns a blank row array based on the column map.
-    * 
-    * The array keys are the column names, and all values are set to null.
-    * 
-    * @access public
-    * 
-    * @return array An associative array where the key is column name
-    * and the value is null.
-    * 
-    */
+     * 
+     * Returns a blank row array based on the column map.
+     * 
+     * The array keys are the column names, and all values are set to null.
+     * 
+     * @access public
+     * 
+     * @return array An associative array where keys are column names and
+     *               all values are null.
+     * 
+     */
     
     function getBlankRow()
     {
@@ -1982,17 +2088,22 @@ class DB_Table {
     
     
     /**
-    * 
-    * Turns on (or off) automatic recasting of insert and update data.
-    * 
-    * @access public
-    * 
-    * @param bool $flag True to autmatically recast insert and update data,
-    * false to not do so.
-    *
-    * @return void
-    * 
-    */
+     * 
+     * Turns on (or off) automatic recasting of insert and update data.
+     * 
+     * Turns on (if $flag is true) or off (if $flag is false) automatic forcible 
+     * recasting of data to the declared data type, if required, prior to inserting 
+     * or updating.  The recasting is done by calling the DB_Table::recast() 
+     * method from within the DB_Table::insert() and DB_Table::update().
+     * 
+     * @access public
+     * 
+     * @param bool $flag True to automatically recast insert and update data,
+     * false to not do so.
+     *
+     * @return void
+     * 
+     */
     
     function autoRecast($flag = true)
     {
@@ -2005,27 +2116,27 @@ class DB_Table {
     
     
     /**
-    * 
-    * Forces array elements to the proper types for their columns.
-    * 
-    * This will not valiate the data, and will forcibly change the data
-    * to match the recast-type.
-    * 
-    * The date, time, and timestamp recasting has special logic for
-    * arrays coming from an HTML_QuickForm object so that the arrays
-    * are converted into properly-formatted strings.
-    * 
-    * @todo If a column key holds an array of values (say from a multiple
-    * select) then this method will not work properly; it will recast the
-    * value to the string 'Array'.  Is this bad?
-    * 
-    * @access public
-    * 
-    * @param array &$data The data array to re-cast.
-    *
-    * @return void
-    * 
-    */
+     * 
+     * Forces array elements to the proper types for their columns.
+     * 
+     * This will not valiate the data, and will forcibly change the data
+     * to match the recast-type.
+     * 
+     * The date, time, and timestamp recasting has special logic for
+     * arrays coming from an HTML_QuickForm object so that the arrays
+     * are converted into properly-formatted strings.
+     * 
+     * @todo If a column key holds an array of values (say from a multiple
+     * select) then this method will not work properly; it will recast the
+     * value to the string 'Array'.  Is this bad?
+     * 
+     * @access public
+     * 
+     * @param array &$data The data array to re-cast.
+     *
+     * @return void
+     * 
+     */
     
     function recast(&$data)
     {
@@ -2238,22 +2349,27 @@ class DB_Table {
     
     
     /**
-    * 
-    * Creates the table based on $this->col and $this->idx.
-    * 
-    * @access public
-    * 
-    * @param mixed $flag The automatic table creation mode to pursue:
-    * - 'safe' to create the table only if it does not exist
-    * - 'drop' to drop any existing table with the same name and re-create it
-    * 
-    * @return mixed Boolean false if there was no need to create the
-    * table, boolean true if the attempt succeeded, or a PEAR_Error if
-    * the attempt failed.
-    * 
-    * @see DB_Table_Manager::create()
-    * 
-    */
+     * 
+     * Creates the table based on $this->col and $this->idx.
+     * 
+     * @access public
+     * 
+     * @param string $flag The automatic table creation mode to pursue:
+     * - 'safe' to create the table only if it does not exist
+     * - 'drop' to drop any existing table with the same name and re-create it
+     * 
+     * @return mixed Boolean true if the table was successfully created,
+     *               false if there was no need to create the table, or
+     *               a PEAR_Error if the attempted creation failed.
+     *
+     * @throws PEAR_Error if
+     *     - DB_Table_Manager::tableExists() returns Error (bubbles up)
+     *     - DB_Table_Manager::create() returns Error (bubbles up)
+     * 
+     * @see DB_Table_Manager::tableExists()
+     * @see DB_Table_Manager::create()
+     * 
+     */
     
     function create($flag)
     {
@@ -2308,17 +2424,25 @@ class DB_Table {
     
     
     /**
-    * 
-    * Alters the table based on $this->col and $this->idx.
-    * 
-    * @access public
-    * 
-    * @return mixed Boolean true if altering was successful or a PEAR_Error on
-    * failure.
-    *
-    * @see DB_Table_Manager::alter()
-    * 
-    */
+     * 
+     * Alters the table to match schema declared in $this->col and $this->idx.
+     *
+     * If the table does not exist, create it instead.
+     * 
+     * @access public
+     * 
+     * @return boolean true if altering is successful (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if
+     *     - DB_Table_Manager::tableExists() returns Error (bubbles up)
+     *     - DB_Table_Manager::create() returns Error (bubbles up)
+     *     - DB_Table_Manager::alter() returns Error (bubbles up)
+     *
+     * @see DB_Table_Manager::tableExists()
+     * @see DB_Table_Manager::create()
+     * @see DB_Table_Manager::alter()
+     * 
+     */
     
     function alter()
     {
@@ -2349,17 +2473,19 @@ class DB_Table {
     
     
     /**
-    * 
-    * Verifies the table based on $this->col and $this->idx.
-    * 
-    * @access public
-    * 
-    * @return mixed Boolean true if the verification was successful, and a
-    * PEAR_Error if verification failed.
-    *
-    * @see DB_Table_Manager::verify()
-    * 
-    */
+     * 
+     * Verifies the table based on $this->col and $this->idx.
+     * 
+     * @access public
+     * 
+     * @return boolean true if verification succees (PEAR_Error on failure).
+     *
+     * @throws PEAR_Error if
+     *     DB_Table_Manager::verify() returns Error (bubbles up)
+     *
+     * @see DB_Table_Manager::verify()
+     * 
+     */
     
     function verify()
     {
@@ -2370,24 +2496,26 @@ class DB_Table {
     
     
     /**
-    * 
-    * Checks if a value validates against the DB_Table data type for a
-    * given column. This only checks that it matches the data type; it
-    * does not do extended validation.
-    * 
-    * @access public
-    * 
-    * @param array $val A value to check against the column's DB_Table
-    * data type.
-    * 
-    * @param array $col A column name from $this->col.
-    * 
-    * @return boolean True if the value validates (matches the
-    * data type), false if not.
-    * 
-    * @see DB_Table_Valid
-    * 
-    */
+     * 
+     * Checks if a value validates against the DB_Table data type for a
+     * given column. This only checks that it matches the data type; it
+     * does not do extended validation.
+     * 
+     * @access public
+     * 
+     * @param array $val A value to check against the column's DB_Table
+     * data type.
+     * 
+     * @param array $col A column name from $this->col.
+     * 
+     * @return boolean True if $val validates against data type, false if not
+     *
+     * @throws PEAR_Error if
+     *     Invalid column type in $this->col (DB_TABLE_ERR_VALIDATE_TYPE)
+     *
+     * @see DB_Table_Valid
+     * 
+     */
     
     function isValid($val, $col)
     {
@@ -2466,16 +2594,16 @@ class DB_Table {
     
     
     /**
-    * 
-    * Is a specific column required to be set and non-null?
-    * 
-    * @access public
-    * 
-    * @param mixed $column The column to check against.
-    * 
-    * @return boolean True if required, false if not.
-    * 
-    */
+     * 
+     * Is a specific column required to be set and non-null?
+     * 
+     * @access public
+     * 
+     * @param mixed $column The column to check against.
+     * 
+     * @return boolean True if required, false if not.
+     * 
+     */
     
     function isRequired($column)
     {
@@ -2489,54 +2617,54 @@ class DB_Table {
     
     
     /**
-    * 
-    * Creates and returns a QuickForm object based on table columns.
-    *
-    * @access public
-    *
-    * @param array $columns A sequential array of column names to use in
-    * the form; if null, uses all columns.
-    *
-    * @param string $array_name By default, the form will use the names
-    * of the columns as the names of the form elements.  If you pass
-    * $array_name, the column names will become keys in an array named
-    * for this parameter.
-    * 
-    * @param array $args An associative array of optional arguments to
-    * pass to the QuickForm object.  The keys are...
-    *
-    * 'formName' : String, name of the form; defaults to the name of this
-    * table.
-    * 
-    * 'method' : String, form method; defaults to 'post'.
-    * 
-    * 'action' : String, form action; defaults to
-    * $_SERVER['REQUEST_URI'].
-    * 
-    * 'target' : String, form target target; defaults to '_self'
-    * 
-    * 'attributes' : Associative array, extra attributes for <form>
-    * tag; the key is the attribute name and the value is attribute
-    * value.
-    * 
-    * 'trackSubmit' : Boolean, whether to track if the form was
-    * submitted by adding a special hidden field
-    * 
-    * @param string $clientValidate By default, validation will match
-    * the 'qf_client' value from the column definition.  However,
-    * if you set $clientValidate to true or false, this will
-    * override the value from the column definition.
-    *
-    * @param array $formFilters An array with filter function names or
-    * callbacks that will be applied to all form elements.
-    *
-    * @return object HTML_QuickForm
-    * 
-    * @see HTML_QuickForm
-    * 
-    * @see DB_Table_QuickForm
-    * 
-    */
+     * 
+     * Creates and returns a QuickForm object based on table columns.
+     *
+     * @access public
+     *
+     * @param array $columns A sequential array of column names to use in
+     * the form; if null, uses all columns.
+     *
+     * @param string $array_name By default, the form will use the names
+     * of the columns as the names of the form elements.  If you pass
+     * $array_name, the column names will become keys in an array named
+     * for this parameter.
+     * 
+     * @param array $args An associative array of optional arguments to
+     * pass to the QuickForm object.  The keys are...
+     *
+     * 'formName' : String, name of the form; defaults to the name of this
+     * table.
+     * 
+     * 'method' : String, form method; defaults to 'post'.
+     * 
+     * 'action' : String, form action; defaults to
+     * $_SERVER['REQUEST_URI'].
+     * 
+     * 'target' : String, form target target; defaults to '_self'
+     * 
+     * 'attributes' : Associative array, extra attributes for <form>
+     * tag; the key is the attribute name and the value is attribute
+     * value.
+     * 
+     * 'trackSubmit' : Boolean, whether to track if the form was
+     * submitted by adding a special hidden field
+     * 
+     * @param string $clientValidate By default, validation will match
+     * the 'qf_client' value from the column definition.  However, if
+     * you set $clientValidate to true or false, this will override the
+     * value from the column definition.
+     *
+     * @param array $formFilters An array with filter function names or
+     * callbacks that will be applied to all form elements.
+     *
+     * @return object HTML_QuickForm
+     * 
+     * @see HTML_QuickForm
+     * 
+     * @see DB_Table_QuickForm
+     * 
+     */
     
     function &getForm($columns = null, $array_name = null, $args = array(),
         $clientValidate = null, $formFilters = null)
@@ -2550,28 +2678,30 @@ class DB_Table {
     
     
     /**
-    * 
-    * Adds elements and rules to a pre-existing HTML_QuickForm object.
-    * 
-    * @access public
-    * 
-    * @param object &$form An HTML_QuickForm object.
-    * 
-    * @param array $columns A sequential array of column names to use in
-    * the form; if null, uses all columns.
-    *
-    * @param string $array_name By default, the form will use the names
-    * of the columns as the names of the form elements.  If you pass
-    * $array_name, the column names will become keys in an array named
-    * for this parameter.
-    * 
-    * @return void
-    * 
-    * @see HTML_QuickForm
-    * 
-    * @see DB_Table_QuickForm
-    * 
-    */
+     * 
+     * Adds elements and rules to a pre-existing HTML_QuickForm object.
+     * 
+     * @access public
+     * 
+     * @param object &$form An HTML_QuickForm object.
+     * 
+     * @param array $columns A sequential array of column names to use in
+     * the form; if null, uses all columns.
+     *
+     * @param string $array_name By default, the form will use the names
+     * of the columns as the names of the form elements.  If you pass
+     * $array_name, the column names will become keys in an array named
+     * for this parameter.
+     *
+     * @param clientValidate
+     * 
+     * @return void
+     * 
+     * @see HTML_QuickForm
+     * 
+     * @see DB_Table_QuickForm
+     * 
+     */
     
     function addFormElements(&$form, $columns = null, $array_name = null,
         $clientValidate = null)
@@ -2579,28 +2709,28 @@ class DB_Table {
         include_once 'DB/Table/QuickForm.php';
         $coldefs = $this->_getFormColDefs($columns);
         DB_Table_QuickForm::addElements($form, $coldefs, $array_name);
-        DB_Table_QuickForm::addRules($form, $coldefs, $array_name,
-            $clientValidate);
+        DB_Table_QuickForm::addRules($form, $coldefs, $array_name, 
+           $clientValidate);
     }
 
 
     /**
-    * 
-    * Adds static form elements like 'header', 'static', 'submit' or 'reset' to
-    * a pre-existing HTML_QuickForm object. The form elements needs to be
-    * defined in a property called $frm.
-    * 
-    * @access public
-    * 
-    * @param object &$form An HTML_QuickForm object.
-    * 
-    * @return void
-    * 
-    * @see HTML_QuickForm
-    * 
-    * @see DB_Table_QuickForm
-    * 
-    */
+     * 
+     * Adds static form elements like 'header', 'static', 'submit' or 'reset' to
+     * a pre-existing HTML_QuickForm object. The form elements needs to be
+     * defined in a property called $frm.
+     * 
+     * @access public
+     * 
+     * @param object &$form An HTML_QuickForm object.
+     * 
+     * @return void
+     * 
+     * @see HTML_QuickForm
+     * 
+     * @see DB_Table_QuickForm
+     * 
+     */
 
     function addStaticFormElements(&$form)
     {
@@ -2610,27 +2740,27 @@ class DB_Table {
 
 
     /**
-    * 
-    * Creates and returns an array of QuickForm elements based on an
-    * array of DB_Table column names.
-    * 
-    * @access public
-    * 
-    * @param array $columns A sequential array of column names to use in
-    * the form; if null, uses all columns.
-    * 
-    * @param string $array_name By default, the form will use the names
-    * of the columns as the names of the form elements.  If you pass
-    * $array_name, the column names will become keys in an array named
-    * for this parameter.
-    * 
-    * @return array An array of HTML_QuickForm_Element objects.
-    * 
-    * @see HTML_QuickForm
-    * 
-    * @see DB_Table_QuickForm
-    * 
-    */
+     * 
+     * Creates and returns an array of QuickForm elements based on an
+     * array of DB_Table column names.
+     * 
+     * @access public
+     * 
+     * @param array $columns A sequential array of column names to use in
+     * the form; if null, uses all columns.
+     * 
+     * @param string $array_name By default, the form will use the names
+     * of the columns as the names of the form elements.  If you pass
+     * $array_name, the column names will become keys in an array named
+     * for this parameter.
+     * 
+     * @return array An array of HTML_QuickForm_Element objects.
+     * 
+     * @see HTML_QuickForm
+     * 
+     * @see DB_Table_QuickForm
+     * 
+     */
     
     function &getFormGroup($columns = null, $array_name = null)
     {
@@ -2642,24 +2772,24 @@ class DB_Table {
     
     
     /**
-    * 
-    * Creates and returns a single QuickForm element based on a DB_Table
-    * column name.
-    * 
-    * @access public
-    * 
-    * @param string $column A DB_Table column name.
-    * 
-    * @param string $elemname The name to use for the generated QuickForm
-    * element.
-    * 
-    * @return object HTML_QuickForm_Element
-    * 
-    * @see HTML_QuickForm
-    * 
-    * @see DB_Table_QuickForm
-    * 
-    */
+     * 
+     * Creates and returns a single QuickForm element based on a DB_Table
+     * column name.
+     * 
+     * @access public
+     * 
+     * @param string $column A DB_Table column name.
+     * 
+     * @param string $elemname The name to use for the generated QuickForm
+     * element.
+     * 
+     * @return object HTML_QuickForm_Element
+     * 
+     * @see HTML_QuickForm
+     * 
+     * @see DB_Table_QuickForm
+     * 
+     */
     
     function &getFormElement($column, $elemname)
     {
@@ -2672,26 +2802,26 @@ class DB_Table {
     }
 
     /**
-    * 
-    * Creates and returns an array of QuickForm elements based on a DB_Table
-    * column name.
-    * 
-    * @author Ian Eure <ieure@php.net>
-    * 
-    * @access public
-    * 
-    * @param array $cols Array of DB_Table column names
-    * 
-    * @param string $array_name The name to use for the generated QuickForm
-    * elements.
-    * 
-    * @return object HTML_QuickForm_Element
-    * 
-    * @see HTML_QuickForm
-    * 
-    * @see DB_Table_QuickForm
-    * 
-    */
+     * 
+     * Creates and returns an array of QuickForm elements based on a DB_Table
+     * column name.
+     * 
+     * @author Ian Eure <ieure@php.net>
+     * 
+     * @access public
+     * 
+     * @param array $cols Array of DB_Table column names
+     * 
+     * @param string $array_name The name to use for the generated QuickForm
+     * elements.
+     * 
+     * @return object HTML_QuickForm_Element
+     * 
+     * @see HTML_QuickForm
+     * 
+     * @see DB_Table_QuickForm
+     * 
+     */
     function &getFormElements($cols, $array_name = null)
     {
         include_once 'DB/Table/QuickForm.php';
@@ -2701,20 +2831,20 @@ class DB_Table {
     
     
     /**
-    * 
-    * Creates a column definition array suitable for DB_Table_QuickForm.
-    * 
-    * @access public
-    * 
-    * @param string|array $column_set A string column name, a sequential
-    * array of columns names, or an associative array where the key is a
-    * column name and the value is the default value for the generated
-    * form element.  If null, uses all columns for this class.
-    * 
-    * @return array An array of columne defintions suitable for passing
-    * to DB_Table_QuickForm.
-    * 
-    */
+     * 
+     * Creates a column definition array suitable for DB_Table_QuickForm.
+     * 
+     * @access public
+     * 
+     * @param string|array $column_set A string column name, a sequential
+     * array of columns names, or an associative array where the key is a
+     * column name and the value is the default value for the generated
+     * form element.  If null, uses all columns for this class.
+     * 
+     * @return array An array of columne defintions suitable for passing
+     * to DB_Table_QuickForm.
+     * 
+     */
     
     function _getFormColDefs($column_set = null)
     {
