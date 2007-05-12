@@ -1,0 +1,22 @@
+PHPUnit 2.3.6 by Sebastian Bergmann.
+
+
+>testJoin1
+SELECT Street.Street, Person.FirstName, Person.LastName, Phone.PhoneNumber, Address.Building, Street.City
+FROM Street, Person, Phone, Address, PersonAddress, PersonPhone
+WHERE Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND City = 'MINNETONKA'.
+>testJoin2
+SELECT PersonPhone.PersonID, Person.FirstName, Person.LastName
+FROM PersonPhone, Person
+WHERE PersonPhone.PersonID = Person.PersonID.
+
+Time: 0.22743797302246
+
+OK (2 tests)
