@@ -1,0 +1,96 @@
+
+==========================================================================
+For release 1.50
+
+1) Syntax of DB_Table::select*() and DB_Table:buildSQL() methods:
+
+The original design of DB_Table allows the select* methods to be applied
+only to query arrays that are stored in the $this->sql property, which 
+must be identified by name. This is unnecessarily restrictive - the array
+syntax for queries is also useful for queries that you don't necessarily
+want to store. 
+
+Proposal:
+Modify DB_Table::select*() (i.e, select, selectResult, and selectCount)
+and DB_Table::buildSQL() so as to accept either the key of a query array
+in $this->sql (as at present) or a query array of the same format. This 
+has already been done for the corresponding functions in DB_Table_Database, 
+so the change can implemented by copying the DB_Table_Database functions 
+and modifying a few lines so that the 'from' element defaults to the table 
+name.
+
+(status - new feature, no BC break)
+
+2) Divide DB_Table_Database::buildFilter into two functions.
+
+The DB_Table_Database::buildFilter method now serves two purposes:
+It contains some very simple code for user-defined filters of the form
+"column_name1 = $value1 AND column_name2 = $value2, ..." from a single
+input array, and it also contains the code required to build filters 
+necessary to check foreign key validity. The latter requires three
+array parameters, corresponding to data to be inserted or updated, a 
+foreign key, and a corresponding referenced key. The explanation of 
+the syntax needed to define a filter used to check foreign key validity 
+is complicated, and is a nuisance to anyone who just wants to understand 
+how to make a simple filter from an array in which keys are column names 
+and values are column values.  
+
+Modification: Create a simpler function called buildFilter that only 
+takes one associative array as an argument, and that only implements 
+the simple case. Rename the current function as _buildFKeyFilter(),
+and make it private.
+
+(status - BC break with 1.50RC1 and 1.5RC2 beta releases)
+
+3) Change return value of DB_Table_Database::validCol() to an associative
+array.
+
+The method validCol() returns a two-element sequential array of the form
+array($table, $column). It may be difficult to remember the order of
+elements in the output. Make the output an associative array of the form 
+array('table'=>$table, 'column'=>$column), and change code that calls 
+this function internally. 
+
+(status - BC break only with beta 1.50RC1 and 1.5RC2 releases)
+
+4) Internals of DB_Table and DB_Table_Database insert() and delete():
+
+As it stands, the checking of foreign key validity in the DB_Table_Database 
+insert() and update() methods and and the execution of any referentially 
+triggered actions in the DB_Table_Database update() and delete() are carried 
+out before calling the corresponding DB_Table function. This means that the 
+checks (in insert and update) and actions (in update) are based on the $data 
+array that is input to the function, rather than that obtained after any 
+recasting, and before any basic data type validation. The correct order 
+of operations for any update would be: recast, type validation, foreign 
+key validity check, referentially triggered actions things stand, in the 
+DB_Table_Database insert() and update() functions the checking of foreign 
+key validity and, in update() and delete(), the execution of any 
+referentially triggered actions are carried out before calling the 
+corresponding DB_Table function. 
+
+Modification: Encapsulate the code that checks foreign keys and executes 
+referentially triggered actions as separate methods of DB_Table_Database, 
+and to have these called from within the DB_Table insert and update methods, 
+after recasting. The calls to the DB_Table_Databse methods would be placed 
+inside if blocks that check for the existence of a parent DB_Table_Database
+object. The DB_Table_Database insert, update, and delete methods would then 
+either become thin wrappers over the corresponding DB_Table table methods, 
+or be dropped. I think it might be more convenient in some contexts to use 
+the parent object for all SQL commands and pass the table names as parameters, 
+and so would probably keep them as thin wrappers.
+	The issue of the order of operations isn't as serious for a delete
+operation (because all you do is carry out ON_DELETE actions and then delete,
+with no recasting or validation). Nonetheless, you'd want to treat this 
+method in a manner consistent with the treatment of the other two. 
+
+(status - No BC break with releases < 1.50RC1, since the change would not
+change the behavior of the DB_Table functions in the absence of a parent
+DB_Table_Database object, but a BC break with the 1.50RC1 and 1.50RC2 beta 
+releases). 
+
+==========================================================================
+For release 1.60
+
+A variety of other proposed changes that don't involve BC breaks. To be
+written. 
