@@ -4,13 +4,14 @@ For release 1.50
 
 1) Syntax of DB_Table::select*() and DB_Table:buildSQL() methods:
 
+Discussion:
 The original design of DB_Table allows the select* methods to be applied
 only to query arrays that are stored in the $this->sql property, which 
 must be identified by name. This is unnecessarily restrictive - the array
 syntax for queries is also useful for queries that you don't necessarily
 want to store. 
 
-Proposal:
+Modification:
 Modify DB_Table::select*() (i.e, select, selectResult, and selectCount)
 and DB_Table::buildSQL() so as to accept either the key of a query array
 in $this->sql (as at present) or a query array of the same format. This 
@@ -23,6 +24,7 @@ name.
 
 2) Divide DB_Table_Database::buildFilter into two functions.
 
+Discussion:
 The DB_Table_Database::buildFilter method now serves two purposes:
 It contains some very simple code for user-defined filters of the form
 "column_name1 = $value1 AND column_name2 = $value2, ..." from a single
@@ -35,10 +37,11 @@ is complicated, and is a nuisance to anyone who just wants to understand
 how to make a simple filter from an array in which keys are column names 
 and values are column values.  
 
-Modification: Create a simpler function called buildFilter that only 
-takes one associative array as an argument, and that only implements 
-the simple case. Rename the current function as _buildFKeyFilter(),
-and make it private.
+Modification: 
+Create a simpler function called buildFilter that takes only one 
+associative array as an argument, and that only implements only the 
+simple case. Rename the current function as _buildFKeyFilter(), and 
+make it private.
 
 (status - BC break with 1.50RC1 and 1.5RC2 beta releases)
 
@@ -46,51 +49,72 @@ and make it private.
 array.
 
 The method validCol() returns a two-element sequential array of the form
-array($table, $column). It may be difficult to remember the order of
-elements in the output. Make the output an associative array of the form 
-array('table'=>$table, 'column'=>$column), and change code that calls 
-this function internally. 
+array($table, $column). It can be difficult to remember the order of
+elements in an array output. Make the output an associative array of the 
+form array('table'=>$table, 'column'=>$column), and change code that 
+calls this function internally. 
 
 (status - BC break only with beta 1.50RC1 and 1.5RC2 releases)
 
-4) Internals of DB_Table and DB_Table_Database insert() and delete():
+4) Internals of DB_Table and DB_Table_Database insert(), update(), & delete():
 
+Discussion:
 As it stands, the checking of foreign key validity in the DB_Table_Database 
 insert() and update() methods and and the execution of any referentially 
-triggered actions in the DB_Table_Database update() and delete() are carried 
-out before calling the corresponding DB_Table function. This means that the 
-checks (in insert and update) and actions (in update) are based on the $data 
-array that is input to the function, rather than that obtained after any 
-recasting, and before any basic data type validation. The correct order 
-of operations for any update would be: recast, type validation, foreign 
-key validity check, referentially triggered actions things stand, in the 
-DB_Table_Database insert() and update() functions the checking of foreign 
-key validity and, in update() and delete(), the execution of any 
-referentially triggered actions are carried out before calling the 
-corresponding DB_Table function. 
+triggered actions in DB_Table_Database update() and delete() are carried 
+out before calling the corresponding DB_Table function. This means that 
+the checks (in insert and update) and actions (in update) are based on 
+the $data array that is input to the function, rather than that obtained 
+after any recasting, and before any basic data type validation. The 
+correct order of operations for an update should be: recast, type 
+validation, foreign key validation, referentially triggered actions,
+update. 
 
-Modification: Encapsulate the code that checks foreign keys and executes 
-referentially triggered actions as separate methods of DB_Table_Database, 
-and to have these called from within the DB_Table insert and update methods, 
-after recasting. The calls to the DB_Table_Databse methods would be placed 
-inside if blocks that check for the existence of a parent DB_Table_Database
-object. The DB_Table_Database insert, update, and delete methods would then 
-either become thin wrappers over the corresponding DB_Table table methods, 
-or be dropped. I think it might be more convenient in some contexts to use 
-the parent object for all SQL commands and pass the table names as parameters, 
-and so would probably keep them as thin wrappers.
-	The issue of the order of operations isn't as serious for a delete
-operation (because all you do is carry out ON_DELETE actions and then delete,
-with no recasting or validation). Nonetheless, you'd want to treat this 
-method in a manner consistent with the treatment of the other two. 
+Modification: 
+Encapsulate the code that executes referentially triggered actions as 
+separate onUpdateAction and onDeleteAction methods DB_Table_Database, 
+and have these and the validForeignKey methods called from within the 
+DB_Table insert, update, and delete methods. The calls to the 
+DB_Table_Databse methods will be placed inside if blocks that check 
+for the existence of a parent DB_Table_Database object. The 
+DB_Table_Database insert, update, and delete methods would then become 
+thin wrappers for the corresponding DB_Table table methods, with the 
+table name as an extra parameter. The behavior of the DB_Table and 
+DB_Table_Database methods would become identical. 
 
 (status - No BC break with releases < 1.50RC1, since the change would not
 change the behavior of the DB_Table functions in the absence of a parent
-DB_Table_Database object, but a BC break with the 1.50RC1 and 1.50RC2 beta 
-releases). 
+DB_Table_Database object, but a BC break with the 1.50RC1 and 1.50RC2 
+beta releases).
 
 ==========================================================================
 For release 1.60
 
-A variety of other proposed changes that don't involve BC breaks. To be
-written. 
+1) Add a DB_Table_Datbase::join() method that returns a query array for a 
+   query that joins a specified set of pairs of tables. Unlike autoJoin(), 
+   this requires that pairs of table to be joined be specified explicitly. 
+
+2) Add left joins to join and autoJoin, by declaring some of the tables 
+   in the $tables parameter to be "optional". Table name values in the 
+   $tables parameter that are prefixed with a colon (e.g., ':TableName') 
+   will be interpreted as "optional" tables and will be OUTER JOINed to 
+   the INNER JOINed set of "required" tables.
+
+3) Add column and table aliases to autoJoin.  Extend the autoJoin 
+   interface to interpret string keys in the $cols and $tables parameter 
+   arrays as aliases: Allow the syntax
+   $cols = array( alias1 => column_name_1, alias2 => column_name_2, ...) 
+   to represent 'SELECT column_name_1 as alias1, column_name_2 as alias2, 
+   ...".  Keys that are strings will be interpreted as aliases, but integer 
+   keys will not.
+
+4) Refinements of _sleep and __wakeup() methods of DB_Table_Database and 
+   DB_Table.  Add further error checking.  Add ability to store DSN to 
+   the __sleep methods and ability to reconnect to the database to the 
+   __wakeup method.
+
+5) Add further checks of foreign key reference sanity to the addRef method: 
+   i)  Check for nullify actions on required columns
+   ii) Check if referenced key is a unique or primary key
+
+6) Fully automated tests, with assertions about SQL query results.
