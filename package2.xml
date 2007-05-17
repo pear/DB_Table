@@ -14,8 +14,11 @@ An object oriented interface to, and model of, a database. Integrates with HTML_
 </summary>
 <description>
 The DB_Table package provides an object oriented interface to a database. 
+
 Each instance of the core DB_Table class contains the schema for a table, defined using abstract data types. The class provides a portable api for insert, update, delete, and select SQL commands, and can validate data types upon insertion and updating. It provides methods to automatically create or verify a database table. DB_Table also provides methods (using PEAR HTML_QuickForm) to generate input forms that match the column definitions. 
+
 Each instance of the DB_Table_Database class contains a model of relationships between tables in a database, in which each table is represented by an instance of DB_Table. DB_Table_Database provides a method for automatic construction of join conditions for inner joins involving any number of tables, optional php validation of foreign key validity, and optional php emulation of actions triggered on delete or update of referenced rows, such as cascading deletes.
+
 The DB_Table_Generator class auto-generates the php code necessary to create an interface to an existing database.
 </description>
  <lead>
@@ -97,6 +100,36 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
          <file name="test.php" role="test" />
          <file name="README" role="doc" />
        </dir> <!-- /tests/generator -->
+       <dir name="database">
+         <file name="README" role="test" />
+         <file name="AutoJoinTest.php" role="test" />
+         <file name="DeleteTest.php" role="test" />
+         <file name="DeleteTest.php" role="test" />
+         <file name="GetTest.php" role="test" />
+         <file name="ModifyTest.php" role="test" />
+         <file name="SelectTest.php" role="test" />
+         <file name="SerialTest.php" role="test" />
+         <file name="SQLTest.php" role="test" />
+         <file name="XMLTest.php" role="test" />
+         <dir name="db1">
+           <file name="define.php" role="test" />
+           <file name="create.php" role="test" />
+           <file name="data.php" role="test" />
+           <file name="insert.php" role="test" />
+           <file name="PersonPhone_Table.php" role="test" />
+         </dir> <!-- /tests/database/db1 -->
+         <dir name="out">
+           <file name="AutoJoinTest.out" role="test" />
+           <file name="DeleteTest.out" role="test" />
+           <file name="DeleteTest.out" role="test" />
+           <file name="GetTest.out" role="test" />
+           <file name="ModifyTest.out" role="test" />
+           <file name="SelectTest.out" role="test" />
+           <file name="SerialTest.out" role="test" />
+           <file name="SQLTest.out" role="test" />
+           <file name="XMLTest.out" role="test" />
+         </dir> <!-- /tests/database/out -->
+       </dir> <!-- /tests/database -->
      </dir> <!-- /tests -->
    </dir> <!-- / -->
  </contents>
