@@ -572,7 +572,7 @@ class DB_Table {
      * Auto-incrementing is implemented in the insert method,
      * using a sequence accessed by the nextID() method.
      *
-     * @access private
+     * @access public
      * 
      * @var string
      * 
