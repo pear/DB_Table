@@ -1,70 +1,9 @@
 <?php
-#require_once 'PHPUnit/TestCase.php';
-require_once 'PHPUnit2/Framework/TestCase.php';
-require_once 'DB/Table/Database.php';
+require_once 'DatabaseTest.php';
 
-#class SelectTest extends PHPUnit_TestCase {
-class SelectTest extends PHPUnit2_Framework_TestCase {
+class SelectTest extends DatabaseTest 
+{
 
-    var $name = null;
-    var $conn = null;
-    var $db   = null;
-    var $fetchmod_assoc = null;
-    var $fetchmod_order = null;
-
-    function setUp() 
-    {
-        // Create DB_Table_Database object $db1 and insert data
-        require 'db1/insert.php';
-
-        $this->name = $db_name;
-        $this->conn =& $conn;
-        $this->db   =& $db1;
-        $this->verbose = $verbose;
-        $this->db_conn = $db_conn;
-
-        if ($this->db->_backend == 'mdb2') {
-            $this->fetchmode_assoc = MDB2_FETCHMODE_ASSOC;
-        } else {
-            $this->fetchmode_assoc = DB_FETCHMODE_ASSOC;
-        }
-        if ($this->db->_backend == 'mdb2') {
-            $this->fetchmode_order = MDB2_FETCHMODE_ORDERED;
-        } else {
-            $this->fetchmode_order = DB_FETCHMODE_ORDERED;
-        }
-
-        // Copy properties of db 
-        foreach ($properties as $property_name) {
-            $this->$property_name = $$property_name;
-        }
-
-        // Copy arrays containing initial table data
-        foreach ($table_arrays as $table_name => $array) {
-            $this->$table_name = $array;
-        }
- 
-    }
-
-    function tearDown() {
-        if (!$this->db_conn) {
-           // print "Dropping Database\n";
-           $this->conn->query("DROP DATABASE {$this->name}");
-        } else {
-            $tables = $this->db->getTable();
-            foreach ($tables as $table) {
-                $name = $table->table;
-                $this->conn->query("DROP Table $name");
-            }
-            $this->conn->query("DROP Table DataFile");
-            $this->conn->query("DROP Table Person_seq");
-            $this->conn->query("DROP Table Address_seq");
-            $this->conn->query("DROP Table Phone_seq");
-        }
-        // print "Disconnecting\n";
-        $this->conn->disconnect();
-    }
-  
     function testSelect1()
     {
         print "\n" . ">testSelect1";
@@ -75,7 +14,7 @@ class SelectTest extends PHPUnit2_Framework_TestCase {
         foreach ($tables as $table_name => $table_obj) {
             $sql = array('select'    => '*',
                          'from'      => $table_name,
-                         'fetchmode' => $this->fetchmode_assoc);
+                         'fetchmode' => $this->fetchmode_assoc );
             $result = $this->db->select($sql);
             if (PEAR::isError($result)){
                 print $result->getMessage();
@@ -122,6 +61,7 @@ class SelectTest extends PHPUnit2_Framework_TestCase {
         $report = $this->db->autoJoin($cols);
         if (PEAR::isError($report)) {
             print "\n" . $report->getMessage();
+            print_r($this->db->getLink());
             $this->assertTrue(false);
             return;
         }
@@ -208,16 +148,16 @@ class SelectTest extends PHPUnit2_Framework_TestCase {
             $this->assertTrue(false);
             return;
         }
-        $i = 0;
-        while ($result->fetchInto($row)) {
-            if ($this->verbose > 0) {
+        if ($this->verbose > 0) {
+            $i = 0;
+            while ($row = $result->fetchRow()) {
                 $s = array();
                 foreach ($row as $key => $value){
                     $s[] = (string) $value;
                 }
                 print "\n" . implode(',', $s);
+                $i = $i + 1;
             }
-            $i = $i + 1;
         }
         $this->assertEquals($i,10);
     }
@@ -250,15 +190,15 @@ class SelectTest extends PHPUnit2_Framework_TestCase {
             return;
         }
         $i = 0;
-        while ($result->fetchInto($row)) {
-            if ($this->verbose > 0) {
+        if ($this->verbose > 0) {
+            while ($row = $result->fetchRow()) {
                 $s = array();
                 foreach ($row as $key => $value){
                     $s[] = (string) $value;
                 }
                 print "\n" . implode(',', $s);
+                $i = $i + 1;
             }
-            $i = $i + 1;
         }
         $this->assertEquals($i,10);
     }
