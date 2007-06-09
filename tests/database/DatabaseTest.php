@@ -24,7 +24,6 @@ class DatabaseTest extends PHPUnit2_Framework_TestCase {
         } else {
             require 'db1/define.php';
         }
-        $db->addAllLinks();
         $db->setTableSubclassPath('db1');
 
         $this->name    = $db_name;
