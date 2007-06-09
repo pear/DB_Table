@@ -57,8 +57,8 @@ $PersonPhone->idx['PersonID'] = array('cols' => 'PersonID', 'type' => 'normal');
 $PersonPhone->idx['PhoneID'] = array('cols' => 'PhoneID', 'type' => 'normal');
 */
 
-require_once 'db1/PersonPhoneTable.php';
-$PersonPhone = new PersonPhoneTable($conn, 'PersonPhone');
+require_once 'db1/PersonPhone_Table.php';
+$PersonPhone = new PersonPhone_Table($conn, 'PersonPhone');
 
 $Street = new DB_Table($conn, 'Street');
 $Street->col['Street'] = array('type' => 'char', 'size' => 64);
@@ -69,24 +69,26 @@ $Street->idx['Street'] = array('cols' => array('Street', 'City', 'StateAbb'),
                                'type' => 'primary');
 
 // Instantiate new DB_Table_Database object 
-$db1 = new DB_Table_Database($conn, $db_name);
+$db = new DB_Table_Database($conn, $db_name);
 
 // Add all tables to it
-$db1->addTable($Person);
-$db1->addTable($Address);
-$db1->addTable($Phone);
-$db1->addTable($PersonAddress);
-$db1->addTable($PersonPhone);
-$db1->addTable($Street);
+$db->addTable($Person);
+$db->addTable($Address);
+$db->addTable($Phone);
+$db->addTable($PersonAddress);
+$db->addTable($PersonPhone);
+$db->addTable($Street);
 
 // Add references to DB_Table_Database object
-$db1->addRef('PersonAddress', 'PersonID2', 'Person',null, 'cascade', 'cascade');
-$db1->addRef('PersonAddress', 'AddressID', 'Address',null, 'cascade', 'cascade');
-$db1->addRef('PersonPhone', 'PersonID', 'Person',null, 'cascade', 'cascade');
-$db1->addRef('PersonPhone', 'PhoneID', 'Phone',null, 'cascade', 'cascade');
-$db1->addRef('Address', array('Street', 'City', 'StateAbb'),
+$db->addRef('PersonAddress', 'PersonID2', 'Person', null, 'cascade', 'cascade');
+$db->addRef('PersonAddress', 'AddressID', 'Address', null, 'cascade', 'cascade');
+$db->addRef('PersonPhone', 'PersonID', 'Person', null, 'cascade', 'cascade');
+$db->addRef('PersonPhone', 'PhoneID', 'Phone', null, 'cascade', 'cascade');
+$db->addRef('Address', array('Street', 'City', 'StateAbb'),
              'Street',  array('Street', 'City', 'StateAbb'),
              'cascade', 'cascade');
+
+$db->addAllLinks();
 
 # List of tables in database
 $table = array($Person, $Address, $Phone, $PersonAddress, $PersonPhone, $Street);
@@ -105,7 +107,7 @@ $table_subclass['Person']  = null;
 $table_subclass['Address'] = null;
 $table_subclass['Phone']   = null;
 $table_subclass['PersonAddress'] = null;
-$table_subclass['PersonPhone'] = 'PersonPhoneTable';
+$table_subclass['PersonPhone'] = 'PersonPhone_Table';
 $table_subclass['Street'] = null;
 
 $ref = array();
