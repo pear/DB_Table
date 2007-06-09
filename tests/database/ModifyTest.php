@@ -1,7 +1,5 @@
 <?php
-#require_once 'PHPUnit/TestCase.php';
-require_once 'PHPUnit2/Framework/TestCase.php';
-require_once 'DB/Table/Database.php';
+require_once 'DatabaseTest.php';
 
 /**
  * Tests methods needed to modify data in a database:
@@ -10,91 +8,7 @@ require_once 'DB/Table/Database.php';
  * Also uses setOnDelete() and setOnUpdate() to modify
  * referentially triggered actions
  */
-#class ModifyTest extends PHPUnit_TestCase {
-class ModifyTest extends PHPUnit2_Framework_TestCase {
-
-    var $name = null;
-    var $conn = null;
-    var $db = null;
-    var $fetchmod_assoc = null;
-    var $fetchmod_order = null;
-
-    function setUp() 
-    {
-        // Create DB_Table_Database object $db1 and insert data
-        require 'db1/insert.php';
-
-        $this->name    = $db_name;
-        $this->conn    =& $conn;
-        $this->db      =& $db1;
-        $this->db_conn = $db_conn;
-        $this->verbose = $verbose;
-
-        if ($this->db->_backend == 'mdb2') {
-            $this->fetchmode_assoc = MDB2_FETCHMODE_ASSOC;
-        } else {
-            $this->fetchmode_assoc = DB_FETCHMODE_ASSOC;
-        }
-        if ($this->db->_backend == 'mdb2') {
-            $this->fetchmode_order = MDB2_FETCHMODE_ORDERED;
-        } else {
-            $this->fetchmode_order = DB_FETCHMODE_ORDERED;
-        }
-
-        // Copy expected values of properties of $db1
-        foreach ($properties as $property_name) {
-            $this->$property_name = $$property_name;
-        }
-
-        // Copy arrays containing contents of tables of $db1
-        foreach ($table_arrays as $table_name => $array) {
-            $this->$table_name = $array;
-        }
- 
-    }
-
-    function tearDown() {
-        if (!$this->db_conn) {
-           // print "\nDropping Database";
-           $this->conn->query("DROP DATABASE {$this->name}");
-        } else {
-           $tables = $this->db->getTable();
-           foreach ($tables as $table) {
-               $name = $table->table;
-               $this->conn->query("DROP Table $name");
-           }
-           $this->conn->query("DROP Table DataFile");
-           $this->conn->query("DROP Table Person_seq");
-           $this->conn->query("DROP Table Address_seq");
-           $this->conn->query("DROP Table Phone_seq");
-        }
-        // print "\nDisconnecting";
-        $this->conn->disconnect();
-    }
-
-    function recursiveUnset(&$value) {
-        if (is_array($value)) {
-            foreach ($value as $key => $element) {
-                $this->recursiveUnset($element); 
-                unset($element);
-            }
-        }
-    }
-
-    function print_result($result, $name) {
-        if ($this->verbose > 1) {
-            if ($name) {
-                print "\nContents of $name";
-            }
-            foreach ($result as $row) {
-                $s = array();
-                foreach ($row as $key => $value){
-                    $s[] = "$value";
-                }
-                print "\n" . implode(', ',$s);
-            }
-        }
-    }
+class ModifyTest extends DatabaseTest {
 
 #   function equal_assoc_array($array1, $array2) {
 #       $same = true;
@@ -143,6 +57,8 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         $data['StateAbb'] = 'MN';
         $data['ZipCode']  = '55345';
         $result = $this->db->ValidForeignKeys('Address',$data);
+
+        // Check that $result is boolean true
         if (PEAR::isError($result)){
             print "\n" . $result->getMessage();
             $this->assertTrue(false);
@@ -151,6 +67,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
             $this->assertTrue(false);
         }
         $this->assertTrue($result);
+
     }
 
     function testValidForeignKeys3()
@@ -165,6 +82,8 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         $data['PersonID'] = 18;
         $data['PhoneID']  = 38;
         $result = $this->db->ValidForeignKeys('PersonPhone',$data);
+
+        // Check that $result is boolean true
         if (PEAR::isError($result)){
             print "\n" . $result->getMessage();
             $this->assertTrue(false);
@@ -191,6 +110,8 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         $data['StateAbb'] = 'MN';
         $data['ZipCode']  = '55345';
         $result = $this->db->ValidForeignKeys('Address',$data);
+
+        // Check that $result is boolean false
         if (PEAR::isError($result)){
             print "\n" . $result->getMessage();
             $this->assertTrue(false);
@@ -226,7 +147,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n Error during inspection of PersonPhone:";
@@ -282,7 +203,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect Address 
         $report = array('select' => '*',
                         'from' => 'Address',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
@@ -384,7 +305,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
@@ -405,7 +326,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
@@ -443,7 +364,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect Street 
         $report = array('select' => '*',
                         'from'   => 'Street',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $count = $this->db->selectCount($report);
         $this->assertEquals($count, '16');
         if ($this->verbose > 1) {
@@ -453,7 +374,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect Address 
         $report = array('select' => 'AddressID, Building, Street, City',
                         'from'   => 'Address',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertEquals(count($result),count($this->Address)-2);
         $this->print_result($result, 'Address');
@@ -461,7 +382,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonAddress 
         $report = array('select' => 'PersonID2, AddressID',
                         'from'   => 'PersonAddress',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertEquals(count($result),count($this->PersonAddress)-2);
         $this->print_result($result, 'PersonAddress');
@@ -491,7 +412,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
@@ -509,7 +430,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
@@ -549,7 +470,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect Street
         $report = array('select' => '*',
                         'from'   => 'Street',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
@@ -562,7 +483,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect Address
         $report = array('select' => 'AddressID, Building, Street, City',
                         'from'   => 'Address',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
@@ -574,7 +495,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonAddress
         $report = array('select' => 'PersonID2, AddressID',
                         'from'   => 'PersonAddress',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->print_result($result, 'PersonAddress');
     }
@@ -603,14 +524,14 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->print_result($result, 'PersonPhone');
 
         // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
-                        'fetchmode' => $this->fetchmode_assoc);
+                        'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->print_result($result, 'PersonAddress');
         $this->assertTrue(true);
@@ -639,14 +560,14 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
             // Inspect Street
             $report = array('select' => '*',
                             'from'   => 'Street',
-                            'fetchmode' => $this->fetchmode_assoc);
+                            'fetchmode' => $this->fetchmode_assoc );
             $count = $this->db->selectCount($report);
             print "\n" . "$count rows remaining in Street"; 
 
             // Inspect Address
             $report = array('select' => 'AddressID, Building, Street, City',
                             'from'   => 'Address',
-                            'fetchmode' => $this->fetchmode_assoc);
+                            'fetchmode' => $this->fetchmode_assoc );
             $result = $this->db->select($report);
             $this->print_result($result, 
                    "Address (ID, Building, Street, City):");
@@ -654,7 +575,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
             // Inspect PersonAddress
             $report = array('select' => '*',
                             'from'   => 'PersonAddress',
-                            'fetchmode' => $this->fetchmode_assoc);
+                            'fetchmode' => $this->fetchmode_assoc );
             $result = $this->db->select($report);
             $this->print_result($result, 'PersonAddress');
         }
@@ -731,7 +652,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
         if ($this->verbose > 1) {
             $report = array('select' => '*',
                             'from' => 'PersonPhone',
-                            'fetchmode' => $this->fetchmode_assoc);
+                            'fetchmode' => $this->fetchmode_assoc );
             $result = $this->db->select($report);
             $this->print_result($result, 'PersonPhone');
         }
@@ -781,13 +702,13 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
                 print "Contents of PersonPhone:";
                 $report = array('select' => '*',
                                 'from' => 'PersonPhone',
-                                'fetchmode' => $this->fetchmode_assoc);
+                                'fetchmode' => $this->fetchmode_assoc );
                 $result = $this->db->select($report);
                 $this->print_result($result, 'PersonPhone');
                 print "\nContents of PersonAddress:";
                 $report = array('select' => '*',
                                 'from' => 'PersonAddress',
-                                'fetchmode' => $this->fetchmode_assoc);
+                                'fetchmode' => $this->fetchmode_assoc );
                 $result = $this->db->select($report);
                 $this->print_result($result, 'PersonAddress');
             }
@@ -813,7 +734,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
             if ($this->verbose > 1) {
                 $report = array('select' => 'AddressID, Building, Street, City',
                                 'from'   => 'Address',
-                                'fetchmode' => $this->fetchmode_assoc);
+                                'fetchmode' => $this->fetchmode_assoc );
                 $result = $this->db->select($report);
                 $this->print_result($result, 
                                     'Address(ID, Building, Street, City)');
@@ -845,13 +766,13 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
             // Inspect PersonPhone
             $report = array('select' => '*',
                             'from' => 'PersonPhone',
-                            'fetchmode' => $this->fetchmode_assoc);
+                            'fetchmode' => $this->fetchmode_assoc );
             $result = $this->db->select($report);
             $this->print_result($result, 'PersonPhone');
             // Inspect PersonAddress
             $report = array('select' => '*',
                             'from' => 'PersonAddress',
-                            'fetchmode' => $this->fetchmode_assoc);
+                            'fetchmode' => $this->fetchmode_assoc );
             $result = $this->db->select($report);
             $this->print_result($result, 'PersonAddress');
         }
@@ -880,7 +801,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
             if ($this->verbose > 1) {
                 $report = array('select' => 'AddressID, Building, Street, City',
                                 'from'   => 'Address',
-                                'fetchmode' => $this->fetchmode_assoc);
+                                'fetchmode' => $this->fetchmode_assoc );
                 $result = $this->db->select($report);
                 $this->print_result($result, 
                        'Address (ID, Building, Street, City)');
@@ -912,12 +833,12 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
             if ($this->verbose > 1) {
                 $report = array('select' => '*',
                                 'from' => 'PersonPhone',
-                                'fetchmode' => $this->fetchmode_assoc);
+                                'fetchmode' => $this->fetchmode_assoc );
                 $result = $this->db->select($report);
                 $this->print_result($result, 'PersonPhone');
                 $report = array('select' => '*',
                                 'from' => 'PersonAddress',
-                                'fetchmode' => $this->fetchmode_assoc);
+                                'fetchmode' => $this->fetchmode_assoc );
                 $result = $this->db->select($report);
                 $this->print_result($result, 'PersonAddress');
             }
@@ -947,7 +868,7 @@ class ModifyTest extends PHPUnit2_Framework_TestCase {
                 $report = array('select' => 
                                 'AddressID, Building, Street, City, StateAbb',
                                 'from'   => 'Address',
-                                'fetchmode' => $this->fetchmode_assoc);
+                                'fetchmode' => $this->fetchmode_assoc );
                 $result = $this->db->select($report);
                 $this->print_result($result, 
                        'Address(ID, Building, Street, City, StateAbb)');
