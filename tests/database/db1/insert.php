@@ -27,14 +27,14 @@ foreach ($data as $data_row) {
     // Create and insert Person record
     $person_row = array();
     foreach ( $Person->col as $col => $col_def ){
-        if ( key_exists($col,$DataFile->col)) {
+        if ( key_exists($col, $DataFile->col)) {
             $person_row[$col] = $data_row[$col];
         } else {
             $person_row[$col]=null;
         }
     }
     $PersonID = $PersonID + 1;
-    $result = $db1->insert('Person',$person_row);
+    $result = $db->insert('Person', $person_row);
     $person_row['PersonID'] = $PersonID;
     $person[] = $person_row;
     if (PEAR::isError($result)){
@@ -50,9 +50,9 @@ foreach ($data as $data_row) {
         }
         $street_id = 
           "{$street_row['Street']}_{$street_row['City']}_{$street_row['StateAbb']}";
-        if (!in_array($street_id,$street_ids)) {
+        if (!in_array($street_id, $street_ids)) {
             $StreetID = $StreetID + 1;
-            $result = $db1->insert('Street',$street_row);
+            $result = $db->insert('Street', $street_row);
             $street[] = $street_row;
             $street_ids[] = $street_id;
         }
@@ -61,13 +61,13 @@ foreach ($data as $data_row) {
         $address_row = array();
         foreach ( $Address->col as $col => $col_def ){
             if ( key_exists($col, $data_row)) {
-                $address_row[$col]=$data_row[$col];
+                $address_row[$col] = $data_row[$col];
             #} else {
             #    $address_row[$col]=null;
             }
         }
         $AddressID = $AddressID + 1;
-        $result = $db1->insert('Address',$address_row);
+        $result = $db->insert('Address', $address_row);
         $address_row['AddressID'] = $AddressID;
         $address[] = $address_row;
         if (PEAR::isError($result)){
@@ -76,7 +76,7 @@ foreach ($data as $data_row) {
             $assoc = array();
             $assoc['PersonID2'] = $PersonID;
             $assoc['AddressID'] = $AddressID;
-            $result = $db1->insert('PersonAddress',$assoc);
+            $result = $db->insert('PersonAddress', $assoc);
             $person_address[] = $assoc;
             if (PEAR::isError($result)){
                 print $result->getMessage()."\n";
@@ -94,9 +94,9 @@ foreach ($data as $data_row) {
         }
         if (!is_null($phone_row['PhoneNumber'])) {
             $PhoneID = $PhoneID + 1;
-            $result = $db1->insert('Phone',$phone_row);
-            $phone_row[] = $PhoneID;
-            $phone[$PhoneID] = $phone_row;
+            $result = $db->insert('Phone', $phone_row);
+            $phone_row['PhoneId'] = $PhoneID;
+            $phone[] = $phone_row;
             if (PEAR::isError($result)){
                 print $result->getMessage()."\n";
             } else {
@@ -104,7 +104,7 @@ foreach ($data as $data_row) {
                 $assoc = array();
                 $assoc['PersonID'] = $PersonID;
                 $assoc['PhoneID']  = $PhoneID;
-                $result = $db1->insert('PersonPhone',$assoc);
+                $result = $db->insert('PersonPhone', $assoc);
                 $person_phone[] = $assoc;
                 if (PEAR::isError($result)){
                     print $result->getMessage()."\n";
