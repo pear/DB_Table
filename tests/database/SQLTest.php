@@ -1,40 +1,12 @@
 <?php
-#require_once 'PHPUnit/TestCase.php';
-require_once 'PHPUnit2/Framework/TestCase.php';
-require_once 'DB/Table/Database.php';
+require_once 'DatabaseTest.php';
 
 /**
  * Tests _quote(), buildFilter() and buildSQL string processing methods
  */
-#class SQLTest extends PHPUnit_TestCase {
-class SQLTest extends PHPUnit2_Framework_TestCase {
+class SQLTest extends DatabaseTest {
 
-    var $db = null;
-    var $name = null;
-    var $conn = null;
-    var $table = null;
-    var $primary_key = null;
-    var $ref = null;
-    var $ref_to = null;
-    var $link = null;
-    var $col = null;
-    var $foreign_col = null;
-
-    function setUp() 
-    {
-        // Create DB_Table_Database object $db1 with no DB/MDB2 connection
-        require 'db1/define.php';
-        $db1->addAllLinks();
-        $this->name =  $db_name;
-        $this->conn =& $conn;
-        $this->db   =& $db1;
-        $this->verbose = $verbose;
-
-        foreach ($properties as $property_name) {
-            $this->$property_name = $$property_name;
-        }
-
-    }
+    var $insert = false;
 
     function testQuoteString()
     {

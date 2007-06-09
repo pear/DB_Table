@@ -1,40 +1,24 @@
 <?php
 #require_once 'PHPUnit/TestCase.php';
-require_once 'PHPUnit2/Framework/TestCase.php';
-require_once 'DB/Table/Database.php';
+#require_once 'PHPUnit2/Framework/TestCase.php';
+#require_once 'DB/Table/Database.php';
+require_once 'DatabaseTest.php';
 
 #class SerialTest extends PHPUnit_TestCase {
-class SerialTest extends PHPUnit2_Framework_TestCase {
+#class SerialTest extends PHPUnit2_Framework_TestCase {
+class SerialTest extends DatabaseTest {
 
-    var $db = null;
-    var $name = null;
-    var $conn = null;
-    var $table = null;
-    var $primary_key = null;
-    var $ref = null;
-    var $ref_to = null;
-    var $link = null;
-    var $col = null;
-    var $foreign_col = null;
+     var $insert = false;
+#
+     function setUp() 
+     {
+         parent::setUp();
 
-    function setUp() 
-    {
-        // Create DB_Table_Database object $db1 with no DB/MDB2 connection
-        require 'db1/define.php';
-        $db1->addAllLinks();
-        $db1->setTableSubclassPath('db1');
-        $this->name =  $db_name;
-        $this->conn =& $conn;
-        $this->db   =& $db1;
+         $serial_string = serialize($this->db);
+         unset($this->db);
+         $this->db = unserialize($serial_string);
 
-        foreach ($properties as $property_name) {
-            $this->$property_name = $$property_name;
-        }
-
-        $serial_string = serialize($this->db);
-        unset($this->db);
-        $this->db = unserialize($serial_string);
-    }
+     }
 
     function testGetTable1()
     {
