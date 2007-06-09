@@ -1,40 +1,17 @@
 <?php
 #require_once 'PHPUnit/TestCase.php';
-require_once 'PHPUnit2/Framework/TestCase.php';
-require_once 'DB/Table/Database.php';
+#require_once 'PHPUnit2/Framework/TestCase.php';
+#require_once 'DB/Table/Database.php';
+require_once 'DatabaseTest.php';
 
 /**
  * Tests _quote(), buildFilter() and buildSQL string processing methods
  */
 #class AutoJoinTest extends PHPUnit_TestCase {
-class AutoJoinTest extends PHPUnit2_Framework_TestCase {
+#class AutoJoinTest extends PHPUnit2_Framework_TestCase {
+class AutoJoinTest extends DatabaseTest {
 
-    var $db = null;
-    var $name = null;
-    var $conn = null;
-    var $table = null;
-    var $primary_key = null;
-    var $ref = null;
-    var $ref_to = null;
-    var $link = null;
-    var $col = null;
-    var $foreign_col = null;
-
-    function setUp() 
-    {
-        // Create DB_Table_Database object $db1 with no DB/MDB2 connection
-        require 'db1/define.php';
-        $db1->addAllLinks();
-        $this->name =  $db_name;
-        $this->conn =& $conn;
-        $this->db   =& $db1;
-        $this->verbose = $verbose;
-
-        foreach ($properties as $property_name) {
-            $this->$property_name = $$property_name;
-        }
-
-    }
+    var $insert = false;
 
     function testJoin1() 
     {
@@ -115,6 +92,53 @@ EOT;
             }
         }
         $this->assertEquals($result, $expect);
+    }
+
+    function testJoin3() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testJoin3";
+        }
+        $db =& $this->db;
+        $success = true;
+
+        $cols = array();
+        $cols[] = 'LastName';
+        $cols[] = 'FirstName';
+        $cols[] = 'PhoneNumber';
+        $cols[] = 'Building';
+        $cols[] = 'Street';
+        $cols[] = 'City';
+        $cols[] = 'ZipCode';
+        $report = $this->db->autoJoin($cols);
+        if (PEAR::isError($report)) {
+            print "\n" . $report->getMessage();
+            $this->assertTrue(false);
+            return;
+        }
+        $result = $db->buildSQL($report, "Street.City = 'MINNETONKA'");
+        if (PEAR::isError($result)) {
+            print "\n" . $result->getMessage();
+            $this->assertTrue(false);
+        } else {
+            $expect = <<<EOT
+SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
+FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
+WHERE PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+  AND Street.City = 'MINNETONKA'
+EOT;
+            if ($this->verbose > 1) {
+                print "\n" . $result;
+            }
+        }
+        $this->assertEquals($result, $expect);
+
     }
 
 }
