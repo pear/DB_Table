@@ -1,8 +1,14 @@
+
 PHPUnit 2.3.6 by Sebastian Bergmann.
 
 
 >testSelect1
 Table Person:
+
+Query:
+SELECT *
+FROM Person
+
 PersonID => 1, FirstName => ANTOINETTE, MiddleName => MARIE, LastName => ARLAND, NameSuffix => 
 PersonID => 2, FirstName => MACHEL, MiddleName => KAY, LastName => WHITMORE, NameSuffix => 
 PersonID => 3, FirstName => ANTHONY, MiddleName => DAVID, LastName => WESTVEER, NameSuffix => 
@@ -23,8 +29,15 @@ PersonID => 17, FirstName => SARAH, MiddleName => JANE, LastName => TENNES, Name
 PersonID => 18, FirstName => ANDREW, MiddleName => PAUL, LastName => WUKMIR, NameSuffix => 
 PersonID => 19, FirstName => SHERRY, MiddleName => MARIE, LastName => CHAPMAN, NameSuffix => 
 PersonID => 20, FirstName => JEFFREY, MiddleName => LEE, LastName => WHITMORE, NameSuffix => 
-Count 20, 20
+
+Count 20, 20 
+
 Table Address:
+
+Query:
+SELECT *
+FROM Address
+
 AddressID => 1, Building => 13188, Street => CARDINAL CREEK RD, UnitType => , Unit => , City => EDEN PRAIRIE, StateAbb => MN, ZipCode => 55346
 AddressID => 2, Building => 5037, Street => NORMAN DR, UnitType => , Unit => , City => MINNETONKA, StateAbb => MN, ZipCode => 55345
 AddressID => 3, Building => 14409, Street => GRENIER RD, UnitType => , Unit => , City => MINNETONKA, StateAbb => MN, ZipCode => 55345
@@ -45,8 +58,15 @@ AddressID => 17, Building => 13700, Street => VALLEY VIEW RD, UnitType => APT, U
 AddressID => 18, Building => 17460, Street => RUSTIC HILLS DR, UnitType => , Unit => , City => EDEN PRAIRIE, StateAbb => MN, ZipCode => 55346
 AddressID => 19, Building => 10721, Street => SMETANA RD, UnitType => APT, Unit => 103, City => MINNETONKA, StateAbb => MN, ZipCode => 55343
 AddressID => 20, Building => 5037, Street => NORMAN DR, UnitType => , Unit => , City => MINNETONKA, StateAbb => MN, ZipCode => 55345
-Count 20, 20
+
+Count 20, 20 
+
 Table Phone:
+
+Query:
+SELECT *
+FROM Phone
+
 PhoneID => 1, PhoneNumber => 9528940424
 PhoneID => 2, PhoneNumber => 9529745279
 PhoneID => 3, PhoneNumber => 9529499236
@@ -65,8 +85,15 @@ PhoneID => 15, PhoneNumber => 9529492390
 PhoneID => 16, PhoneNumber => 9529344367
 PhoneID => 17, PhoneNumber => 9529350387
 PhoneID => 18, PhoneNumber => 9529745079
-Count 18, 18
+
+Count 18, 18 
+
 Table PersonAddress:
+
+Query:
+SELECT *
+FROM PersonAddress
+
 PersonID2 => 1, AddressID => 1
 PersonID2 => 2, AddressID => 2
 PersonID2 => 3, AddressID => 3
@@ -87,8 +114,15 @@ PersonID2 => 17, AddressID => 17
 PersonID2 => 18, AddressID => 18
 PersonID2 => 19, AddressID => 19
 PersonID2 => 20, AddressID => 20
-Count 20, 20
+
+Count 20, 20 
+
 Table PersonPhone:
+
+Query:
+SELECT *
+FROM PersonPhone
+
 PersonID => 1, PhoneID => 1
 PersonID => 2, PhoneID => 2
 PersonID => 3, PhoneID => 3
@@ -107,8 +141,15 @@ PersonID => 17, PhoneID => 15
 PersonID => 18, PhoneID => 16
 PersonID => 19, PhoneID => 17
 PersonID => 20, PhoneID => 18
-Count 18, 18
+
+Count 18, 18 
+
 Table Street:
+
+Query:
+SELECT *
+FROM Street
+
 Street => CARDINAL CREEK RD, City => EDEN PRAIRIE, StateAbb => MN, Sunny => 
 Street => NORMAN DR, City => MINNETONKA, StateAbb => MN, Sunny => 
 Street => GRENIER RD, City => MINNETONKA, StateAbb => MN, Sunny => 
@@ -126,8 +167,23 @@ Street => GRAND VIEW DR, City => EDEN PRAIRIE, StateAbb => MN, Sunny =>
 Street => CITY WEST PKWY, City => EDEN PRAIRIE, StateAbb => MN, Sunny => 
 Street => VALLEY VIEW RD, City => EDEN PRAIRIE, StateAbb => MN, Sunny => 
 Street => SMETANA RD, City => MINNETONKA, StateAbb => MN, Sunny => 
-Count 17, 17.
+
+Count 17, 17 
+.
 >testSelect2
+
+Query:
+SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
+FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
+WHERE PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+ORDER BY LastName
+
 CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
 CRUZ,JOSEPH,9529450055,14408,WOODHILL CIR,MINNETONKA,55345
 HAMMER,JEVENY,9529300438,16335,TEMPLE DR S,MINNETONKA,55345
@@ -136,9 +192,22 @@ KAPSNER,CHRISTINE,9529310051,6135,CHASEWOOD PKWY,MINNETONKA,55343
 LARSON,JODY,6513346195,13411,MAYWOOD CURV,MINNETONKA,55345
 SELANDER,MICHAEL,9529331534,5978,CHASEWOOD PKWY,MINNETONKA,55343
 WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
+WHITMORE,JEFFREY,9529745079,5037,NORMAN DR,MINNETONKA,55345
 WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
-WHITMORE,JEFFREY,9529745079,5037,NORMAN DR,MINNETONKA,55345.
+.
 >testSelect3
+
+Query:
+SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
+FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
+WHERE PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+
 WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
 KAPSNER,CHRISTINE,9529310051,6135,CHASEWOOD PKWY,MINNETONKA,55343
 KALIL,JEAN,9529385751,5403,POMPANO DR,MINNETONKA,55343
@@ -148,34 +217,90 @@ LARSON,JODY,6513346195,13411,MAYWOOD CURV,MINNETONKA,55345
 CRUZ,JOSEPH,9529450055,14408,WOODHILL CIR,MINNETONKA,55345
 WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
 SELANDER,MICHAEL,9529331534,5978,CHASEWOOD PKWY,MINNETONKA,55343
-CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343.
+CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
+.
 >testSelectResult1
-CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
-CRUZ,JOSEPH,9529450055,14408,WOODHILL CIR,MINNETONKA,55345
-HAMMER,JEVENY,9529300438,16335,TEMPLE DR S,MINNETONKA,55345
-KALIL,JEAN,9529385751,5403,POMPANO DR,MINNETONKA,55343
-KAPSNER,CHRISTINE,9529310051,6135,CHASEWOOD PKWY,MINNETONKA,55343
-LARSON,JODY,6513346195,13411,MAYWOOD CURV,MINNETONKA,55345
-SELANDER,MICHAEL,9529331534,5978,CHASEWOOD PKWY,MINNETONKA,55343
-WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
-WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
-WHITMORE,JEFFREY,9529745079,5037,NORMAN DR,MINNETONKA,55345.
->testSelectResult2
-CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
-CRUZ,JOSEPH,9529450055,14408,WOODHILL CIR,MINNETONKA,55345
-HAMMER,JEVENY,9529300438,16335,TEMPLE DR S,MINNETONKA,55345
-KALIL,JEAN,9529385751,5403,POMPANO DR,MINNETONKA,55343
-KAPSNER,CHRISTINE,9529310051,6135,CHASEWOOD PKWY,MINNETONKA,55343
-LARSON,JODY,6513346195,13411,MAYWOOD CURV,MINNETONKA,55345
-SELANDER,MICHAEL,9529331534,5978,CHASEWOOD PKWY,MINNETONKA,55343
-WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
-WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
-WHITMORE,JEFFREY,9529745079,5037,NORMAN DR,MINNETONKA,55345.
->testSelectCount1
-Count = 10.
->testSelectCount2
-Count = 8.
 
-Time: 25.128602027893
+Query:
+SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
+FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
+WHERE PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+ORDER BY LastName
+
+CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
+CRUZ,JOSEPH,9529450055,14408,WOODHILL CIR,MINNETONKA,55345
+HAMMER,JEVENY,9529300438,16335,TEMPLE DR S,MINNETONKA,55345
+KALIL,JEAN,9529385751,5403,POMPANO DR,MINNETONKA,55343
+KAPSNER,CHRISTINE,9529310051,6135,CHASEWOOD PKWY,MINNETONKA,55343
+LARSON,JODY,6513346195,13411,MAYWOOD CURV,MINNETONKA,55345
+SELANDER,MICHAEL,9529331534,5978,CHASEWOOD PKWY,MINNETONKA,55343
+WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
+WHITMORE,JEFFREY,9529745079,5037,NORMAN DR,MINNETONKA,55345
+WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
+.
+>testSelectResult2
+
+Query:
+SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
+FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
+WHERE PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+ORDER BY LastName
+
+CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
+CRUZ,JOSEPH,9529450055,14408,WOODHILL CIR,MINNETONKA,55345
+HAMMER,JEVENY,9529300438,16335,TEMPLE DR S,MINNETONKA,55345
+KALIL,JEAN,9529385751,5403,POMPANO DR,MINNETONKA,55343
+KAPSNER,CHRISTINE,9529310051,6135,CHASEWOOD PKWY,MINNETONKA,55343
+LARSON,JODY,6513346195,13411,MAYWOOD CURV,MINNETONKA,55345
+SELANDER,MICHAEL,9529331534,5978,CHASEWOOD PKWY,MINNETONKA,55343
+WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
+WHITMORE,JEFFREY,9529745079,5037,NORMAN DR,MINNETONKA,55345
+WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
+.
+>testSelectCount1
+
+Query:
+SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
+FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
+WHERE PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+ORDER BY LastName
+
+Count = 10
+.
+>testSelectCount2
+
+Query:
+SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
+FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
+WHERE PersonPhone.PhoneID = Phone.PhoneID
+  AND PersonPhone.PersonID = Person.PersonID
+  AND PersonAddress.AddressID = Address.AddressID
+  AND PersonAddress.PersonID2 = Person.PersonID
+  AND Address.Street = Street.Street
+  AND Address.City = Street.City
+  AND Address.StateAbb = Street.StateAbb
+
+Count = 8
+.
+
+Time: 36.351750850677
 
 OK (7 tests)
