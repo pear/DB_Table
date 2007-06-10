@@ -41,14 +41,14 @@ class AutoJoinTest extends DatabaseTest {
             $expect = <<<EOT
 SELECT Street.Street, Person.FirstName, Person.LastName, Phone.PhoneNumber, Address.Building, Street.City
 FROM Street, Person, Phone, Address, PersonAddress, PersonPhone
-WHERE Address.Street = Street.Street
+WHERE ( Address.Street = Street.Street
   AND Address.City = Street.City
   AND Address.StateAbb = Street.StateAbb
   AND PersonAddress.PersonID2 = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonPhone.PhoneID = Phone.PhoneID
-  AND PersonPhone.PersonID = Person.PersonID
-  AND City = 'MINNETONKA'
+  AND PersonPhone.PersonID = Person.PersonID )
+  AND ( City = 'MINNETONKA' )
 EOT;
             if ($this->verbose > 1) {
                 print "\n" . $result;
@@ -124,14 +124,14 @@ EOT;
             $expect = <<<EOT
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
 FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
-WHERE PersonPhone.PhoneID = Phone.PhoneID
+WHERE ( PersonPhone.PhoneID = Phone.PhoneID
   AND PersonPhone.PersonID = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonAddress.PersonID2 = Person.PersonID
   AND Address.Street = Street.Street
   AND Address.City = Street.City
-  AND Address.StateAbb = Street.StateAbb
-  AND Street.City = 'MINNETONKA'
+  AND Address.StateAbb = Street.StateAbb )
+  AND ( Street.City = 'MINNETONKA' )
 EOT;
             if ($this->verbose > 1) {
                 print "\n" . $result;
