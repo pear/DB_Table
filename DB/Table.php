@@ -1434,8 +1434,8 @@ class DB_Table {
      * 
      * Used to re-connect this DB_Table object to a parent DB_Table_Database
      * object during unserialization. Can also disconnect if the $database 
-     * is null. Use the DB_Table_Database::addTable method instead to add a 
-     * table to a new DB_Table_Database.
+     * parameter is null. Use the DB_Table_Database::addTable method instead 
+     * to add a table to a new DB_Table_Database.
      * 
      * @access public
      * 
@@ -1667,6 +1667,23 @@ class DB_Table {
             }
         }
 
+        // Does a parent DB_Table_Database object exist?
+        if ($this->_database) {
+  
+            // Validate foreign key values (if enabled)
+            if ($this->_database->_check_fkey) {
+               $result = $this->_database->validForeignKeys($this->table, $data);
+               if (PEAR::isError($result)) {
+                   return $result;
+               } elseif (!$result) {
+                   return DB_Table_Database::throwError(
+                                   DB_TABLE_DATABASE_ERR_FKEY_UPDATE,
+                                   $this->table);
+               }
+            }
+    
+        }
+       
         // Do insertion
         if ($this->backend == 'mdb2') {
             $result = $this->db->extended->autoExecute($this->table, $data,
@@ -1847,7 +1864,31 @@ class DB_Table {
                 return $result;
             }
         }
-        
+
+        // Does a parent DB_Table_Database object exist?
+        if ($this->_database) {
+  
+            // Validate foreign key values (if enabled)
+            if ($this->_database->_check_fkey) {
+               $result = $this->_database->validForeignKeys($this->table, $data);
+               if (PEAR::isError($result)) {
+                   return $result;
+               } elseif (!$result) {
+                   return DB_Table_Database::throwError(
+                                   DB_TABLE_DATABASE_ERR_FKEY_UPDATE,
+                                   $this->table);
+               }
+            }
+    
+            // Implement any relevant ON UPDATE actions
+            $result = $this->_database->onUpdateAction($this, $data, $where);
+            if (PEAR::isError($result)) {
+                return $result;
+            }
+
+        }
+       
+        // Submit update command 
         if ($this->backend == 'mdb2') {
             $result = $this->db->extended->autoExecute($this->table, $data,
                 MDB2_AUTOQUERY_UPDATE, $where);
@@ -1953,12 +1994,17 @@ class DB_Table {
      *
      * Deletes table rows matching a custom WHERE clause.
      * 
-     * Constructs and submits and SQL DELETE command with the specified WHERE clause.
-     * Command is submitted by DB::query() or MDB2::exec()
+     * Constructs and submits and SQL DELETE command with the specified WHERE 
+     * clause. Command is submitted by DB::query() or MDB2::exec().
+     *
+     * If a reference to a DB_Table_Database instance exists, carry out any
+     * ON DELETE actions declared in that instance before actual insertion, 
+     * if emulation of ON DELETE actions is enabled in that instance.
      *
      * @access public
      * 
-     * @param string $where Logical condition in the WHERE clause of the delete command.
+     * @param string $where Logical condition in the WHERE clause of the 
+     *                      delete command.
      *
      * @return mixed void on success (PEAR_Error on failure)
      *
@@ -1973,6 +2019,17 @@ class DB_Table {
     
     function delete($where)
     {
+        // Does a parent DB_Table_Database object exist?
+        if ($this->_database) {
+  
+            // Implement any relevant ON DELETE actions
+            $result = $this->_database->onDeleteAction($this, $where);
+            if (PEAR::isError($result)) {
+                return $result;
+            }
+
+        }
+       
         if ($this->backend == 'mdb2') {
             $result = $this->db->exec("DELETE FROM $this->table WHERE $where");
         } else {
