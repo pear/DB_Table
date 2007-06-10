@@ -595,6 +595,8 @@ class DB_Table_Database
     /**
      * Take on_update actions if $_act_on_update is true
      *
+     * By default, on_update actions are enabled ($_act_on_update = true)
+     *
      * @var    boolean
      * @access private
      */
@@ -603,18 +605,22 @@ class DB_Table_Database
     /**
      * Take on_delete actions if $_act_on_delete is true
      *
+     * By default, on_delete actions are enabled ($_act_on_delete = true)
+     *
      * @var    boolean
      * @access private
      */
     var $_act_on_delete = true;
 
     /**
-     * Validate foreign key values before insert or update if $_check_fkey is true
+     * Validate foreign keys before insert or update if $_check_fkey is true
+     *
+     * By default, validation is disabled ($_check_fkey = false)
      *
      * @var    boolean
      * @access private
      */
-    var $_check_fkey = true;
+    var $_check_fkey = false;
 
     // }}}
     // {{{ Methods
