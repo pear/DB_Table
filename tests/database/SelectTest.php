@@ -28,6 +28,7 @@ class SelectTest extends DatabaseTest
                     print "\n" . "$table_name $n_result $n_table";
                 } else {
                     print "\nTable $table_name:";
+                    print "\n\nQuery:\n" . $this->db->buildSQL($sql) . "\n";
                     foreach ($result as $row){
                         $s = array();
                         foreach ($row as $key => $value){
@@ -35,7 +36,7 @@ class SelectTest extends DatabaseTest
                         }
                         print "\n" . implode(', ', $s);
                     }
-                    print "\n" . "Count $n_result, $n_table";
+                    print "\n\n" . "Count $n_result, $n_table \n";
                 } 
             }
             if ($n_result != $n_table) {
@@ -73,6 +74,7 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
+            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
             foreach ($result as $row){
                 $s = array();
                 foreach ($row as $key => $value){
@@ -80,6 +82,7 @@ class SelectTest extends DatabaseTest
                 }
                 print "\n" . implode(',', $s);
             }
+            print "\n";
         }
         $this->assertEquals(count($result), 10);
     }
@@ -112,6 +115,7 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
+            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
             foreach ($result as $row){
                 $s = array();
                 foreach ($row as $key => $value){
@@ -119,6 +123,7 @@ class SelectTest extends DatabaseTest
                 }
                 print "\n" . implode(',', $s);
             }
+            print "\n";
         }
         $this->assertEquals(count($result), 10);
     }
@@ -149,6 +154,7 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
+            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
             $i = 0;
             while ($row = $result->fetchRow()) {
                 $s = array();
@@ -158,6 +164,7 @@ class SelectTest extends DatabaseTest
                 print "\n" . implode(',', $s);
                 $i = $i + 1;
             }
+            print "\n";
         }
         $this->assertEquals($i,10);
     }
@@ -191,6 +198,7 @@ class SelectTest extends DatabaseTest
         }
         $i = 0;
         if ($this->verbose > 0) {
+            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
             while ($row = $result->fetchRow()) {
                 $s = array();
                 foreach ($row as $key => $value){
@@ -199,6 +207,7 @@ class SelectTest extends DatabaseTest
                 print "\n" . implode(',', $s);
                 $i = $i + 1;
             }
+            print "\n";
         }
         $this->assertEquals($i,10);
     }
@@ -229,7 +238,8 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
-            print "\n". "Count = $result";
+            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\nCount = $result\n";
         }
         $this->assertEquals($result, '10');
     }
@@ -260,7 +270,8 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
-            print "\n" . "Count = $result";
+            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\nCount = $result\n";
         }
         $this->assertEquals($result, '8');
     }
