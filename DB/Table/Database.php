@@ -326,7 +326,7 @@ $GLOBALS['_DB_TABLE_DATABASE']['default_error'] = array(
         DB_TABLE_DATABASE_ERR_NO_COL_NO_TBL =>
         'No columns or tables provided as parameters to autoJoin',
         DB_TABLE_DATABASE_ERR_COL_NOT_UNIQUE =>
-        'Ambiguous column name in autoJoin',
+        'Ambiguous column name in autoJoin. Column',
         DB_TABLE_DATABASE_ERR_AMBIG_JOIN =>
         'Ambiguous join in autoJoin, during join of table',
         DB_TABLE_DATABASE_ERR_FAIL_JOIN =>
@@ -609,7 +609,7 @@ class DB_Table_Database
     var $_act_on_delete = true;
 
     /**
-     * Check foreign keys before insert or update if $_check_fkey is true
+     * Validate foreign key values before insert or update if $_check_fkey is true
      *
      * @var    boolean
      * @access private
@@ -627,7 +627,7 @@ class DB_Table_Database
      * object. See $error property docblock for a discussion of error
      * handling. 
      * 
-     * @param  object $db   DB/MDB2 database connection object
+     * @param  object &$db   DB/MDB2 database connection object
      * @param  string $name the database name
      * @return object DB_Table_Database
      * @access public
@@ -715,8 +715,8 @@ class DB_Table_Database
      * Returns true on success, and PEAR error on failure. Returns error code
      * DB_TABLE_DATABASE_ERR_DB_OBJECT if $db is not a DB or MDB2 object.
      *
-     * @param  object $db DB/MDB2 connection object
-     * @return mixed  true on success, Error on failure
+     * @param  object &$db DB/MDB2 connection object
+     * @return boolean true on success (PEAR_Error on failure)
      * @access public
      */
     function setDBconnection(&$db)
@@ -833,7 +833,7 @@ class DB_Table_Database
      * If $name is a table name, return $this->_table[$name] DB_Table object
      * reference
      *
-     * Returns PEAR Error with the following DB_TABLE_DATABASE_ERR* codes
+     * Returns PEAR_Error with the following DB_TABLE_DATABASE_ERR* codes
      * if:
      *    - $name is not a string ( _TBL_NOT_STRING )
      *    - $name is not valid table name ( _NO_TBL )
@@ -1315,8 +1315,8 @@ class DB_Table_Database
      *    - $table_obj is not a DB_Table ( _DBTABLE_OBJECT )
      *    - more than one primary key is defined  ( _ERR_MULT_PKEY )
      *
-     * @param  object $table_obj the DB_Table object (reference)
-     * @return mixed  true on success, Error on failure
+     * @param  object &$table_obj the DB_Table object (reference)
+     * @return boolean true on success (PEAR_Error on failure)
      * @access public
      */
     function addTable(&$table_obj)
@@ -1484,7 +1484,7 @@ class DB_Table_Database
      * @param  mixed   $rkey      referenced key in referenced table
      * @param  string  $on_delete action upon delete of a referenced row.
      * @param  string  $on_update action upon update of a referenced row.
-     * @return mixed   true on success, PEAR Error on failure
+     * @return boolean true on success (PEAR_Error on failure)
      * @access public
      */
     function addRef($ftable, $fkey, $rtable, $rkey = null,
@@ -1732,7 +1732,7 @@ class DB_Table_Database
      * @param  string $ftable  name of referencing (foreign key) table
      * @param  string $rtable  name of referenced table
      * @param  string $action  on delete action (action string or null)
-     * @return mixed true on normal completion, PEAR Error on failure
+     * @return boolean true on normal completion (PEAR_Error on failure)
      * @access public
      */ 
     function setOnDelete($ftable, $rtable, $action)
@@ -1761,7 +1761,7 @@ class DB_Table_Database
      * @param string $ftable  name of referencing (foreign key) table
      * @param string $rtable  name of referenced table
      * @param array  $action  on update action (action string or null)
-     * @return mixed true on normal completion, PEAR Error on failure
+     * @return boolean true on normal completion (PEAR_Error on failure)
      * @access public
      */ 
     function setOnUpdate($ftable, $rtable, $action)
@@ -1796,7 +1796,7 @@ class DB_Table_Database
      * @param  string $table1 name of 1st linked table
      * @param  string $table2 name of 2nd linked table
      * @param  string $link   name of linking/association table.
-     * @return mixed  true on success, PEAR Error on failure
+     * @return boolean true on success (PEAR_Error on failure)
      * @access public
      */
     function addLink($table1, $table2, $link)
@@ -1978,7 +1978,7 @@ class DB_Table_Database
      * the remaining tables, the returned table or set of tables is 
      * restricted to those in which $col is not a foreign key. 
      *
-     * Returns a PEAR Error with the following DB_TABLE_DATABASE_ERR_* error
+     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_ERR_* error
      * codes if:
      *    - column $col does not exist in the database ( _NO_COL_DB )
      *    - column $col does not exist in the specified table ( _NO_COL_TBL )
@@ -2061,7 +2061,7 @@ class DB_Table_Database
      *
      * @see DB_Table::create()
      *
-     * @return mixed true on sucess, PEAR Error on failure of any table
+     * @return boolean true on sucess (PEAR_Error on failure of any table)
      * @access public
      */
     function createTables($flag = 'safe')
@@ -2093,7 +2093,7 @@ class DB_Table_Database
      * @param @data       associative array containing all or part of a row
      *                    of data of $table_name, with column name keys.
      * @return bool true if all foreign keys are valid, false otherwise.
-     *              PEAR Error if an error is thrown by a required query
+     *              PEAR_Error if an error is thrown by a required query
      * @access public
      */
     function validForeignKeys($table_name, $data)
@@ -2142,7 +2142,7 @@ class DB_Table_Database
      *                     This is the data that will be inserted into
      *                     the table. Data is checked against the column
      *                     names and data types for validity.
-     * @return mixed true on success or Error on failure
+     * @return boolean true on success (PEAR_Error on failure)
      * @access public
      */
     function insert($table_name, $data)
@@ -2156,23 +2156,10 @@ class DB_Table_Database
                        "insert, $table_name");
         }
 
-        // Check foreign key constraints
-        if ($this->_check_fkey) {
-           $valid = $this->validForeignKeys($table_name, $data);
-           if (PEAR::isError($valid)) {
-               return $valid;
-           } 
-           if (!$valid) {
-               return DB_Table_Database::throwError(
-                               DB_TABLE_DATABASE_ERR_FKEY_INSERT,
-                               "$table_name");
-           }
-        }
-
         // Insert into $table_obj
         $result = $table_obj->insert($data);
 
-        // Return value: true or PEAR Error
+        // Return value: true or PEAR_Error
         if (PEAR::isError($result)) {
             return $result;
         } else {
@@ -2207,7 +2194,7 @@ class DB_Table_Database
      *                       columns to be updated values are new values.
      * @param string $where SQL WHERE clause that limits the set of
      *                       records to update.
-     * @return mixed true on success or Error on failure
+     * @return boolean true on success (PEAR_Error on failure)
      * @access public
      */
     function update($table_name, $data, $where)
@@ -2221,19 +2208,35 @@ class DB_Table_Database
                        "update, $table_name");
         }
 
-        // Check foreign key constraints
-        if ($this->_check_fkey) {
-           $result = $this->validForeignKeys($table_name, $data);
-           if (PEAR::isError($result)) {
-               return $result;
-           } elseif (!$result) {
-               return DB_Table_Database::throwError(
-                               DB_TABLE_DATABASE_ERR_FKEY_UPDATE,
-                               $table_name);
-           }
+        // Apply update
+        $result = $table_obj->update($data, $where);
+
+        // Return value: true or PEAR Error
+        if (PEAR::isError($result)) {
+            return $result;
+        } else {
+            return true;
         }
 
-        // Implement on_update action
+    }
+
+    /**
+     * Turns on (or off) automatic validation of updated data for all tables.
+     *
+     * @param  bool $flag true to turn on auto-validation, false to turn off
+     * @return void
+     * @access public
+     */
+    function autoValidUpdate($flag = true)
+    {
+        foreach ($this->_table as $table_obj) {
+            $table_obj->autoValidUpdate($flag);
+        }
+    }
+
+    function onUpdateAction(&$table_obj, $data, $where)
+    {
+        $table_name = $table_obj->table;
         if ($this->_act_on_update and isset($this->_ref_to[$table_name])) {
             $update_rows = null;
             foreach ($this->_ref_to[$table_name] as $ftable_name) {
@@ -2381,35 +2384,17 @@ class DB_Table_Database
                                 return $result;
                             }
                         }
-                    }
-                }
-            }
-        } // end implement on_update action 
+                    } // foreach ($update_row)
+                } // if (!is_null($fdata))
 
-        // Apply update
-        $result = $table_obj->update($data, $where);
+            } // foreach loop over referencing tables
+        } // end if
 
-        // Return value: true or PEAR Error
-        if (PEAR::isError($result)) {
-            return $result;
-        } else {
-            return true;
-        }
+        // Normal completion
+        return true;
+
     }
 
-    /**
-     * Turns on (or off) automatic validation of updated data for all tables.
-     *
-     * @param  bool $flag true to turn on auto-validation, false to turn off
-     * @return void
-     * @access public
-     */
-    function autoValidUpdate($flag = true)
-    {
-        foreach ($this->_table as $table_obj) {
-            $table_obj->autoValidUpdate($flag);
-        }
-    }
 
     /**
      * Turns on (or off) automatic recasting of insert and update data
@@ -2451,7 +2436,7 @@ class DB_Table_Database
      * @param string $table_name name of table from which to delete
      * @param string $where      SQL WHERE clause that limits the set
      *                           of records to delete
-     * @return mixed true on success, PEAR Error on failure
+     * @return boolean true on success (PEAR_Error on failure)
      * @access public
      */
     function delete($table_name, $where)
@@ -2465,8 +2450,21 @@ class DB_Table_Database
                        "delete, $table_name");
         }
 
+        // Delete from $table_obj
+        $result = $table_obj->delete($where);
 
-        // Implement any relevant ON DELETE actions
+        // Return value: true or PEAR Error
+        if (PEAR::isError($result)) {
+            return $result;
+        } else {
+            return true;
+        }
+
+    }
+
+    function onDeleteAction(&$table_obj, $where)
+    {
+        $table_name = $table_obj->table;
         if ($this->_act_on_delete and isset($this->_ref_to[$table_name])) {
             $delete_rows = null;
             foreach ($this->_ref_to[$table_name] as $ftable_name) {
@@ -2578,19 +2576,10 @@ class DB_Table_Database
                 } // end foreach ($delete_rows)
 
             } // end foreach ($this->_ref_to[...] as $ftable_name)
-        } // end implement on_delete actions
-
-        // Delete from $table_obj
-        $result = $table_obj->delete($where);
-
-        // Return value: true or PEAR Error
-        if (PEAR::isError($result)) {
-            return $result;
-        } else {
-            return true;
-        }
+        } // end if 
 
     }
+
 
     /**
      * Returns array in which keys of $data are replaced by values of $keys.
@@ -2803,8 +2792,8 @@ class DB_Table_Database
      * @param int    $start  The record number from which to start result set
      * @param int    $count  The number of records to list in result set.
      * @param array $params  Parameters for placeholder substitutions, if any.
-     * @return mixed A PEAR_Error on failure, or a
-     *               DB_Result/MDB2_Result_* object on success.
+     * @return object DB_Result/MDB2_Result_* object on success
+     *                (PEAR_Error on failure)
      * @see DB_Table::_swapModes()
      * @access public
      */
@@ -3026,6 +3015,10 @@ class DB_Table_Database
                 }
                 $table  = $col_array[0];
                 $column = $col_array[1];
+                if (is_array($table)) {
+                    return DB_Table_Database::throwError(
+                           DB_TABLE_DATABASE_ERR_COL_NOT_UNIQUE, $col);
+                }
                 $cols[$key] = "$table.$column";
                 if (!in_array($table, $all_tables)) {
                     $all_tables[] = $table;
@@ -3347,7 +3340,7 @@ class DB_Table_Database
      * equates only the relevant non-null values of $data to the values of
      * corresponding database columns. If $match == 'full', the function
      * returns an empty string if all of the relevant values of data are
-     * null, and returns a PEAR Error if some of the selected values are
+     * null, and returns a PEAR_Error if some of the selected values are
      * null and others are not null.
      *
      * @param array $data     associative array, keys are column names
