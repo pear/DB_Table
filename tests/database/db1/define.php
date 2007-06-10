@@ -88,7 +88,11 @@ $db->addRef('Address', array('Street', 'City', 'StateAbb'),
              'Street',  array('Street', 'City', 'StateAbb'),
              'cascade', 'cascade');
 
+// Add links PersonPhone and PersonAddress
 $db->addAllLinks();
+
+// Enable foreign key validation by PHP layer
+$db->setCheckFKey(true);
 
 # List of tables in database
 $table = array($Person, $Address, $Phone, $PersonAddress, $PersonPhone, $Street);
