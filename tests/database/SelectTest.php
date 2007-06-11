@@ -67,14 +67,16 @@ class SelectTest extends DatabaseTest
             return;
         }
         $report['order'] = 'LastName';
-        $result = $this->db->select($report, "Street.City = 'MINNETONKA'");
+        $filter = "Street.City = 'MINNETONKA'";
+        $result = $this->db->select($report, $filter);
         if (PEAR::isError($result)) {
             print "\n" . $result->getMessage();
             $this->assertTrue(false);
             return;
         }
         if ($this->verbose > 0) {
-            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\n\nQuery:\n" . 
+                  $this->db->buildSQL($report, $filter) . "\n";
             foreach ($result as $row){
                 $s = array();
                 foreach ($row as $key => $value){
@@ -106,7 +108,7 @@ class SelectTest extends DatabaseTest
             return;
         }
         $this->db->sql['report'] = $report;
-        $result = $this->db->select('report',
+        $result = $this->db->select('report', 
                                     "Street.City = 'MINNETONKA'",
                                     'FirstName');
         if (PEAR::isError($result)) {
@@ -115,7 +117,10 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
-            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\n\nQuery:\n" . 
+                  $this->db->buildSQL('report', 
+                                   "Street.City = 'MINNETONKA'",
+                                   'FirstName') . "\n";
             foreach ($result as $row){
                 $s = array();
                 foreach ($row as $key => $value){
@@ -154,7 +159,9 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
-            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\n\nQuery:\n" . 
+                  $this->db->buildSQL($report, "Street.City = 'MINNETONKA'")
+                  . "\n";
             $i = 0;
             while ($row = $result->fetchRow()) {
                 $s = array();
@@ -198,7 +205,9 @@ class SelectTest extends DatabaseTest
         }
         $i = 0;
         if ($this->verbose > 0) {
-            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\n\nQuery:\n" . 
+                  $this->db->buildSQL('report', "Street.City = 'MINNETONKA'")
+                  . "\n";
             while ($row = $result->fetchRow()) {
                 $s = array();
                 foreach ($row as $key => $value){
@@ -238,7 +247,9 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
-            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\n\nQuery:\n" . 
+                  $this->db->buildSQL($report, "Street.City = 'MINNETONKA'")
+                  . "\n";
             print "\nCount = $result\n";
         }
         $this->assertEquals($result, '10');
@@ -270,7 +281,9 @@ class SelectTest extends DatabaseTest
             return;
         }
         if ($this->verbose > 0) {
-            print "\n\nQuery:\n" . $this->db->buildSQL($report) . "\n";
+            print "\n\nQuery:\n" . 
+                  $this->db->buildSQL($report,
+                             "Street.City = 'EDEN PRAIRIE'") . "\n";
             print "\nCount = $result\n";
         }
         $this->assertEquals($result, '8');
