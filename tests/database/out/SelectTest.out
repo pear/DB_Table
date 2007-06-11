@@ -175,13 +175,14 @@ Count 17, 17
 Query:
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
 FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
-WHERE PersonPhone.PhoneID = Phone.PhoneID
+WHERE ( PersonPhone.PhoneID = Phone.PhoneID
   AND PersonPhone.PersonID = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonAddress.PersonID2 = Person.PersonID
   AND Address.Street = Street.Street
   AND Address.City = Street.City
-  AND Address.StateAbb = Street.StateAbb
+  AND Address.StateAbb = Street.StateAbb )
+  AND ( Street.City = 'MINNETONKA' )
 ORDER BY LastName
 
 CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
@@ -200,13 +201,15 @@ WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
 Query:
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
 FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
-WHERE PersonPhone.PhoneID = Phone.PhoneID
+WHERE ( PersonPhone.PhoneID = Phone.PhoneID
   AND PersonPhone.PersonID = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonAddress.PersonID2 = Person.PersonID
   AND Address.Street = Street.Street
   AND Address.City = Street.City
-  AND Address.StateAbb = Street.StateAbb
+  AND Address.StateAbb = Street.StateAbb )
+  AND ( Street.City = 'MINNETONKA' )
+ORDER BY FirstName
 
 WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
 KAPSNER,CHRISTINE,9529310051,6135,CHASEWOOD PKWY,MINNETONKA,55343
@@ -224,13 +227,14 @@ CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
 Query:
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
 FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
-WHERE PersonPhone.PhoneID = Phone.PhoneID
+WHERE ( PersonPhone.PhoneID = Phone.PhoneID
   AND PersonPhone.PersonID = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonAddress.PersonID2 = Person.PersonID
   AND Address.Street = Street.Street
   AND Address.City = Street.City
-  AND Address.StateAbb = Street.StateAbb
+  AND Address.StateAbb = Street.StateAbb )
+  AND ( Street.City = 'MINNETONKA' )
 ORDER BY LastName
 
 CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
@@ -249,13 +253,14 @@ WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
 Query:
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
 FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
-WHERE PersonPhone.PhoneID = Phone.PhoneID
+WHERE ( PersonPhone.PhoneID = Phone.PhoneID
   AND PersonPhone.PersonID = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonAddress.PersonID2 = Person.PersonID
   AND Address.Street = Street.Street
   AND Address.City = Street.City
-  AND Address.StateAbb = Street.StateAbb
+  AND Address.StateAbb = Street.StateAbb )
+  AND ( Street.City = 'MINNETONKA' )
 ORDER BY LastName
 
 CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
@@ -274,13 +279,14 @@ WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
 Query:
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
 FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
-WHERE PersonPhone.PhoneID = Phone.PhoneID
+WHERE ( PersonPhone.PhoneID = Phone.PhoneID
   AND PersonPhone.PersonID = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonAddress.PersonID2 = Person.PersonID
   AND Address.Street = Street.Street
   AND Address.City = Street.City
-  AND Address.StateAbb = Street.StateAbb
+  AND Address.StateAbb = Street.StateAbb )
+  AND ( Street.City = 'MINNETONKA' )
 ORDER BY LastName
 
 Count = 10
@@ -290,17 +296,18 @@ Count = 10
 Query:
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
 FROM Person, Phone, Address, Street, PersonPhone, PersonAddress
-WHERE PersonPhone.PhoneID = Phone.PhoneID
+WHERE ( PersonPhone.PhoneID = Phone.PhoneID
   AND PersonPhone.PersonID = Person.PersonID
   AND PersonAddress.AddressID = Address.AddressID
   AND PersonAddress.PersonID2 = Person.PersonID
   AND Address.Street = Street.Street
   AND Address.City = Street.City
-  AND Address.StateAbb = Street.StateAbb
+  AND Address.StateAbb = Street.StateAbb )
+  AND ( Street.City = 'EDEN PRAIRIE' )
 
 Count = 8
 .
 
-Time: 36.351750850677
+Time: 35.061257839203
 
 OK (7 tests)
