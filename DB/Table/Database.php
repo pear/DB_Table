@@ -137,84 +137,90 @@ define('DB_TABLE_DATABASE_ERR_NO_COL_DB', -223);
 define('DB_TABLE_DATABASE_ERR_NO_COL_TBL', -224);
 
 /**
- * Error in a select* method for an undefined key of $this->sql
+ * Error in a buildSQL or select* method for an undefined key of $this->sql
  */
 define('DB_TABLE_DATABASE_ERR_SQL_UNDEF', -225);
 
 /**
+ * Error in a buildSQL or select* method for a key of $this->sql that is 
+ * not a string
+ */
+define('DB_TABLE_DATABASE_ERR_SQL_NOT_STRING', -226);
+
+/**
  * Error in buildFilter due to invalid match type 
  */
-define('DB_TABLE_DATABASE_ERR_MATCH_TYPE', -226);
+define('DB_TABLE_DATABASE_ERR_MATCH_TYPE', -227);
 
 /**
  * Error in buildFilter due to invalid key for full match
  */
-define('DB_TABLE_DATABASE_ERR_DATA_KEY', -227);
+define('DB_TABLE_DATABASE_ERR_DATA_KEY', -228);
 
 /**
  * Error in buildFilter due to invalid key for full match
  */
-define('DB_TABLE_DATABASE_ERR_FILT_KEY', -228);
+define('DB_TABLE_DATABASE_ERR_FILT_KEY', -229);
 
 /**
  * Error in buildFilter due to invalid key for full match
  */
-define('DB_TABLE_DATABASE_ERR_FULL_KEY', -229);
+define('DB_TABLE_DATABASE_ERR_FULL_KEY', -230);
 
 /**
  * Error in insert for a failed foreign key constraint
  */
-define('DB_TABLE_DATABASE_ERR_FKEY_INSERT', -230);
+define('DB_TABLE_DATABASE_ERR_FKEY_INSERT', -231);
 
 /**
  * Error in update for a failed foreign key constraint
  */
-define('DB_TABLE_DATABASE_ERR_FKEY_UPDATE', -231);
+define('DB_TABLE_DATABASE_ERR_FKEY_UPDATE', -232);
 
 /**
  * Error in delete due to a referentially triggered 'restrict' action
  */
-define('DB_TABLE_DATABASE_ERR_RESTRICT_DELETE', -232);
+define('DB_TABLE_DATABASE_ERR_RESTRICT_DELETE', -233);
 
 /**
  * Error in update due to a referentially triggered 'restrict' action
  */
-define('DB_TABLE_DATABASE_ERR_RESTRICT_UPDATE', -233);
+define('DB_TABLE_DATABASE_ERR_RESTRICT_UPDATE', -234);
 
 /**
  * Error in fromXML for table with multiple auto_increment columns
  */
-define('DB_TABLE_DATABASE_ERR_XML_MULT_AUTO_INC', -234);
+define('DB_TABLE_DATABASE_ERR_XML_MULT_AUTO_INC', -235);
 
 /**
  * Error in autoJoin, column and tables parameter both null
  */
-define('DB_TABLE_DATABASE_ERR_NO_COL_NO_TBL', -235);
+define('DB_TABLE_DATABASE_ERR_NO_COL_NO_TBL', -236);
 
 /**
  * Error in autoJoin for ambiguous column name
  */
-define('DB_TABLE_DATABASE_ERR_COL_NOT_UNIQUE', -236);
+define('DB_TABLE_DATABASE_ERR_COL_NOT_UNIQUE', -237);
 
 /**
  * Error in autoJoin for non-unique set of join conditions
  */
-define('DB_TABLE_DATABASE_ERR_AMBIG_JOIN', -237);
+define('DB_TABLE_DATABASE_ERR_AMBIG_JOIN', -238);
 
 /**
  * Error in autoJoin for failed construction of join 
  */
-define('DB_TABLE_DATABASE_ERR_FAIL_JOIN', -238);
+define('DB_TABLE_DATABASE_ERR_FAIL_JOIN', -239);
 
 /**
  * Error in fromXML for PHP 4 (this function requires PHP 5)
  */
-define('DB_TABLE_DATABASE_ERR_PHP_VERSION', -239);
+define('DB_TABLE_DATABASE_ERR_PHP_VERSION', -240);
 
 /**
  * Error parsing XML string in fromXML
  */
-define('DB_TABLE_DATABASE_ERR_XML_PARSE', -240);
+define('DB_TABLE_DATABASE_ERR_XML_PARSE', -241);
 
 // }}}
 
@@ -306,7 +312,9 @@ $GLOBALS['_DB_TABLE_DATABASE']['default_error'] = array(
         DB_TABLE_DATABASE_ERR_NO_COL_TBL =>
         'In validCol, column does not exist in specified table. Column',
         DB_TABLE_DATABASE_ERR_SQL_UNDEF =>
-        'Undefined key of $sql property array ',
+        'Undefined key of $sql property array. Key',
+        DB_TABLE_DATABASE_ERR_SQL_NOT_STRING =>
+        'Key of $sql property array is not a string.',
         DB_TABLE_DATABASE_ERR_MATCH_TYPE =>
         'Invalid match parameter of buildFilter',
         DB_TABLE_DATABASE_ERR_DATA_KEY =>
@@ -389,7 +397,7 @@ class DB_Table_Database
      * @var    object
      * @access private
      */
-    var $_db = null;
+    var $db = null;
 
     /**
      * The backend type, which may be 'db' or 'mdb2'
@@ -397,7 +405,7 @@ class DB_Table_Database
      * @var    string
      * @access private
      */
-    var $_backend = null;
+    var $backend = null;
 
     /**
     * If there is an error on instantiation, this captures that error.
@@ -642,10 +650,10 @@ class DB_Table_Database
     {
         // Is $db an DB/MDB2 object or null?
         if (is_a($db, 'db_common')) {
-            $this->_backend = 'db';
+            $this->backend = 'db';
             $this->fetchmode = DB_FETCHMODE_ORDERED;
         } elseif (is_a($db, 'mdb2_driver_common')) {
-            $this->_backend = 'mdb2';
+            $this->backend = 'mdb2';
             $this->fetchmode = MDB2_FETCHMODE_ORDERED;
         } else {
             $this->error =& DB_Table_Database::throwError(
@@ -653,7 +661,7 @@ class DB_Table_Database
                             "DB_Table_Database");
             return;
         }
-        $this->_db  =& $db;
+        $this->db  =& $db;
         $this->name = $name;
 
         $this->setFixCase(false);
@@ -713,8 +721,8 @@ class DB_Table_Database
     /**
      * Set DB/MDB2 connection instance for database and all tables
      *
-     * Assign a reference to the DB/MDB2 object $db to $this->_db, set
-     * $this->_backend to 'db' or 'mdb2' accordingly, and set the same pair
+     * Assign a reference to the DB/MDB2 object $db to $this->db, set
+     * $this->backend to 'db' or 'mdb2' accordingly, and set the same pair
      * of values for the $db and $backend properties of every DB_Table
      * object in the database.
      *
@@ -739,8 +747,8 @@ class DB_Table_Database
         }
 
         // Set db and backend for database and all of its tables
-        $this->_db =& $db;
-        $this->_backend = $backend;
+        $this->db =& $db;
+        $this->backend = $backend;
         foreach ($this->_table as $name => $table) {
             $table->db =& $db;
             $table->backend = $backend;
@@ -805,8 +813,8 @@ class DB_Table_Database
     function setFixCase($flag = false) 
     {
         $flag = (bool) $flag;
-        $option = $this->_db->getOption('portability');
-        if ($this->_backend == 'db') {
+        $option = $this->db->getOption('portability');
+        if ($this->backend == 'db') {
             $option = $option | DB_PORTABILITY_LOWERCASE;
             if (!$flag) {
                 $option = $option ^ DB_PORTABILITY_LOWERCASE;
@@ -817,19 +825,19 @@ class DB_Table_Database
                 $option = $option ^ MDB2_PORTABILITY_FIX_CASE;
             }
         } 
-        $this->_db->setOption('portability', $option);
+        $this->db->setOption('portability', $option);
         $this->fix_case = $flag;
     }
     
     /**
-     * Return reference to $this->_db DB/MDB2 object
+     * Return reference to $this->db DB/MDB2 object
      *
      * @return object reference to DB/MDB2 object
      * @access public
      */
     function &getDBInstance() 
     {
-        return $this->_db;
+        return $this->db;
     }
 
     /**
@@ -876,7 +884,7 @@ class DB_Table_Database
      * If $name is null, return the $this->_primary_key array
      * If $name is a table name, return $this->_primary_key[$name]
      *
-     * Returns PEAR Error with the following DB_TABLE_DATABASE_* error
+     * Returns PEAR_Error with the following DB_TABLE_DATABASE_* error
      * codes if:
      *    - $name is not a string ( _TBL_NOT_STRING )
      *    - $name is not valid table name ( _NO_TBL )
@@ -915,7 +923,7 @@ class DB_Table_Database
      * If $name is null, return the $this->_table_subclass array
      * If $name is a table name, return $this->_table_subclass[$name]
      *
-     * Returns PEAR Error with the following DB_TABLE_DATABASE_* error
+     * Returns PEAR_Error with the following DB_TABLE_DATABASE_* error
      * codes if:
      *    - $name is not a string ( _TBL_NOT_STRING )
      *    - $name is not valid table name ( _NO_TBL )
@@ -968,7 +976,7 @@ class DB_Table_Database
      * If $column_name is null, return $_col property array
      * If $column_name is valid, return $_col[$column_name] subarray
      *
-     * Returns a PEAR Error with the following DB_TABLE_DATABASE_* error
+     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
      * codes if:
      *    - $column_name is not a string ( _COL_NOT_STRING )
      *    - $column_name is not valid column name ( _NO_COL )
@@ -1008,7 +1016,7 @@ class DB_Table_Database
      * If $column_name is null, return $this->_foreign_col property array
      * If $column_name is valid, return $this->_foreign_col[$column_name] 
      *
-     * Returns a PEAR Error with the following DB_TABLE_DATABASE_* error
+     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
      * codes if:
      *    - $column_name is not a string ( _COL_NOT_STRING )
      *    - $column_name is not valid foreign column name ( _NO_FOREIGN_COL )
@@ -1057,7 +1065,7 @@ class DB_Table_Database
      * if $table1 and $table2 are both valid table names, but there is no 
      * reference from $table1 to $table2.
      * 
-     * Returns a PEAR Error with the following DB_TABLE_DATABASE_* error
+     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
      * codes if:
      *    - $table1 or $table2 is not a string ( _TBL_NOT_STRING )
      *    - $table1 or $table2 is not a valid table name ( _NO_TBL )
@@ -1141,7 +1149,7 @@ class DB_Table_Database
      * Returns $this->_ref_to property array if $table_name is null.
      * Returns $this->_ref_to[$table_name] if $table_name is not null.
      *
-     * Returns a PEAR Error with the following DB_TABLE_DATABASE_* error
+     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
      * codes if:
      *    - $table_name is not a string ( _TBL_NOT_STRING )
      *    - $table_name is not a valid table name ( _NO_TBL )
@@ -1194,7 +1202,7 @@ class DB_Table_Database
      * if $table1 and $table2 are both valid table names but there is no 
      * link between them.
      * 
-     * Returns a PEAR Error with the following DB_TABLE_DATABASE_* error
+     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
      * codes if $table1 or $table2 is not null and:
      *    - $table1 or $table2 is not a string ( _TBL_NOT_STRING )
      *    - $table1 or $table2 is not a valid table name ( _NO_TBL )
@@ -1364,8 +1372,8 @@ class DB_Table_Database
         $this->_table_subclass[$table] = $subclass;
 
         // Set shared properties
-        $table_obj->db =& $this->_db;
-        $table_obj->backend   = $this->_backend;
+        $table_obj->db =& $this->db;
+        $table_obj->backend   = $this->backend;
         $table_obj->fetchmode = $this->fetchmode;
 
         // Add all columns to $_col property
@@ -2217,7 +2225,7 @@ class DB_Table_Database
         // Apply update
         $result = $table_obj->update($data, $where);
 
-        // Return value: true or PEAR Error
+        // Return value: true or PEAR_Error
         if (PEAR::isError($result)) {
             return $result;
         } else {
@@ -2279,7 +2287,7 @@ class DB_Table_Database
 
                 // Select rows to be updated, if not done previously
                 if ($update_rows === null) {
-                    if ($this->_backend == 'mdb2') {
+                    if ($this->backend == 'mdb2') {
                         $fetchmode_assoc = MDB2_FETCHMODE_ASSOC;
                     } else {
                         $fetchmode_assoc = DB_FETCHMODE_ASSOC;
@@ -2459,7 +2467,7 @@ class DB_Table_Database
         // Delete from $table_obj
         $result = $table_obj->delete($where);
 
-        // Return value: true or PEAR Error
+        // Return value: true or PEAR_Error
         if (PEAR::isError($result)) {
             return $result;
         } else {
@@ -2486,7 +2494,7 @@ class DB_Table_Database
 
                 // Select rows to be deleted, if not done previously
                 if ($delete_rows === null) {
-                    if ($this->_backend == 'mdb2') {
+                    if ($this->backend == 'mdb2') {
                         $fetchmode_assoc = MDB2_FETCHMODE_ASSOC;
                     } else {
                         $fetchmode_assoc = DB_FETCHMODE_ASSOC;
@@ -2615,66 +2623,79 @@ class DB_Table_Database
     }
 
     /**
-     * Returns SQL select string constructed from sql map array
+     * Returns SQL SELECT string constructed from sql query array
      *
-     * @param  mixed  $sql_key key of $this->sql, or sql map array
-     * @return string SQL SELECT command string (or Error)
+     * @param mixed  $query  SELECT query array, or key string of $this->sql
+     * @param string $filter SQL snippet to AND with default WHERE clause
+     * @param string $order  SQL snippet to override default ORDER BY clause
+     * @param int    $start  The row number from which to start result set
+     * @param int    $count  The number of rows to list in the result set.
+     *
+     * @return string SQL SELECT command string (or PEAR_Error on failure)
+     *
      * @access public
      */
-    function buildSQL($sql_key, $filter = null, $order = null, 
-                                $start = null, $count = null)
+    function buildSQL($query, $filter = null, $order = null, 
+                              $start = null, $count = null)
     {
-        // Is $sql_key a query array or a key of $this->sql_key ?
-        if (is_array($sql_key)) {
-            $sql_array = $sql_key;
-        } elseif (is_string($sql_key)) {
-            if (isset($this->sql[$sql_key])) {
-                $sql_array = $this->sql[$sql_key];
+
+        // Is $query a query array or a key of $this->sql ?
+        if (!is_array($query)) {
+            if (is_string($query)) {
+                if (isset($this->sql[$query])) {
+                    $query = $this->sql[$query];
+                } else {
+                    return DB_Table_Database::throwError(
+                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
+                              $query);
+                }
             } else {
                 return DB_Table_Database::throwError(
-                          DB_TABLE_DATABASE_ERR_SQL_UNDEF, $sql_key);
+                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
             }
         }
        
         // override the ORDER part
         if (!is_null($order)) {
-            $sql_array['order'] = $order;
+            $query['order'] = $order;
         }
 
         // Construct SQL command from parts
         $s = array();
-        if (isset($sql_array['select'])) {
-            $s[] = 'SELECT ' . $sql_array['select'];
+        if (isset($query['select'])) {
+            $s[] = 'SELECT ' . $query['select'];
         } else {
             $s[] = 'SELECT *';
         }
-        $s[] = 'FROM ' . $sql_array['from'];
-        if (isset($sql_array['join'])) {
-            $s[] = $sql_array['join'];
+        $s[] = 'FROM ' . $query['from'];
+        if (isset($query['join'])) {
+            $s[] = $query['join'];
         }
-        if (isset($sql_array['where'])) {
-            $s[] = 'WHERE ' . $sql_array['where'];
+        if (isset($query['where'])) {
             if ($filter) {
-                $s[] =  '  AND '. $filter;
+                $s[] = 'WHERE ( ' . $query['where'] . ' )';
+                $s[] = '  AND ( '. $filter . ' )';
+            } else {
+                $s[] = 'WHERE ' . $query['where'];
             }
         } elseif ($filter) {
             $s[] = 'WHERE ' . $filter;
         }
-        if (isset($sql_array['group'])) {
-            $s[] = 'GROUP BY ' . $sql_array['group'];
+        if (isset($query['group'])) {
+            $s[] = 'GROUP BY ' . $query['group'];
         }
-        if (isset($sql_array['having'])) {
-            $s[] = 'HAVING '. $sql_array['having'];
+        if (isset($query['having'])) {
+            $s[] = 'HAVING '. $query['having'];
         }
-        if (isset($sql_array['order'])) {
-            $s[] = 'ORDER BY ' . $sql_array['order'];
+        if (isset($query['order'])) {
+            $s[] = 'ORDER BY ' . $query['order'];
         }
         $cmd = implode("\n", $s);
         
         // add LIMIT if requested
         if (!is_null($start) && !is_null($count)) {
-            $db =& $this->_db;
-            if ($this->_backend == 'mdb2') {
+            $db =& $this->db;
+            if ($this->backend == 'mdb2') {
                 $db->setLimit($count, $start);
             } else {
                 $cmd = $db->modifyLimitQuery(
@@ -2689,13 +2710,13 @@ class DB_Table_Database
     /**
      * Selects rows using one of the DB/MDB2 get*() methods.
      *
-     * @param string $sql_key The name of the SQL SELECT to use from the
-     *                        $this->sql property array.
-     * @param string $filter  SQL snippet to AND with default WHERE clause
-     * @param string $order   SQL snippet to override default ORDER BY clause
-     * @param int    $start   The row number from which to start result set
-     * @param int    $count   The number of rows to list in the result set.
-     * @param array  $params  Parameters for placeholder substitutions, if any
+     * @param string $query SQL SELECT query array, or a key of the
+     *                          $this->sql property array.
+     * @param string $filter    SQL snippet to AND with default WHERE clause
+     * @param string $order     SQL snippet to override default ORDER BY clause
+     * @param int    $start     The row number from which to start result set
+     * @param int    $count     The number of rows to list in the result set.
+     * @param array  $params    Parameters for placeholder substitutions, if any
      * @return mixed  An array of records from the table if anything but 
      *                ('getOne'), a single value (if 'getOne'), or a PEAR_Error
      * @see DB::getAll()
@@ -2711,24 +2732,34 @@ class DB_Table_Database
      * @see DB_Table_Database::_swapModes()
      * @access public
      */
-    function select($sql_key, $filter = null, $order = null,
+    function select($query, $filter = null, $order = null,
                            $start = null, $count = null, $params = array())
     {
+        // Is $query a query array or a key of $this->sql ?
+        if (!is_array($query)) {
+            if (is_string($query)) {
+                if (isset($this->sql[$query])) {
+                    $query = $this->sql[$query];
+                } else {
+                    return DB_Table_Database::throwError(
+                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
+                              $query);
+                }
+            } else {
+                return DB_Table_Database::throwError(
+                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
+            }
+        }
+       
         // build the base command
-        $sql = $this->buildSQL($sql_key, $filter, $order, $start, $count);
+        $sql = $this->buildSQL($query, $filter, $order, $start, $count);
         if (PEAR::isError($sql)) {
             return $sql;
         }
 
-        if (is_string($sql_key)) {
-            $sql_array = $this->sql[$sql_key];
-        } else {
-            $sql_array = $sql_key;
-        }
-
         // set the get*() method name
-        if (isset($sql_array['get'])) {
-            $method = ucwords(strtolower(trim($sql_array['get'])));
+        if (isset($query['get'])) {
+            $method = ucwords(strtolower(trim($query['get'])));
             $method = "get$method";
         } else {
             $method = 'getAll';
@@ -2736,9 +2767,9 @@ class DB_Table_Database
 
         // DB_Table assumes you are using a shared PEAR DB/MDB2 object.
         // Record fetchmode settings, to be restored before returning.
-        $db =& $this->_db;
+        $db =& $this->db;
         $restore_mode = $db->fetchmode;
-        if ($this->_backend == 'mdb2') {
+        if ($this->backend == 'mdb2') {
             $restore_class = $db->getOption('fetch_class');
         } else {
             $restore_class = $db->fetchmode_object_class;
@@ -2747,11 +2778,11 @@ class DB_Table_Database
         // swap modes
         $fetchmode = $this->fetchmode;
         $fetchmode_object_class = $this->fetchmode_object_class;
-        if (isset($sql_array['fetchmode'])) {
-            $fetchmode = $sql_array['fetchmode'];
+        if (isset($query['fetchmode'])) {
+            $fetchmode = $query['fetchmode'];
         }
-        if (isset($sql_array['fetchmode_object_class'])) {
-            $fetchmode_object_class = $sql_array['fetchmode_object_class'];
+        if (isset($query['fetchmode_object_class'])) {
+            $fetchmode_object_class = $query['fetchmode_object_class'];
         }
         $this->_swapModes($fetchmode, $fetchmode_object_class);
 
@@ -2761,7 +2792,7 @@ class DB_Table_Database
         }
 
         // get the result
-        if ($this->_backend == 'mdb2') {
+        if ($this->backend == 'mdb2') {
             $result = $db->extended->$method($sql, null, $params);
         } else {
             switch ($method) {
@@ -2791,7 +2822,7 @@ class DB_Table_Database
     /**
      * Selects rows as a DB_Result/MDB2_Result_* object.
      *
-     * @param string $sql_key The name of the SQL SELECT to use from the
+     * @param string $query  The name of the SQL SELECT to use from the
      *                       $this->sql property array.
      * @param string $filter SQL snippet to AND to the default WHERE clause
      * @param string $order  SQL snippet to override default ORDER BY clause
@@ -2803,26 +2834,36 @@ class DB_Table_Database
      * @see DB_Table::_swapModes()
      * @access public
      */
-    function selectResult($sql_key, $filter = null, $order = null,
+    function selectResult($query, $filter = null, $order = null,
                    $start = null, $count = null, $params = array())
     {
+        // Is $query a DB_Table query array or a key of $this->sql ?
+        if (!is_array($query)) {
+            if (is_string($query)) {
+                if (isset($this->sql[$query])) {
+                    $query = $this->sql[$query];
+                } else {
+                    return DB_Table_Database::throwError(
+                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
+                              $query);
+                }
+            } else {
+                return DB_Table_Database::throwError(
+                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
+            }
+        }
+       
         // build the base command
-        $sql = $this->buildSQL($sql_key, $filter, $order, $start, $count);
+        $sql = $this->buildSQL($query, $filter, $order, $start, $count);
         if (PEAR::isError($sql)) {
             return $sql;
         }
 
-        if (is_string($sql_key)) {
-            $sql_array = $this->sql[$sql_key];
-        } else {
-            $sql_array = $sql_key;
-        }
-
         // DB_Table assumes you are using a shared PEAR DB/MDB2 object.
         // Record fetchmode settings, to be restored afterwards.
-        $db =& $this->_db;
+        $db =& $this->db;
         $restore_mode = $db->fetchmode;
-        if ($this->_backend == 'mdb2') {
+        if ($this->backend == 'mdb2') {
             $restore_class = $db->getOption('fetch_class');
         } else {
             $restore_class = $db->fetchmode_object_class;
@@ -2831,11 +2872,11 @@ class DB_Table_Database
         // swap modes
         $fetchmode = $this->fetchmode;
         $fetchmode_object_class = $this->fetchmode_object_class;
-        if (isset($sql_array['fetchmode'])) {
-            $fetchmode = $sql_array['fetchmode'];
+        if (isset($query['fetchmode'])) {
+            $fetchmode = $query['fetchmode'];
         }
-        if (isset($sql_array['fetchmode_object_class'])) {
-            $fetchmode_object_class = $sql_array['fetchmode_object_class'];
+        if (isset($query['fetchmode_object_class'])) {
+            $fetchmode_object_class = $query['fetchmode_object_class'];
         }
         $this->_swapModes($fetchmode, $fetchmode_object_class);
 
@@ -2845,7 +2886,7 @@ class DB_Table_Database
         }
 
         // get the result
-        if ($this->_backend == 'mdb2') {
+        if ($this->backend == 'mdb2') {
             $stmt =& $db->prepare($sql);
             if (PEAR::isError($stmt)) {
                 return $stmt;
@@ -2871,7 +2912,7 @@ class DB_Table_Database
      * query results themselves.
      *
      * @author Ian Eure <ian@php.net>
-     * @param string $sql_key The name of the SQL SELECT to use from the
+     * @param string $query  The name of the SQL SELECT to use from the
      *                       $this->sql property array.
      * @param string $filter Ad-hoc SQL snippet to AND with the default
      *                       SELECT WHERE clause.
@@ -2881,64 +2922,75 @@ class DB_Table_Database
      * @param int    $count  Number of rows to list in result set
      * @param array  $params Parameters to use in placeholder substitutions
      *                       (if any).
-     * @return int   Number of records from the table, or Error on failure
+     * @return int   Number of records from the table (or PEAR_Error on failure)
      *
      * @see DB_Table::select()
      * @access public
      */
-    function selectCount($sql_key, $filter = null, $order = null,
+    function selectCount($query, $filter = null, $order = null,
                        $start = null, $count = null, $params = array())
     {
 
-        // Is $sql_key a key of $this->sql, or an sql select array?
-        if (is_string($sql_key)) {
-            if (isset($this->sql[$sql_key])) {
-                $count_sql = $this->sql[$sql_key];
+        // Is $query a query array or a key of $this->sql ?
+        if (is_array($query)) {
+            $sql_key = null;
+            $count_query = $query;
+        } else {
+            if (is_string($query)) {
+                if (isset($this->sql[$query])) {
+                    $sql_key = $query;
+                    $count_query = $this->sql[$query];
+                } else {
+                    return DB_Table_Database::throwError(
+                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
+                              $query);
+                }
             } else {
                 return DB_Table_Database::throwError(
-                          DB_TABLE_DATABASE_ERR_SQL_UNDEF,
-                          $sql_key);
+                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
             }
-        } else {
-            $count_sql = $sql_key;
-            $sql_key   = null;
         }
 
-        // Is $sql_key a key in $this->sql ?
+        // If the query is a stored query in $this->sql, then create a corresponding
+        // key for the count query, or check if the count-query already exists
         $ready = false;
         if ($sql_key) {
             // Create an sql key name for this count-query
             $count_key = '__count_' . $sql_key;
-            // Does a count-query already exist for this key?
+            // Check if a this count query alread exists in $this->sql
             if (isset($this->sql[$count_key])) {
                 $ready = true;
             }
         }
 
-        // Complete $count_sql, if necessary
-        if (!$ready) {
+        // If a count-query does not already exist, create $count_query query array
+        if ($ready) {
+
+            $count_query = $this->sql[$count_key];
+
+        } else {
 
             // Is a count-field set for the query?
-            if (!isset($count_sql['count']) || 
-                trim($count_sql['count']) == '') {
-                $count_sql['count'] = '*';
+            if (!isset($count_query['count']) || 
+                trim($count_query['count']) == '') {
+                $count_query['count'] = '*';
             }
 
             // Replace the SELECT fields with a COUNT() command
-            $count_sql['select'] = "COUNT({$count_sql['count']})";
+            $count_query['select'] = "COUNT({$count_query['count']})";
 
             // Replace the 'get' key so we only get one result item
-            $count_sql['get'] = 'one';
+            $count_query['get'] = 'one';
 
             // Create a new count-query in $this->sql
             if ($sql_key) {
-                $this->sql[$count_key] = $count_sql;
+                $this->sql[$count_key] = $count_query;
             }
 
         }
 
         // Retrieve the count results
-        return $this->select($count_sql, $filter, $order,
+        return $this->select($count_query, $filter, $order,
                              $start, $count, $params);
 
     }
@@ -2991,13 +3043,13 @@ class DB_Table_Database
      * @param  array $tables sequential array of table names
      * @param  array $filter SQL logical expression to be added 
      *                       (ANDed) to the where clause
-     * @return array sql map array for select statement
+     * @return array sql query array for select statement
      * @access public
      */
     function autoJoin($cols = null, $tables = null, $filter = null)
     {
         // initialize array containing clauses of select statement
-        $sql_array = array();
+        $query = array();
 
         if (is_null($tables)) {
             if (is_null($cols)) {
@@ -3009,7 +3061,7 @@ class DB_Table_Database
 
         if (!$cols) {
             // If no columns specified, SELECT * FROM ...
-            $sql_array['select'] = '*';
+            $query['select'] = '*';
         } else {
 
             // Qualify unqualified columns with table names
@@ -3033,14 +3085,14 @@ class DB_Table_Database
             $tables = $all_tables;
 
             // Construct select clause
-            $sql_array['select'] = implode(', ', $cols);
+            $query['select'] = implode(', ', $cols);
 
         }
 
         // Construct array $joins of join conditions
         $n_tables = count($tables);
         if ($n_tables == 1) {
-            $sql_array['from'] = $tables[0];
+            $query['from'] = $tables[0];
         } else {
             $join_tables = array($tables[0]); // list of joined tables
             $link_tables = array();           // list of required linking tables
@@ -3205,28 +3257,28 @@ class DB_Table_Database
             }
 
             // Construct from clause from $tables array
-            $sql_array['from'] = implode(', ', $tables);
+            $query['from'] = implode(', ', $tables);
 
             // Construct where clause from $joins array
-            $sql_array['where'] = implode("\n  AND ", $joins);
+            $query['where'] = implode("\n  AND ", $joins);
 
         }
 
         // Add $filter condition, if present
         if ($filter) {
-           if (isset($sql_array['where'])) {
-               $sql_array['where'] = $sql_array['where'] .
-                                     "\n  AND ( $filter )";
+           if (isset($query['where'])) {
+               $query['where'] = '( ' . $query['where'] . " )\n" .
+                           '  AND ( ' . $filter . ')';
            } else {
-               $sql_array['where'] = $filter;
+               $query['where'] = $filter;
            }
         }
 
-        return $sql_array;
+        return $query;
     }
 
     /**
-     * Changes the $this->_db PEAR DB/MDB2 object fetchmode and
+     * Changes the $this->db PEAR DB/MDB2 object fetchmode and
      * fetchmode_object_class.
      *
      * @param string $new_mode A DB/MDB2_FETCHMODE_* constant.  If null,
@@ -3242,9 +3294,9 @@ class DB_Table_Database
     function _swapModes($new_mode, $new_class)
     {
         // get the old (current) mode and class
-        $db =& $this->_db;
+        $db =& $this->db;
         $old_mode = $db->fetchmode;
-        if ($this->_backend == 'mdb2') {
+        if ($this->backend == 'mdb2') {
             $old_class = $db->getOption('fetch_class');
         } else {
             $old_class = $db->fetchmode_object_class;
@@ -3478,10 +3530,10 @@ class DB_Table_Database
         if (is_bool($value)) {
            return $value ? '1' : '0';
         } 
-        if ($this->_backend == 'mdb2') {
-            $value = $this->_db->quote($value);
+        if ($this->backend == 'mdb2') {
+            $value = $this->db->quote($value);
         } else {
-            $value = $this->_db->quoteSmart($value);
+            $value = $this->db->quoteSmart($value);
         }
         return (string) $value;
     }
@@ -3494,8 +3546,8 @@ class DB_Table_Database
      */
     function __sleep()
     {
-        $this->_db      = null;
-        $this->_backend = null;
+        $this->db      = null;
+        $this->backend = null;
         // needed in setDatabaseInstance, where null is passed by reference
         $null_variable  = null;
         foreach ($this->_table as $name => $table_obj) {
@@ -3510,7 +3562,7 @@ class DB_Table_Database
      * Unserializes child DB_Table objects
      *
      * Immediately after unserialization, a DB_Table_Databse object 
-     * has null $_db and $_backend properties, and each of its child 
+     * has null $db and $backend properties, and each of its child 
      * DB_Table objects has null $db and $backend properties. The
      * DB_Table_Database::setDB method should be called immediately 
      * after unserialization to re-establish the database connection, 
