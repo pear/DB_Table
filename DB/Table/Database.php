@@ -170,60 +170,59 @@ define('DB_TABLE_DATABASE_ERR_FULL_KEY', -230);
 /**
  * Error in insert for a failed foreign key constraint
  */
-define('DB_TABLE_DATABASE_ERR_FKEY_INSERT', -231);
-
-/**
- * Error in update for a failed foreign key constraint
- */
-define('DB_TABLE_DATABASE_ERR_FKEY_UPDATE', -232);
+define('DB_TABLE_DATABASE_ERR_FKEY_CONSTRAINT', -231);
 
 /**
  * Error in delete due to a referentially triggered 'restrict' action
  */
-define('DB_TABLE_DATABASE_ERR_RESTRICT_DELETE', -233);
+define('DB_TABLE_DATABASE_ERR_RESTRICT_DELETE', -232);
 
 /**
  * Error in update due to a referentially triggered 'restrict' action
  */
-define('DB_TABLE_DATABASE_ERR_RESTRICT_UPDATE', -234);
+define('DB_TABLE_DATABASE_ERR_RESTRICT_UPDATE', -233);
 
 /**
  * Error in fromXML for table with multiple auto_increment columns
  */
-define('DB_TABLE_DATABASE_ERR_XML_MULT_AUTO_INC', -235);
+define('DB_TABLE_DATABASE_ERR_XML_MULT_AUTO_INC', -234);
 
 /**
  * Error in autoJoin, column and tables parameter both null
  */
-define('DB_TABLE_DATABASE_ERR_NO_COL_NO_TBL', -236);
+define('DB_TABLE_DATABASE_ERR_NO_COL_NO_TBL', -235);
 
 /**
  * Error in autoJoin for ambiguous column name
  */
-define('DB_TABLE_DATABASE_ERR_COL_NOT_UNIQUE', -237);
+define('DB_TABLE_DATABASE_ERR_COL_NOT_UNIQUE', -236);
 
 /**
  * Error in autoJoin for non-unique set of join conditions
  */
-define('DB_TABLE_DATABASE_ERR_AMBIG_JOIN', -238);
+define('DB_TABLE_DATABASE_ERR_AMBIG_JOIN', -237);
 
 /**
  * Error in autoJoin for failed construction of join 
  */
-define('DB_TABLE_DATABASE_ERR_FAIL_JOIN', -239);
+define('DB_TABLE_DATABASE_ERR_FAIL_JOIN', -238);
 
 /**
  * Error in fromXML for PHP 4 (this function requires PHP 5)
  */
-define('DB_TABLE_DATABASE_ERR_PHP_VERSION', -240);
+define('DB_TABLE_DATABASE_ERR_PHP_VERSION', -239);
 
 /**
  * Error parsing XML string in fromXML
  */
-define('DB_TABLE_DATABASE_ERR_XML_PARSE', -241);
+define('DB_TABLE_DATABASE_ERR_XML_PARSE', -240);
 
 // }}}
 
+/**
+ * DB_Table_Base base class
+ */
+require_once 'DB/Table/Base.php';
 
 /**
  * DB_Table table abstraction class
@@ -312,9 +311,9 @@ $GLOBALS['_DB_TABLE_DATABASE']['default_error'] = array(
         DB_TABLE_DATABASE_ERR_NO_COL_TBL =>
         'In validCol, column does not exist in specified table. Column',
         DB_TABLE_DATABASE_ERR_SQL_UNDEF =>
-        'Undefined key of $sql property array. Key',
+        'Query string is not a key of $sql property array. Key is',
         DB_TABLE_DATABASE_ERR_SQL_NOT_STRING =>
-        'Key of $sql property array is not a string.',
+        'Query is neither an array nor a string',
         DB_TABLE_DATABASE_ERR_MATCH_TYPE =>
         'Invalid match parameter of buildFilter',
         DB_TABLE_DATABASE_ERR_DATA_KEY =>
@@ -323,10 +322,8 @@ $GLOBALS['_DB_TABLE_DATABASE']['default_error'] = array(
         'Incompatible data_key and filter_key in buildFilter',
         DB_TABLE_DATABASE_ERR_FULL_KEY =>
         'Invalid key value in buildFilter: Mixed null and not null',
-        DB_TABLE_DATABASE_ERR_FKEY_INSERT =>
-        'Foreign key does not reference any rows on insertion into table',
-        DB_TABLE_DATABASE_ERR_FKEY_UPDATE =>
-        'Foreign key does not reference any rows on update of table',
+        DB_TABLE_DATABASE_ERR_FKEY_CONSTRAINT =>
+        'Foreign key constraint failure: Key does not reference any rows',
         DB_TABLE_DATABASE_ERR_RESTRICT_DELETE =>
         'Referentially trigger restrict of delete from table',
         DB_TABLE_DATABASE_ERR_RESTRICT_UPDATE =>
@@ -378,7 +375,7 @@ foreach ($GLOBALS['_DB_TABLE_DATABASE']['default_error'] as $code => $message) {
  * @author   David C. Morse <morse@php.net>
  *
  */
-class DB_Table_Database
+class DB_Table_Database extends DB_Table_Base
 {
 
     // {{{ properties
@@ -390,40 +387,6 @@ class DB_Table_Database
      * @access public
      */
     var $name   = null;
-
-    /**
-     * The PEAR DB/MDB2 object that connects to the database.
-     *
-     * @var    object
-     * @access private
-     */
-    var $db = null;
-
-    /**
-     * The backend type, which may be 'db' or 'mdb2'
-     *
-     * @var    string
-     * @access private
-     */
-    var $backend = null;
-
-    /**
-    * If there is an error on instantiation, this captures that error.
-    *
-    * This property is used only for errors encountered in the constructor
-    * at instantiation time.  To check if there was an instantiation error...
-    *
-    * <code>
-    * $obj =& new DB_Table_Database();
-    * if ($obj->error) {
-    *     // ... error handling code here ...
-    * }
-    * </code>
-    *
-    * @var    object PEAR_Error
-    * @access public
-    */
-    var $error = null;
 
     /**
      * Associative array of DB_Table object references. Keys are table names.
@@ -544,33 +507,6 @@ class DB_Table_Database
     var $_link = array();
 
     /**
-     * Baseline SELECT maps for select(), selectResult(), selectCount().
-     *
-     * @var    array
-     * @access public
-     */
-    var $sql = array();
-
-    /**
-     * When calling select() and selectResult(), use this fetch mode (usually
-     * a DB/MDB2_FETCHMODE_* constant).  If null, uses whatever is set in the 
-     * $db DB/MDB2 object.
-     *
-     * @var    int
-     * @access public
-     */
-    var $fetchmode = null;
-
-    /**
-     * When fetchmode is DB/MDB2_FETCHMODE_OBJECT, use this class for each
-     * returned row. If null, uses whatever is set in the $db DB/MDB2 object.
-     *
-     * @var    string
-     * @access public
-     */
-    var $fetchmode_object_class = null;
-
-    /**
      * If the column keys in associative array return sets are fixed case
      * (all upper or lower case) this property should be set true. 
      *
@@ -656,67 +592,19 @@ class DB_Table_Database
             $this->backend = 'mdb2';
             $this->fetchmode = MDB2_FETCHMODE_ORDERED;
         } else {
-            $this->error =& DB_Table_Database::throwError(
-                            DB_TABLE_DATABASE_ERR_DB_OBJECT,
-                            "DB_Table_Database");
+            $code = DB_TABLE_DATABASE_ERR_DB_OBJECT ;
+            $text = $GLOBALS['_DB_TABLE_DATABASE']['error'][$code]
+                  . ' DB_Table_Database';
+            $this->error =& PEAR::throwError($text, $code);
             return;
         }
         $this->db  =& $db;
         $this->name = $name;
 
+        $this->_primary_subclass = 'DB_TABLE_DATABASE';
         $this->setFixCase(false);
     }
 
-    /**
-     * Specialized version of throwError() modeled on PEAR_Error.
-     * 
-     * Throws a PEAR_Error with a DB_Table_Database error message based 
-     * on a DB_Table_Database constant error code.
-     * 
-     * @param string $code  A DB_Table_Database error code constant.
-     * @param string $extra Extra text for the error (in addition to the 
-     *                      regular error message).
-     * @return object PEAR_Error
-     * @access public
-     * @static
-     */
-    function &throwError($code, $extra = null)
-    {
-        // get the error message text based on the error code
-        $text = 'DB_TABLE_DATABASE ERROR - ' . "\n" .
-                $GLOBALS['_DB_TABLE_DATABASE']['error'][$code];
-        
-        // add any additional error text
-        if ($extra) {
-            $text .= ' ' . $extra;
-        }
-        
-        // done!
-        $error = PEAR::throwError($text, $code);
-        return $error;
-    }
-   
-    /**
-     * Overwrites one or more error messages, e.g., to internationalize them.
-     * 
-     * @param mixed $code If string, the error message with code $code will be
-     *                    overwritten by $message. If array, each key is a code
-     *                    and each value is a new message. 
-     * 
-     * @param string $message Only used if $key is not an array.
-     * @return void
-     * @access public
-     */
-    function setErrorMessage($code, $message = null) {
-        if (is_array($code)) {
-            foreach ($code as $single_code => $single_message) {
-                $GLOBALS['_DB_TABLE_DATABASE']['error'][$single_code] 
-                    = $single_message;
-            }
-        } else {
-            $GLOBALS['_DB_TABLE_DATABASE']['error'][$code] = $message;
-        }
-    }
 
     /**
      * Set DB/MDB2 connection instance for database and all tables
@@ -741,7 +629,7 @@ class DB_Table_Database
         } elseif (is_subclass_of($db, 'MDB2_Driver_Common')) {
             $backend = 'mdb2';
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_DB_OBJECT,
                       "setDBconnection");
         }
@@ -867,12 +755,12 @@ class DB_Table_Database
             if (isset($this->_table[$name])) {
                 return $this->_table[$name];
             } else {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_TBL,
                           "getTable, $name");
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                       "getTable");
         }
@@ -906,12 +794,12 @@ class DB_Table_Database
             if (isset($this->_primary_key[$name])) {
                 return $this->_primary_key[$name];
             } else {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_TBL,
                           "getPrimaryKey, $name");
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                       "getPrimaryKey");
         }
@@ -959,12 +847,12 @@ class DB_Table_Database
             if (isset($this->_table_subclass[$name])) {
                 return $this->_table_subclass[$name];
             } else {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_TBL,
                           "getTableSubclass, $name");
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                       "getTableSubclass");
         }
@@ -999,12 +887,12 @@ class DB_Table_Database
             if (isset($this->_col[$column_name])) {
                 return $this->_col[$column_name];
             } else {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_COL,
                           "'$column_name'");
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                        DB_TABLE_DATABASE_ERR_COL_NOT_STRING,
                        'getCol');
         }
@@ -1043,12 +931,12 @@ class DB_Table_Database
             if (isset($this->_foreign_col[$column_name])) {
                 return $this->_foreign_col[$column_name];
             } else {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_FOREIGN_COL,
                           $column_name);
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_COL_NOT_STRING,
                       'getForeignCol');
         }
@@ -1114,13 +1002,13 @@ class DB_Table_Database
                             return null;
                         } else {
                             // Invalid table name
-                            return DB_Table_Database::throwError(
+                            return $this->throwError(
                                       DB_TABLE_DATABASE_ERR_NO_TBL,
                                       "getRef, $table2");
                         }
                     }
                 } else {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                               "getRef");
                 }
@@ -1130,13 +1018,13 @@ class DB_Table_Database
                     return null;
                 } else {
                     // Invalid table name
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_NO_TBL,
                               "getRef, $table1");
                 }
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                        DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                        "getRef");
         }
@@ -1179,13 +1067,13 @@ class DB_Table_Database
                     return null;
                 } else {
                     // Invalid table name
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_NO_TBL,
                               "getRefTo, $table_name");
                 }
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                       "getRefTo");
         }
@@ -1255,13 +1143,13 @@ class DB_Table_Database
                             return null;
                         } else {
                             // Invalid 2nd table name string
-                            return DB_Table_Database::throwError(
+                            return $this->throwError(
                                       DB_TABLE_DATABASE_ERR_NO_TBL,
                                       "getLink, $table2");
                         }
                     }
                 } else {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                               "getLink");
                 }
@@ -1271,13 +1159,13 @@ class DB_Table_Database
                     return null;
                 } else {
                     // Invalid 1st table name string
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_NO_TBL,
                               "getLink, $table1");
                 }
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_TBL_NOT_STRING,
                       "getLink");
         }
@@ -1342,7 +1230,7 @@ class DB_Table_Database
         } elseif (is_a($table_obj, 'DB_Table')) {
             $subclass = null;
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_DBTABLE_OBJECT);
         }
 
@@ -1358,7 +1246,7 @@ class DB_Table_Database
                 } else {
                     // More than one primary key defined in the table
                     unset($this->_primary_key[$table]);
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_MULT_PKEY, $table);
                 }
             }
@@ -1508,7 +1396,7 @@ class DB_Table_Database
         if (isset($this->_table[$ftable])) {
             $ftable_obj =& $this->_table[$ftable];
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_NO_FTABLE,
                       "$ftable => $rtable");
         }
@@ -1517,7 +1405,7 @@ class DB_Table_Database
         if (isset($this->_table[$rtable])) {
             $rtable_obj =& $this->_table[$rtable];
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_NO_RTABLE,
                       "$ftable => $rtable");
         }
@@ -1528,7 +1416,7 @@ class DB_Table_Database
                 $rkey = $this->_primary_key[$rtable];
             } else {
                 // Error: null referenced key and no primary key
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_PKEY,
                           "$ftable => $rtable");
             }
@@ -1537,35 +1425,35 @@ class DB_Table_Database
         // Check $fkey and $rkey types and compatibility
         if (is_string($fkey)) {
             if (!is_string($rkey)) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_RKEY_NOT_STRING,
                           "$ftable => $rtable");
             }
             if (!isset($ftable_obj->col[$fkey])) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_FCOL,
                           "$ftable.$fkey => $rtable.$rkey");
             }
             if (!isset($rtable_obj->col[$rkey])) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_RCOL,
                           "$ftable.$fkey => $rtable.$rkey");
             }
             $ftype = $ftable_obj->col[$fkey]['type'];
             $rtype = $rtable_obj->col[$rkey]['type'];
             if (!($rtype == $ftype)) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_REF_TYPE,
                           "$ftable.$fkey => $rtable.$rkey");
             }
         } elseif (is_array($fkey)) {
             if (!is_array($rkey)) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_RKEY_NOT_ARRAY,
                           "$ftable => $rtable");
             }
             if (!(count($fkey) == count($rkey))) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_RKEY_COL_NUMBER,
                           "$ftable => $rtable");
             }
@@ -1573,25 +1461,25 @@ class DB_Table_Database
                 $fcol = $fkey[$i];
                 $rcol = $rkey[$i];
                 if (!isset($ftable_obj->col[$fcol])) {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_NO_FCOL,
                               "$ftable.$fcol => $rtable.$rcol");
                 }
                 if (!isset($rtable_obj->col[$rcol])) {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_NO_RCOL,
                               "$ftable.$fcol => $rtable.$rcol");
                 }
                 $ftype = $ftable_obj->col[$fcol]['type'];
                 $rtype = $rtable_obj->col[$rcol]['type'];
                 if (!($rtype == $ftype)) {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                               DB_TABLE_DATABASE_ERR_REF_TYPE,
                               "$ftable.$fcol => $rtable.$rcol");
                 }
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_FKEY,
                       "$ftable => $rtable");
         }
@@ -1600,12 +1488,12 @@ class DB_Table_Database
         $valid_actions = 
                array(null, 'cascade', 'set null', 'set default', 'restrict');
         if (!in_array($on_delete, $valid_actions)) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                    DB_TABLE_DATABASE_ERR_ON_DELETE_ACTION,
                    "$ftable => $rtable");
         }
         if (!in_array($on_update, $valid_actions)) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                    DB_TABLE_DATABASE_ERR_ON_UPDATE_ACTION,
                    "$ftable => $rtable");
         }
@@ -1621,7 +1509,7 @@ class DB_Table_Database
         } else {
              if (isset($this->_ref[$ftable][$rtable])) {
                  // Multiple references from $ftable to $rtable
-                 return DB_Table_Database::throwError(
+                 return $this->throwError(
                            DB_TABLE_DATABASE_ERR_MULT_REF,
                            "$ftable => $rtable");
              }
@@ -1757,7 +1645,7 @@ class DB_Table_Database
         if (isset($this->_ref[$ftable])) {
             if (isset($this->_ref[$ftable][$rtable])) {
                 if (!in_array($action, $valid_actions)) {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                            DB_TABLE_DATABASE_ERR_REF_ON_DELETE_ACTION,
                            "$ftable => $rtable");
                 }
@@ -1786,7 +1674,7 @@ class DB_Table_Database
         if (isset($this->_ref[$ftable])) {
             if (isset($this->_ref[$ftable][$rtable])) {
                 if (!in_array($action, $valid_actions)) {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                            DB_TABLE_DATABASE_ERR_REF_ON_UPDATE_ACTION,
                            "$ftable => $rtable");
                 }
@@ -1819,37 +1707,37 @@ class DB_Table_Database
         // Check for existence of all three tables
         if (is_string($table1)) {
             if (!isset($this->_table[$table1])) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_TBL,
                           "addLink, $table1");
             }
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_NO_TBL,
                       "addLink, $table1");
         }
         if (!isset($this->_table[$table2])) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_NO_TBL,
                       "addLink, $table2");
         }
         if (!isset($this->_table[$link])) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_NO_TBL,
                       "addLink, $link");
         }
         if (!isset($this->_ref[$link])) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_NO_REF_LINK,
                       "$link => $table1, $table2");
         } else {
             if (!isset($this->_ref[$link][$table1])) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_REF_LINK,
                           "$link => $table1");
             }
             if (!isset($this->_ref[$link][$table2])) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_REF_LINK,
                           "$link => $table2");
             }
@@ -2012,7 +1900,7 @@ class DB_Table_Database
             $column = $col[0];
             // Does $column exist in database ?
             if (!isset($this->_col[$column])) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_COL_DB, 
                           "$column");
             }
@@ -2043,12 +1931,12 @@ class DB_Table_Database
                  $table_obj =& $this->_table[$table];
                  $col_array = $table_obj->col;
                  if (!isset($col_array[$column])) {
-                     return DB_Table_Database::throwError(
+                     return $this->throwError(
                                DB_TABLE_DATABASE_ERR_NO_COL_TBL,
                                "$table.$column");
                  }
             } else {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_TBL, "validCol, $table");
             }
         }
@@ -2133,11 +2021,14 @@ class DB_Table_Database
                                  'from'  => $rtable_name,
                                  'where' => $filter);
                     $referenced_rows = $this->select($sql);
+                    // Check for failed query
                     if (PEAR::isError($referenced_rows)) {
                         return $referenced_rows;
                     }
+                    // Check for failed foreign key constraint
                     if (count($referenced_rows) == 0) {
-                        return false;
+                        return $this->throwError( 
+                               DB_TABLE_DATABASE_ERR_FKEY_CONSTRAINT);
                     }
                 }
             }
@@ -2165,7 +2056,7 @@ class DB_Table_Database
         if (isset($this->_table[$table_name])) {
             $table_obj =& $this->_table[$table_name];
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                        DB_TABLE_DATABASE_ERR_NO_TBL,
                        "insert, $table_name");
         }
@@ -2217,7 +2108,7 @@ class DB_Table_Database
         if (isset($this->_table[$table_name])) {
             $table_obj =& $this->_table[$table_name];
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                        DB_TABLE_DATABASE_ERR_NO_TBL,
                        "update, $table_name");
         }
@@ -2351,7 +2242,7 @@ class DB_Table_Database
                 } elseif ($action == null) {
                     $fdata = null;
                 } else {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                         DB_TABLE_DATABASE_ERR_ON_UPDATE_ACTION,
                         "$ftable_name => $table_name");
                 }
@@ -2380,7 +2271,7 @@ class DB_Table_Database
                                 return $frows;
                             }
                             if (count($frows) > 0) {
-                                 return DB_Table_Database::throwError(
+                                 return $this->throwError(
                                         DB_TABLE_DATABASE_ERR_RESTRICT_UPDATE,
                                         $table_name);
                             }
@@ -2459,7 +2350,7 @@ class DB_Table_Database
         if (isset($this->_table[$table_name])) {
             $table_obj =& $this->_table[$table_name];
         } else {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                        DB_TABLE_DATABASE_ERR_NO_TBL,
                        "delete, $table_name");
         }
@@ -2557,7 +2448,7 @@ class DB_Table_Database
                             return $frows;
                         }
                         if (count($frows) > 0) {
-                             return DB_Table_Database::throwError(
+                             return $this->throwError(
                                        DB_TABLE_DATABASE_ERR_RESTRICT_DELETE,
                                        $table_name);
                         }
@@ -2583,7 +2474,7 @@ class DB_Table_Database
                         }
                     } else {
                         // Invalid $action name, throw Error
-                        return DB_Table_Database::throwError(
+                        return $this->throwError(
                            DB_TABLE_DATABASE_ERR_ON_DELETE_ACTION,
                            "$ftable_name => $table_name");
                     }
@@ -2620,379 +2511,6 @@ class DB_Table_Database
             $i = $i + 1;
         }
         return $new_data;
-    }
-
-    /**
-     * Returns SQL SELECT string constructed from sql query array
-     *
-     * @param mixed  $query  SELECT query array, or key string of $this->sql
-     * @param string $filter SQL snippet to AND with default WHERE clause
-     * @param string $order  SQL snippet to override default ORDER BY clause
-     * @param int    $start  The row number from which to start result set
-     * @param int    $count  The number of rows to list in the result set.
-     *
-     * @return string SQL SELECT command string (or PEAR_Error on failure)
-     *
-     * @access public
-     */
-    function buildSQL($query, $filter = null, $order = null, 
-                              $start = null, $count = null)
-    {
-
-        // Is $query a query array or a key of $this->sql ?
-        if (!is_array($query)) {
-            if (is_string($query)) {
-                if (isset($this->sql[$query])) {
-                    $query = $this->sql[$query];
-                } else {
-                    return DB_Table_Database::throwError(
-                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
-                              $query);
-                }
-            } else {
-                return DB_Table_Database::throwError(
-                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
-            }
-        }
-       
-        // override the ORDER part
-        if (!is_null($order)) {
-            $query['order'] = $order;
-        }
-
-        // Construct SQL command from parts
-        $s = array();
-        if (isset($query['select'])) {
-            $s[] = 'SELECT ' . $query['select'];
-        } else {
-            $s[] = 'SELECT *';
-        }
-        $s[] = 'FROM ' . $query['from'];
-        if (isset($query['join'])) {
-            $s[] = $query['join'];
-        }
-        if (isset($query['where'])) {
-            if ($filter) {
-                $s[] = 'WHERE ( ' . $query['where'] . ' )';
-                $s[] = '  AND ( '. $filter . ' )';
-            } else {
-                $s[] = 'WHERE ' . $query['where'];
-            }
-        } elseif ($filter) {
-            $s[] = 'WHERE ' . $filter;
-        }
-        if (isset($query['group'])) {
-            $s[] = 'GROUP BY ' . $query['group'];
-        }
-        if (isset($query['having'])) {
-            $s[] = 'HAVING '. $query['having'];
-        }
-        if (isset($query['order'])) {
-            $s[] = 'ORDER BY ' . $query['order'];
-        }
-        $cmd = implode("\n", $s);
-        
-        // add LIMIT if requested
-        if (!is_null($start) && !is_null($count)) {
-            $db =& $this->db;
-            if ($this->backend == 'mdb2') {
-                $db->setLimit($count, $start);
-            } else {
-                $cmd = $db->modifyLimitQuery(
-                            $cmd, $start, $count);
-            }
-        }
-
-        // Return command string
-        return $cmd;
-    }
-
-    /**
-     * Selects rows using one of the DB/MDB2 get*() methods.
-     *
-     * @param string $query SQL SELECT query array, or a key of the
-     *                          $this->sql property array.
-     * @param string $filter    SQL snippet to AND with default WHERE clause
-     * @param string $order     SQL snippet to override default ORDER BY clause
-     * @param int    $start     The row number from which to start result set
-     * @param int    $count     The number of rows to list in the result set.
-     * @param array  $params    Parameters for placeholder substitutions, if any
-     * @return mixed  An array of records from the table if anything but 
-     *                ('getOne'), a single value (if 'getOne'), or a PEAR_Error
-     * @see DB::getAll()
-     * @see MDB2::getAll()
-     * @see DB::getAssoc()
-     * @see MDB2::getAssoc()
-     * @see DB::getCol()
-     * @see MDB2::getCol()
-     * @see DB::getOne()
-     * @see MDB2::getOne()
-     * @see DB::getRow()
-     * @see MDB2::getRow()
-     * @see DB_Table_Database::_swapModes()
-     * @access public
-     */
-    function select($query, $filter = null, $order = null,
-                           $start = null, $count = null, $params = array())
-    {
-        // Is $query a query array or a key of $this->sql ?
-        if (!is_array($query)) {
-            if (is_string($query)) {
-                if (isset($this->sql[$query])) {
-                    $query = $this->sql[$query];
-                } else {
-                    return DB_Table_Database::throwError(
-                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
-                              $query);
-                }
-            } else {
-                return DB_Table_Database::throwError(
-                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
-            }
-        }
-       
-        // build the base command
-        $sql = $this->buildSQL($query, $filter, $order, $start, $count);
-        if (PEAR::isError($sql)) {
-            return $sql;
-        }
-
-        // set the get*() method name
-        if (isset($query['get'])) {
-            $method = ucwords(strtolower(trim($query['get'])));
-            $method = "get$method";
-        } else {
-            $method = 'getAll';
-        }
-
-        // DB_Table assumes you are using a shared PEAR DB/MDB2 object.
-        // Record fetchmode settings, to be restored before returning.
-        $db =& $this->db;
-        $restore_mode = $db->fetchmode;
-        if ($this->backend == 'mdb2') {
-            $restore_class = $db->getOption('fetch_class');
-        } else {
-            $restore_class = $db->fetchmode_object_class;
-        }
-
-        // swap modes
-        $fetchmode = $this->fetchmode;
-        $fetchmode_object_class = $this->fetchmode_object_class;
-        if (isset($query['fetchmode'])) {
-            $fetchmode = $query['fetchmode'];
-        }
-        if (isset($query['fetchmode_object_class'])) {
-            $fetchmode_object_class = $query['fetchmode_object_class'];
-        }
-        $this->_swapModes($fetchmode, $fetchmode_object_class);
-
-        // make sure params is an array
-        if (!is_null($params)) {
-            $params = (array) $params;
-        }
-
-        // get the result
-        if ($this->backend == 'mdb2') {
-            $result = $db->extended->$method($sql, null, $params);
-        } else {
-            switch ($method) {
-
-                case 'getCol':
-                    $result = $db->$method($sql, 0, $params);
-                    break;
-
-                case 'getAssoc':
-                    $result = $db->$method($sql, false, $params);
-                    break;
-
-                default:
-                    $result = $db->$method($sql, $params);
-                    break;
-
-            }
-        }
-
-        // restore old fetch_mode and fetch_object_class back
-        $this->_swapModes($restore_mode, $restore_class);
-
-        return $result;
-    }
-
-
-    /**
-     * Selects rows as a DB_Result/MDB2_Result_* object.
-     *
-     * @param string $query  The name of the SQL SELECT to use from the
-     *                       $this->sql property array.
-     * @param string $filter SQL snippet to AND to the default WHERE clause
-     * @param string $order  SQL snippet to override default ORDER BY clause
-     * @param int    $start  The record number from which to start result set
-     * @param int    $count  The number of records to list in result set.
-     * @param array $params  Parameters for placeholder substitutions, if any.
-     * @return object DB_Result/MDB2_Result_* object on success
-     *                (PEAR_Error on failure)
-     * @see DB_Table::_swapModes()
-     * @access public
-     */
-    function selectResult($query, $filter = null, $order = null,
-                   $start = null, $count = null, $params = array())
-    {
-        // Is $query a DB_Table query array or a key of $this->sql ?
-        if (!is_array($query)) {
-            if (is_string($query)) {
-                if (isset($this->sql[$query])) {
-                    $query = $this->sql[$query];
-                } else {
-                    return DB_Table_Database::throwError(
-                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
-                              $query);
-                }
-            } else {
-                return DB_Table_Database::throwError(
-                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
-            }
-        }
-       
-        // build the base command
-        $sql = $this->buildSQL($query, $filter, $order, $start, $count);
-        if (PEAR::isError($sql)) {
-            return $sql;
-        }
-
-        // DB_Table assumes you are using a shared PEAR DB/MDB2 object.
-        // Record fetchmode settings, to be restored afterwards.
-        $db =& $this->db;
-        $restore_mode = $db->fetchmode;
-        if ($this->backend == 'mdb2') {
-            $restore_class = $db->getOption('fetch_class');
-        } else {
-            $restore_class = $db->fetchmode_object_class;
-        }
-
-        // swap modes
-        $fetchmode = $this->fetchmode;
-        $fetchmode_object_class = $this->fetchmode_object_class;
-        if (isset($query['fetchmode'])) {
-            $fetchmode = $query['fetchmode'];
-        }
-        if (isset($query['fetchmode_object_class'])) {
-            $fetchmode_object_class = $query['fetchmode_object_class'];
-        }
-        $this->_swapModes($fetchmode, $fetchmode_object_class);
-
-        // make sure params is an array
-        if (!is_null($params)) {
-            $params = (array) $params;
-        }
-
-        // get the result
-        if ($this->backend == 'mdb2') {
-            $stmt =& $db->prepare($sql);
-            if (PEAR::isError($stmt)) {
-                return $stmt;
-            }
-            $result =& $stmt->execute($params);
-        } else {
-            $result =& $db->query($sql, $params);
-        }
-
-        // swap modes back
-        $this->_swapModes($restore_mode, $restore_class);
-
-        // return the result
-        return $result;
-    }
-
-
-    /**
-     * Counts the number of rows which will be returned by a query.
-     *
-     * This function works identically to {@link select()}, but it
-     * returns the number of rows returned by a query instead of the
-     * query results themselves.
-     *
-     * @author Ian Eure <ian@php.net>
-     * @param string $query  The name of the SQL SELECT to use from the
-     *                       $this->sql property array.
-     * @param string $filter Ad-hoc SQL snippet to AND with the default
-     *                       SELECT WHERE clause.
-     * @param string $order  Ad-hoc SQL snippet to override the default
-     *                       SELECT ORDER BY clause.
-     * @param int    $start  Row number from which to start listing in result
-     * @param int    $count  Number of rows to list in result set
-     * @param array  $params Parameters to use in placeholder substitutions
-     *                       (if any).
-     * @return int   Number of records from the table (or PEAR_Error on failure)
-     *
-     * @see DB_Table::select()
-     * @access public
-     */
-    function selectCount($query, $filter = null, $order = null,
-                       $start = null, $count = null, $params = array())
-    {
-
-        // Is $query a query array or a key of $this->sql ?
-        if (is_array($query)) {
-            $sql_key = null;
-            $count_query = $query;
-        } else {
-            if (is_string($query)) {
-                if (isset($this->sql[$query])) {
-                    $sql_key = $query;
-                    $count_query = $this->sql[$query];
-                } else {
-                    return DB_Table_Database::throwError(
-                              DB_TABLE_DATABASE_ERR_SQL_UNDEF, 
-                              $query);
-                }
-            } else {
-                return DB_Table_Database::throwError(
-                          DB_TABLE_DATABASE_ERR_SQL_NOT_STRING);
-            }
-        }
-
-        // If the query is a stored query in $this->sql, then create a corresponding
-        // key for the count query, or check if the count-query already exists
-        $ready = false;
-        if ($sql_key) {
-            // Create an sql key name for this count-query
-            $count_key = '__count_' . $sql_key;
-            // Check if a this count query alread exists in $this->sql
-            if (isset($this->sql[$count_key])) {
-                $ready = true;
-            }
-        }
-
-        // If a count-query does not already exist, create $count_query query array
-        if ($ready) {
-
-            $count_query = $this->sql[$count_key];
-
-        } else {
-
-            // Is a count-field set for the query?
-            if (!isset($count_query['count']) || 
-                trim($count_query['count']) == '') {
-                $count_query['count'] = '*';
-            }
-
-            // Replace the SELECT fields with a COUNT() command
-            $count_query['select'] = "COUNT({$count_query['count']})";
-
-            // Replace the 'get' key so we only get one result item
-            $count_query['get'] = 'one';
-
-            // Create a new count-query in $this->sql
-            if ($sql_key) {
-                $this->sql[$count_key] = $count_query;
-            }
-
-        }
-
-        // Retrieve the count results
-        return $this->select($count_query, $filter, $order,
-                             $start, $count, $params);
-
     }
 
     /**
@@ -3053,7 +2571,7 @@ class DB_Table_Database
 
         if (is_null($tables)) {
             if (is_null($cols)) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_NO_COL_NO_TBL);
             }
             $tables = array();
@@ -3074,7 +2592,7 @@ class DB_Table_Database
                 $table  = $col_array[0];
                 $column = $col_array[1];
                 if (is_array($table)) {
-                    return DB_Table_Database::throwError(
+                    return $this->throwError(
                            DB_TABLE_DATABASE_ERR_COL_NOT_UNIQUE, $col);
                 }
                 $cols[$key] = "$table.$column";
@@ -3120,7 +2638,7 @@ class DB_Table_Database
                         foreach ($list as $table2 => $def) {
                             if (in_array($table2, $join_tables)) {
                                 if ($joined) {
-                                    return DB_Table_Database::throwError(
+                                    return $this->throwError(
                                            DB_TABLE_DATABASE_ERR_AMBIG_JOIN,
                                            $table1);
                                 }
@@ -3147,7 +2665,7 @@ class DB_Table_Database
                         foreach ($list as $table2) {
                             if (in_array($table2, $join_tables)) {
                                 if ($joined) {
-                                    return DB_Table_Database::throwError(
+                                    return $this->throwError(
                                               DB_TABLE_DATABASE_ERR_AMBIG_JOIN,
                                               $table1);
                                 }
@@ -3177,12 +2695,12 @@ class DB_Table_Database
                             if (in_array($table2, $join_tables)) {
                                 $n_link = count($links);
                                 if ($n_link > 1) {
-                                    return DB_Table_Database::throwError(
+                                    return $this->throwError(
                                       DB_TABLE_DATABASE_ERR_AMBIG_JOIN,
                                       $table1);
                                 }
                                 if ($joined and $n_link > 0) {
-                                    return DB_Table_Database::throwError(
+                                    return $this->throwError(
                                       DB_TABLE_DATABASE_ERR_AMBIG_JOIN,
                                       $table1);
                                 }
@@ -3239,7 +2757,7 @@ class DB_Table_Database
                         if ($direct) {
                             $direct = false;
                         } else {
-                            return DB_Table_Database::throwError(
+                            return $this->throwError(
                                    DB_TABLE_DATABASE_ERR_FAIL_JOIN,$table1);
                         }
                     }
@@ -3277,51 +2795,6 @@ class DB_Table_Database
         return $query;
     }
 
-    /**
-     * Changes the $this->db PEAR DB/MDB2 object fetchmode and
-     * fetchmode_object_class.
-     *
-     * @param string $new_mode A DB/MDB2_FETCHMODE_* constant.  If null,
-     * defaults to whatever the DB/MDB2 object is currently using.
-     *
-     * @param string $new_class The object class to use for results when
-     * the $db object is in DB/MDB2_FETCHMODE_OBJECT fetch mode.  If null,
-     * defaults to whatever the the DB/MDB2 object is currently using.
-     *
-     * @return void
-     * @access private
-     */
-    function _swapModes($new_mode, $new_class)
-    {
-        // get the old (current) mode and class
-        $db =& $this->db;
-        $old_mode = $db->fetchmode;
-        if ($this->backend == 'mdb2') {
-            $old_class = $db->getOption('fetch_class');
-        } else {
-            $old_class = $db->fetchmode_object_class;
-        }
-
-        // don't need to swap anything if the new modes are both
-        // null or if the old and new modes already match.
-        if ((is_null($new_mode) && is_null($new_class)) ||
-            ($old_mode == $new_mode && $old_class == $new_class)) {
-            return;
-        }
-
-        // set the default new mode
-        if (is_null($new_mode)) {
-            $new_mode = $old_mode;
-        }
-
-        // set the default new class
-        if (is_null($new_class)) {
-            $new_class = $old_class;
-        }
-
-        // swap modes
-        $db->setFetchMode($new_mode, $new_class);
-    }
 
     /**
      * Returns WHERE clause equating values of $data array to database column 
@@ -3343,9 +2816,9 @@ class DB_Table_Database
      * be inserted into or used to update one row of a database table, in which
      * array keys are column names. When present, $data_key contains either
      * the name of a single array key of interest, or a numerical array of such
-     * keys. These are usually the names of the columns of a foreign key in that
-     * table. When, $data_key is null or absent, it is taken to be equal to an
-     * array containing all of the keys of $data. When present, $filt_key
+     * keys. These are usually the names of the columns of a foreign key in 
+     * that table. When, $data_key is null or absent, it is taken to be equal 
+     * to an array containing all of the keys of $data. When present, $filt_key
      * contains either a string or a numerical array of strings that are 
      * aliases for the keys in $data_key.  These are usually the names of the
      * corresponding columns in the referenced table. When $filt_key is null 
@@ -3417,7 +2890,7 @@ class DB_Table_Database
     {
         // Check $match type value
         if (!in_array($match, array('simple', 'partial', 'full'))) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                             DB_TABLE_DATABASE_ERR_MATCH_TYPE);
         }
 
@@ -3430,7 +2903,7 @@ class DB_Table_Database
             foreach ($data as $key => $value) {
                 if (!is_null($value)) {
                     if ($match == 'full' && isset($found_null)) {
-                        return DB_Table_Database::throwError(
+                        return $this->throwError(
                                   DB_TABLE_DATABASE_ERR_FULL_KEY);
                     }
                     $value = $this->quote($value);
@@ -3458,7 +2931,7 @@ class DB_Table_Database
         // General case: $data_key and/or $filt_key not null
         if (is_string($data_key)) {
             if (!is_string($filt_key)) {
-                 return DB_Table_Database::throwError(
+                 return $this->throwError(
                             DB_TABLE_DATABASE_ERR_FILT_KEY);
             }
             if (array_key_exists($data_key, $data)) {
@@ -3474,7 +2947,7 @@ class DB_Table_Database
             }
         } elseif (is_array($data_key)) {
             if (!is_array($filt_key)) {
-                return DB_Table_Database::throwError(
+                return $this->throwError(
                           DB_TABLE_DATABASE_ERR_FILT_KEY);
             }
             $filter = array();
@@ -3485,7 +2958,7 @@ class DB_Table_Database
                     $value = $data[$data_col];
                     if (!is_null($value)) {
                         if ($match == 'full' && isset($found_null)) {
-                            return DB_Table_Database::throwError(
+                            return $this->throwError(
                                       DB_TABLE_DATABASE_ERR_FULL_KEY);
                         }
                         $value = $this->quote($value);
@@ -3504,39 +2977,39 @@ class DB_Table_Database
             return implode(' AND ', $filter);
         } else {
             // Invalid data key
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                       DB_TABLE_DATABASE_ERR_DATA_KEY);
         }
     }
 
-    /**
-    * Returns SQL literal string representation of a php value
-    *
-    * If $value is: 
-    *    - a string, return the string enquoted and escaped
-    *    - a number, return cast of number to string, without quotes
-    *    - a boolean, return '1' for true and '0' for false
-    *    - null, return the string 'NULL'
-    * 
-    * @param  mixed  $value 
-    * @return string representation of value as an SQL literal
-    * 
-    * @see DB_Common::quoteSmart()
-    * @see MDB2::quote()
-    * @access public
-    */
-    function quote($value)
-    {
-        if (is_bool($value)) {
-           return $value ? '1' : '0';
-        } 
-        if ($this->backend == 'mdb2') {
-            $value = $this->db->quote($value);
-        } else {
-            $value = $this->db->quoteSmart($value);
-        }
-        return (string) $value;
-    }
+#    /**
+#    * Returns SQL literal string representation of a php value
+#    *
+#    * If $value is: 
+#    *    - a string, return the string enquoted and escaped
+#    *    - a number, return cast of number to string, without quotes
+#    *    - a boolean, return '1' for true and '0' for false
+#    *    - null, return the string 'NULL'
+#    * 
+#    * @param  mixed  $value 
+#    * @return string representation of value as an SQL literal
+#    * 
+#    * @see DB_Common::quoteSmart()
+#    * @see MDB2::quote()
+#    * @access public
+#    */
+#    function quote($value)
+#    {
+#        if (is_bool($value)) {
+#           return $value ? '1' : '0';
+#        } 
+#        if ($this->backend == 'mdb2') {
+#            $value = $this->db->quote($value);
+#        } else {
+#            $value = $this->db->quoteSmart($value);
+#        }
+#        return (string) $value;
+#    }
     
     /**
      * Serializes all table references and sets $db = null, $backend = null
@@ -3632,14 +3105,14 @@ class DB_Table_Database
         // Check PHP version. Throw error if not >= PHP 5.0.0
         $version = phpversion();
         if (version_compare($version, '5.0.0', "<")) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                    DB_TABLE_DATABASE_ERR_PHP_VERSION,
                    $version);
         }
 
         $xml = simplexml_load_string($xml_string);
         if ($xml == false) {
-            return DB_Table_Database::throwError(
+            return $this->throwError(
                    DB_TABLE_DATABASE_ERR_XML_PARSE);
         }
     
@@ -3680,7 +3153,7 @@ class DB_Table_Database
                     if (is_null($table_obj->auto_inc_col)) {
                         $table_obj->auto_inc_col = $col_name;
                     } else {
-                        return DB_Table_Database::throwError(
+                        return $this->throwError(
                                   DB_TABLE_DATABASE_ERR_XML_MULT_AUTO_INC);
                     }
                 }
