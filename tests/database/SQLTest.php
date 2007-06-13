@@ -92,78 +92,6 @@ class SQLTest extends DatabaseTest {
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
-        $data_key = 'col3';
-        $result = $this->db->buildFilter($data, $data_key);
-        $expect = "col3 = 'anyold string'";
-        if ($this->verbose > 0) {
-            print "\n" . $result;
-        }
-        $this->assertEquals($result, $expect);
-    }
-
-    function testBuildFilter3() 
-    {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter3";
-        }
-        $data['col1'] = 1;
-        $data['col2'] = false;
-        $data['col3'] = 'anyold string';
-        $data_key = array('col1', 'col3');
-        $result = $this->db->buildFilter($data, $data_key);
-        $expect = "col1 = 1 AND col3 = 'anyold string'";
-        if ($this->verbose > 0) {
-            print "\n" . $result;
-        }
-        $this->assertEquals($result, $expect);
-    }
-
-    function testBuildFilter4() 
-    {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter4";
-        }
-        $data['col1'] = 1;
-        $data['col2'] = false;
-        $data['col3'] = 'anyold string';
-        $data['col4'] = null;
-        $data_key = 'col3';
-        $filt_key = 'COL3';
-        $result = $this->db->buildFilter($data, $data_key, $filt_key);
-        $expect = "COL3 = 'anyold string'";
-        if ($this->verbose > 0) {
-            print "\n" . $result;
-        }
-        $this->assertEquals($result, $expect);
-    }
-
-    function testBuildFilter5() 
-    {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter5";
-        }
-        $data['col1'] = 1;
-        $data['col2'] = false;
-        $data['col3'] = 'anyold string';
-        $data['col4'] = null;
-        $data_key = array('col1', 'col3');
-        $filt_key = array('COL1', 'COL3');
-        $result = $this->db->buildFilter($data, $data_key, $filt_key);
-        $expect = "COL1 = 1 AND COL3 = 'anyold string'";
-        if ($this->verbose > 0) {
-            print "\n" . $result;
-        }
-        $this->assertEquals($result, $expect);
-    }
-
-    function testBuildFilter6() 
-    {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter6";
-        }
-        $data['col1'] = 1;
-        $data['col2'] = false;
-        $data['col3'] = 'anyold string';
         $data['col4'] = null;
         $result = $this->db->buildFilter($data);
         $expect = '';
@@ -173,16 +101,88 @@ class SQLTest extends DatabaseTest {
         $this->assertEquals($result, $expect);
     }
 
-    function testBuildFilter7() 
+    function testBuildFKeyFilter1() 
     {
         if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter7";
+            print "\n" . ">testBuildFKeyFilter1";
+        }
+        $data['col1'] = 1;
+        $data['col2'] = false;
+        $data['col3'] = 'anyold string';
+        $data_key = 'col3';
+        $result = $this->db->_buildFKeyFilter($data, $data_key);
+        $expect = "col3 = 'anyold string'";
+        if ($this->verbose > 0) {
+            print "\n" . $result;
+        }
+        $this->assertEquals($result, $expect);
+    }
+
+    function testBuildFKeyFilter2() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testBuildFKeyFilter3";
+        }
+        $data['col1'] = 1;
+        $data['col2'] = false;
+        $data['col3'] = 'anyold string';
+        $data_key = array('col1', 'col3');
+        $result = $this->db->_buildFKeyFilter($data, $data_key);
+        $expect = "col1 = 1 AND col3 = 'anyold string'";
+        if ($this->verbose > 0) {
+            print "\n" . $result;
+        }
+        $this->assertEquals($result, $expect);
+    }
+
+    function testBuildFKeyFilter4() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testBuildFKeyFilter4";
         }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
         $data['col4'] = null;
-        $result = $this->db->buildFilter($data, null, null, 'partial');
+        $data_key = 'col3';
+        $filt_key = 'COL3';
+        $result = $this->db->_buildFKeyFilter($data, $data_key, $filt_key);
+        $expect = "COL3 = 'anyold string'";
+        if ($this->verbose > 0) {
+            print "\n" . $result;
+        }
+        $this->assertEquals($result, $expect);
+    }
+
+    function testBuildFKeyFilter5() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testBuildFKeyFilter5";
+        }
+        $data['col1'] = 1;
+        $data['col2'] = false;
+        $data['col3'] = 'anyold string';
+        $data['col4'] = null;
+        $data_key = array('col1', 'col3');
+        $filt_key = array('COL1', 'COL3');
+        $result = $this->db->_buildFKeyFilter($data, $data_key, $filt_key);
+        $expect = "COL1 = 1 AND COL3 = 'anyold string'";
+        if ($this->verbose > 0) {
+            print "\n" . $result;
+        }
+        $this->assertEquals($result, $expect);
+    }
+
+    function testBuildFKeyFilter7() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testBuildFKeyFilter7";
+        }
+        $data['col1'] = 1;
+        $data['col2'] = false;
+        $data['col3'] = 'anyold string';
+        $data['col4'] = null;
+        $result = $this->db->_buildFKeyFilter($data, null, null, 'partial');
         $expect = "col1 = 1 AND col2 = 0 AND col3 = 'anyold string'";
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -191,16 +191,16 @@ class SQLTest extends DatabaseTest {
     }
 
     /*
-    function testBuildFilter8() 
+    function testBuildFKeyFilter8() 
     {
         if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter8";
+            print "\n" . ">testBuildFKeyFilter8";
         }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
         $data['col4'] = null;
-        $result = $this->db->buildFilter($data, null, null, 'full');
+        $result = $this->db->_buildFKeyFilter($data, null, null, 'full');
         if (PEAR::isError($result)) {
             $this->assertTrue(true);
         } else {
@@ -212,17 +212,17 @@ class SQLTest extends DatabaseTest {
     }
     */
 
-    function testBuildFilter9() 
+    function testBuildFKeyFilter9() 
     {
         if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter9";
+            print "\n" . ">testBuildFKeyFilter9";
         }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
         $data['col4'] = null;
         $data_key = 'col4';
-        $result = $this->db->buildFilter($data, $data_key);
+        $result = $this->db->_buildFKeyFilter($data, $data_key);
         $expect = '';
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -230,17 +230,17 @@ class SQLTest extends DatabaseTest {
         $this->assertEquals($result, $expect);
     }
 
-    function testBuildFilter10() 
+    function testBuildFKeyFilter10() 
     {
         if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter10";
+            print "\n" . ">testBuildFKeyFilter10";
         }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
         $data['col4'] = null;
         $data_key = array('col2', 'col4');
-        $result = $this->db->buildFilter($data, $data_key);
+        $result = $this->db->_buildFKeyFilter($data, $data_key);
         $expect = '';
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -248,10 +248,10 @@ class SQLTest extends DatabaseTest {
         $this->assertEquals($result, $expect);
     }
 
-    function testBuildFilter11() 
+    function testBuildFKeyFilter11() 
     {
         if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter11";
+            print "\n" . ">testBuildFKeyFilter11";
         }
         $data['col1'] = 1;
         $data['col2'] = false;
@@ -259,7 +259,7 @@ class SQLTest extends DatabaseTest {
         $data['col4'] = null;
         $data_key = array('col1', 'col4');
         $filt_key = array('COL1', 'COL4');
-        $result = $this->db->buildFilter($data, $data_key, $filt_key);
+        $result = $this->db->_buildFKeyFilter($data, $data_key, $filt_key);
         $expect = '';
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -302,6 +302,36 @@ class SQLTest extends DatabaseTest {
             print "\n" . $result;
         }
         $this->assertTrue(true);
+    }
+
+    function testBuildSQL3() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testBuildSQL3";
+        }
+        $db =& $this->db;
+        $result = $db->buildSQL(1);
+        if (PEAR::isError($result)){
+           print "\n" . $result->getMessage();
+           $this->assertTrue(true);
+        } else {
+           $this->assertTrue(false);
+        }
+    }
+
+    function testBuildSQL4() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testBuildSQL4";
+        }
+        $db =& $this->db;
+        $result = $db->buildSQL('not_a_key');
+        if (PEAR::isError($result)){
+           print "\n" . $result->getMessage();
+           $this->assertTrue(true);
+        } else {
+           $this->assertTrue(false);
+        }
     }
 
 }
