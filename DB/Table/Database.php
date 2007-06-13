@@ -2008,7 +2008,7 @@ class DB_Table_Database extends DB_Table_Base
 
                 // Construct select where clause for referenced rows,
                 // $filter = '' if $data contains no foreign key columns,
-                $filter = $this->buildFilter($data, $fkey, $rkey);
+                $filter = $this->_buildFKeyFilter($data, $fkey, $rkey);
                 if (PEAR::isError($filter)) {
                     return $filter;
                 }
@@ -2259,7 +2259,8 @@ class DB_Table_Database extends DB_Table_Base
                         }
 
                         // Construct filter for rows that reference $update_row
-                        $filter = $this->buildFilter($update_row, $rkey, $fkey);
+                        $filter = $this->_buildFKeyFilter($update_row, 
+                                                          $rkey, $fkey);
     
                         // Apply action to foreign/referencing rows
                         if ($action == 'restrict') {
@@ -2435,7 +2436,8 @@ class DB_Table_Database extends DB_Table_Base
                     }
 
                     // Construct filter for referencing rows in $ftable_name
-                    $filter = $this->buildFilter($delete_row, $rkey, $fkey);
+                    $filter = $this->_buildFKeyFilter($delete_row, 
+                                                      $rkey, $fkey);
 
                     // Apply action for one deleted row
                     if ($action == 'restrict') {
@@ -2883,10 +2885,10 @@ class DB_Table_Database extends DB_Table_Base
      * @return string SQL expression equating values in $data, for which keys
      *                also appear in $data_key, to values of corresponding 
      *                database columns named in $filt_key.
-     * @access public
+     * @access private
      */
-    function buildFilter($data, $data_key = null, $filt_key = null, 
-                         $match = 'simple')
+    function _buildFKeyFilter($data, $data_key = null, $filt_key = null, 
+                              $match = 'simple')
     {
         // Check $match type value
         if (!in_array($match, array('simple', 'partial', 'full'))) {
@@ -3078,12 +3080,13 @@ class DB_Table_Database extends DB_Table_Base
      * @access public
      */
     function toXML($indent = '') {
+        require_once 'DB/Table/XML.php';
         $s = array();
-        $s[] = DB_Table::_openXMLtag('database', $indent);
+        $s[] = DB_Table_XML::openTag('database', $indent);
         foreach ($this->_table as $name => $table_obj) {
             $s[] = $table_obj->toXML($indent);
         }
-        $s[] = DB_Table::_closeXMLtag('database', $indent);
+        $s[] = DB_Table_XML::closeTag('database', $indent);
         return implode("\n", $s);
     }
 
