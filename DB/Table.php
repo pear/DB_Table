@@ -463,7 +463,6 @@ foreach ($GLOBALS['_DB_TABLE']['default_error'] as $code => $message) {
 }
 
 /**
- * 
  * DB_Table is a database API and data type SQL abstraction class.
  * 
  * DB_Table provides database API abstraction, data type abstraction,
@@ -537,12 +536,9 @@ class DB_Table extends DB_Table_Base
      * Auto-increment column $auto_inc_col upon insertion only if $_auto_inc is
      * true and the value of that column is null in the data to be inserted.
      *
-     * @access private
-     * 
      * @var bool
-     * 
+     * @access private
      */
-
     var $_auto_inc = true;
 
 
@@ -690,19 +686,13 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     * 
      * Is a particular RDBMS supported by DB_Table?
      * 
      * @static
-     * 
-     * @access public
-     * 
      * @param string $phptype The RDBMS type for PHP.
-     * 
      * @param string $dbsyntax The chosen database syntax.
-     * 
-     * @return bool True if supported, false if not.
-     * 
+     * @return bool  True if supported, false if not.
+     * @access public
      */
     
     function supported($phptype, $dbsyntax = '')
@@ -717,22 +707,17 @@ class DB_Table extends DB_Table_Base
 
 
     /**
-     * 
      * Is a creation mode supported for a RDBMS by DB_Table?
      * 
-     * @access public
-     * 
      * @param string $mode The chosen creation mode.
-     * 
      * @param string $phptype The RDBMS type for PHP.
-     * 
-     * @return bool True if supported, false if not (PEAR_Error on failure)
+     * @return bool  True if supported, false if not (PEAR_Error on failure)
      *
      * @throws PEAR_Error if
      *     Unknown creation mode is specified (DB_TABLE_ERR_CREATE_FLAG)
      * 
+     * @access public
      */
-    
     function modeSupported($mode, $phptype)
     {
         // check phptype for validity
@@ -769,21 +754,16 @@ class DB_Table extends DB_Table_Base
 
 
     /**
-     * 
      * Overwrite one or more error messages, e.g. to internationalize them.
-     * 
-     * @access public
      * 
      * @param mixed $code If string, the error message with code $code will
      * be overwritten by $message. If array, the error messages with code
      * of each array key will be overwritten by the key's value.
      * 
      * @param string $message Only used if $key is not an array.
-     *
      * @return void
-     * 
+     * @access public
      */
-
     function setErrorMessage($code, $message = null) {
         if (is_array($code)) {
             foreach ($code as $single_code => $single_message) {
@@ -799,18 +779,15 @@ class DB_Table extends DB_Table_Base
      * 
      * Returns all or part of the $this->col property array.
      * 
-     * @access public
-     * 
      * @param mixed $col If null, returns the $this->col property array
      * as it is.  If string, returns that column name from the $this->col
      * array. If an array, returns those columns named as the array
      * values from the $this->col array as an array.
      *
      * @return mixed All or part of the $this->col property array, or
-     * boolean false if no matching column names are found.
-     * 
+     *               boolean false if no matching column names are found.
+     * @access public
      */
-    
     function getColumns($col = null)
     {
         // by default, return all column definitions
@@ -849,19 +826,16 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     * 
      * Returns all or part of the $this->idx property array.
      * 
-     * @access public
-     * 
      * @param mixed $idx Index name (key in $this->idx), or array of
-     *      index name strings.
+     *                   index name strings.
      * 
      * @return mixed All or part of the $this->idx property array, 
      *               or boolean false if $idx is not null but invalid
      * 
+     * @access public
      */
-    
     function getIndexes($idx = null)
     {
         // by default, return all index definitions
@@ -900,7 +874,6 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     * 
      * Connect or disconnect a DB_Table_Database instance to this table
      * instance.
      * 
@@ -910,7 +883,7 @@ class DB_Table extends DB_Table_Base
      * to add a table to a new DB_Table_Database.
      * 
      * @param object &$database DB_Table_Database instance that this table
-     *               belongs to (or null to indicate disconnection from instance).
+     *               belongs to (or null to disconnect from instance).
      * 
      * @return void
      * @access public
@@ -1039,7 +1012,6 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     * 
      * Turns on or off auto-incrementing of $auto_inc_col column (if any)
      * 
      * For auto-incrementing to work, an $auto_inc_col column must be declared,
@@ -1047,14 +1019,10 @@ class DB_Table extends DB_Table_Base
      * the $auto_inc_col column must be not set or null in the $data passed to
      * the insert method. 
      * 
-     * @access public
-     * 
-     * @param bool $flag True to turn on auto-increment, false to turn off.
-     * 
+     * @param  bool $flag True to turn on auto-increment, false to turn off.
      * @return void
-     * 
+     * @access public
      */
-    
     function setAutoInc($flag = true)
     {
         if ($flag) {
@@ -1066,21 +1034,16 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     * 
      * Turns on (or off) automatic validation of inserted data.
      * 
      * Enables (if $flag is true) or disables (if $flag is false) automatic 
      * validation of data types prior to actual insertion into the database 
      * by the DB_Table::insert() method.
      *
-     * @access public
-     * 
-     * @param bool $flag True to turn on auto-validation, false to turn it off.
-     * 
+     * @param  bool $flag True to turn on auto-validation, false to turn off.
      * @return void
-     * 
+     * @access public
      */
-    
     function autoValidInsert($flag = true)
     {
         if ($flag) {
@@ -1092,10 +1055,7 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     *
      * Validates an array for insertion into the table.
-     * 
-     * @access public
      * 
      * @param array $data An associative array of key-value pairs where
      * the key is the column name and the value is the column value.  This
@@ -1109,10 +1069,10 @@ class DB_Table extends DB_Table_Base
      *     - Missing required column value    (DB_TABLE_ERR_INS_COL_NOMAP)
      *     - Column value doesn't match type  (DB_TABLE_ERR_INS_DATA_INVALID)
      *
-     * @see insert()
+     * @access public
      * 
+     * @see insert()
      */
-        
     function validInsert(&$data)
     {
         // loop through the data, and disallow insertion of unmapped
@@ -1169,8 +1129,6 @@ class DB_Table extends DB_Table_Base
      * If auto-validation is enabled (if $this->_valid_insert), update() 
      * validates column types with validUpdate() before insertion.
      *
-     * @access public
-     * 
      * @param array $data An associative array of key-value pairs where the
      * key is the column name and the value is the column value. These are
      * the columns that will be updated with new values.
@@ -1184,14 +1142,12 @@ class DB_Table extends DB_Table_Base
      *     - Data fails type validation (bubbles error returned by validUpdate)
      *     - Error thrown by DB/MDB2::autoexecute()
      *
+     * @access public
+     * 
      * @see validUpdate()
-     *
      * @see DB::autoExecute()
-     * 
      * @see MDB2::autoExecute()
-     * 
      */
-    
     function update($data, $where)
     {
         // forcibly recast the data elements to their proper types?
@@ -1242,20 +1198,16 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     * 
      * Turns on (or off) automatic validation of updated data.
      * 
      * Enables (if $flag is true) or disables (if $flag is false) automatic 
      * validation of data types prior to updating rows in the database by
      * the {@link update()} method.
-     * @access public
-     * 
-     * @param bool $flag True to turn on auto-validation, false to turn it off.
-     * 
+     *
+     * @param  bool $flag True to turn on auto-validation, false to turn off.
      * @return void
-     * 
+     * @access public
      */
-    
     function autoValidUpdate($flag = true)
     {
         if ($flag) {
@@ -1267,28 +1219,24 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     *
      * Validates an array for updating the table.
-     * 
-     * @access public
      * 
      * @param array $data An associative array of key-value pairs where
      * the key is the column name and the value is the column value.  This
      * is the data that will be inserted into the table.  Data is checked
      * against the column data type for validity.
      * 
-     * @return mixed Boolean true on success, a PEAR_Error object on
-     * failure.
+     * @return mixed Boolean true on success (PEAR_Error object on failure)
      *
      * @throws PEAR_Error if
      *     - Invalid column name key in $data (DB_TABLE_ERR_UPD_COL_NOMAP)
      *     - Missing required column value    (DB_TABLE_ERR_UPD_COL_NOMAP)
      *     - Column value doesn't match type  (DB_TABLE_ERR_UPD_DATA_INVALID)
      *
-     * @see update()
+     * @access public
      * 
+     * @see update()
      */
-        
     function validUpdate(&$data)
     {
         // loop through each data element, and check the
@@ -1331,7 +1279,6 @@ class DB_Table extends DB_Table_Base
     
     
     /**
-     *
      * Deletes table rows matching a custom WHERE clause.
      * 
      * Constructs and submits and SQL DELETE command with the specified WHERE 
@@ -1341,8 +1288,6 @@ class DB_Table extends DB_Table_Base
      * ON DELETE actions declared in that instance before actual insertion, 
      * if emulation of ON DELETE actions is enabled in that instance.
      *
-     * @access public
-     * 
      * @param string $where Logical condition in the WHERE clause of the 
      *                      delete command.
      *
@@ -1351,12 +1296,11 @@ class DB_Table extends DB_Table_Base
      * @throws PEAR_Error if
      *     DB::query() or MDB2::exec() returns error (bubbles up)
      *
+     * @access public
+     * 
      * @see DB::query()
-     * 
      * @see MDB2::exec()
-     * 
      */
-    
     function delete($where)
     {
         // Does a parent DB_Table_Database object exist?
@@ -1388,21 +1332,18 @@ class DB_Table extends DB_Table_Base
      * Generates a sequence value by calling the DB or MDB2::nextID() method. The
      * sequence name defaults to the table name, or may be specified explicitly.
      * 
-     * @access public
-     * 
-     * @param string $seq_name The sequence name; defaults to table_id.
+     * @param  string  $seq_name The sequence name; defaults to table_id.
      * 
      * @return integer The next value in the sequence (PEAR_Error on failure)
      *
      * @throws PEAR_Error if
      *     Sequence name too long (>26 char + _seq) (DB_TABLE_ERR_SEQ_STRLEN)
      *
-     * @see DB::nextID()
+     * @access public
      * 
+     * @see DB::nextID()
      * @see MDB2::nextID()
-     *
      */
-    
     function nextID($seq_name = null)
     {
         if (is_null($seq_name)) {
@@ -1433,8 +1374,6 @@ class DB_Table extends DB_Table_Base
      * returns the value of one of these functions. Helps makes user input 
      * safe against SQL injection attack.
      * 
-     * @access public
-     * 
      * @param mixed $val The value to be quoted
      *
      * @return string The value with quotes escaped, inside single quotes if 
@@ -1442,6 +1381,8 @@ class DB_Table extends DB_Table_Base
      *
      * @throws PEAR_Error if
      *     DB_Common::quoteSmart() or MDB2::quote() returns Error (bubbled up)
+     * 
+     * @access public
      * 
      * @see DB_Common::quoteSmart()
      * @see MDB2::quote()
@@ -1518,7 +1459,9 @@ class DB_Table extends DB_Table_Base
      * value to the string 'Array'.  Is this bad?
      * 
      * @param array   &$data The data array to re-cast.
+     * 
      * @return void
+     * 
      * @access public
      */
     function recast(&$data)
@@ -2235,10 +2178,11 @@ class DB_Table extends DB_Table_Base
      * @access public
      */
     function toXML($indent = '') {
+        require_once 'DB/Table/XML.php';
         $s = array();
-        $s[] = DB_Table::_openXMLtag('table', $indent);
-        $s[] = DB_Table::_lineXMLelement('name', $this->table, $indent);
-        $s[] = DB_Table::_openXMLtag('declaration', $indent);
+        $s[] = DB_Table_XML::openTag('table', $indent);
+        $s[] = DB_Table_XML::lineElement('name', $this->table, $indent);
+        $s[] = DB_Table_XML::openTag('declaration', $indent);
         // Column declarations
         foreach ($this->col as $name => $col) {
             $type     = (isset($col['type'])) ? $col['type'] : null;
@@ -2247,44 +2191,44 @@ class DB_Table extends DB_Table_Base
             $require  = (isset($col['require'])) ? $col['require'] : null;
             $default  = (isset($col['set default'])) ? $col['set default'] : null;
             $line = '   ' . $name . '  ' . $type;
-            $s[] = DB_Table::_openXMLtag('field', $indent);
-            $s[] = DB_Table::_lineXMLelement('name', $name, $indent);
-            $s[] = DB_Table::_lineXMLelement('type', $type, $indent);
+            $s[] = DB_Table_XML::openTag('field', $indent);
+            $s[] = DB_Table_XML::lineElement('name', $name, $indent);
+            $s[] = DB_Table_XML::lineElement('type', $type, $indent);
             if ($size) {
-                $s[] = DB_Table::_lineXMLelement('length', $size, $indent);
+                $s[] = DB_Table_XML::lineElement('length', $size, $indent);
             }
             if ($require) {
                 $require = (int) $require;
-                $s[] = DB_Table::_lineXMLelement('notnull', $require, $indent);
+                $s[] = DB_Table_XML::lineElement('notnull', $require, $indent);
             }
             if (!($default === null)) {
-               $s[] = DB_Table::_lineXMLelement('set default', $default, $indent);
+               $s[] = DB_Table_XML::lineElement('set default', $default, $indent);
             }
             if ($this->auto_inc_col == $name) {
-               $s[] = DB_Table::_lineXMLelement('autoinc', '1', $indent);
+               $s[] = DB_Table_XML::lineElement('autoinc', '1', $indent);
             }
-            $s[] = DB_Table::_closeXMLtag('field', $indent);
+            $s[] = DB_Table_XML::closeTag('field', $indent);
         }
         // Index declarations
         foreach ($this->idx as $name => $idx) {
-            $s[] = DB_Table::_openXMLtag('index', $indent);
+            $s[] = DB_Table_XML::openTag('index', $indent);
             $cols = $idx['cols'];
             $type = $idx['type'];
             if (is_string($name)) {
-                $s[] = DB_Table::_lineXMLelement('name', $name, $indent);
+                $s[] = DB_Table_XML::lineElement('name', $name, $indent);
             }
             if ($type == 'primary') {
-                $s[] = DB_Table::_lineXMLelement('primary', '1', $indent);
+                $s[] = DB_Table_XML::lineElement('primary', '1', $indent);
             } elseif ($type == 'unique') {
-                $s[] = DB_Table::_lineXMLelement('unique', '1', $indent);
+                $s[] = DB_Table_XML::lineElement('unique', '1', $indent);
             }
             if (is_string($cols)) {
                 $cols = array($cols);
             }
             foreach ($cols as $col) {
-                $s[] = DB_Table::_lineXMLelement('field', $col, $indent);
+                $s[] = DB_Table_XML::lineElement('field', $col, $indent);
             }
-            $s[] = DB_Table::_closeXMLtag('index', $indent);
+            $s[] = DB_Table_XML::closeTag('index', $indent);
         }
         // Foreign key references (if $this->_database is not null)
         if ($this->_database) {
@@ -2301,83 +2245,34 @@ class DB_Table extends DB_Table_Base
                     }
                     $on_delete = $def['on_delete']; // on-delete action
                     $on_update = $def['on_update']; // on-update action
-                    $s[] = DB_Table::_openXMLtag('foreign', $indent);
+                    $s[] = DB_Table_XML::openTag('foreign', $indent);
                     foreach ($fkey as $fcol) {
-                        $s[] = DB_Table::_lineXMLelement('field', $fcol, $indent);
+                        $s[] = DB_Table_XML::lineElement('field', $fcol, $indent);
                     }
-                    $s[] = DB_Table::_openXMLtag('references', $indent);
-                    $s[] = DB_Table::_lineXMLelement('table', $rtable, $indent);
+                    $s[] = DB_Table_XML::openTag('references', $indent);
+                    $s[] = DB_Table_XML::lineElement('table', $rtable, $indent);
                     if ($rkey) {
                         foreach ($rkey as $rcol) {
-                            $s[] = DB_Table::_lineXMLelement('field', $rcol,
+                            $s[] = DB_Table_XML::lineElement('field', $rcol,
                                                              $indent);
                         }
                     }
-                    $s[] = DB_Table::_closeXMLtag('references', $indent);
+                    $s[] = DB_Table_XML::closeTag('references', $indent);
                     if ($on_delete) {
-                        $s[] = DB_Table::_lineXMLelement('ondelete', $on_delete,
+                        $s[] = DB_Table_XML::lineElement('ondelete', $on_delete,
                                                          $indent);
                     }
                     if ($on_update) {
-                        $s[] = DB_Table::_lineXMLelement('onupdate', $on_update,
+                        $s[] = DB_Table_XML::lineElement('onupdate', $on_update,
                                                          $indent);
                     }
-                    $s[] = DB_Table::_closeXMLtag('foreign', $indent);
+                    $s[] = DB_Table_XML::closeTag('foreign', $indent);
                 }
             }
         }
-        $s[] = DB_Table::_closeXMLtag('declaration', $indent);
-        $s[] = DB_Table::_closeXMLtag('table', $indent);
+        $s[] = DB_Table_XML::closeTag('declaration', $indent);
+        $s[] = DB_Table_XML::closeTag('table', $indent);
         return implode("\n", $s);
-    }
-
-
-    /**
-     * Returns XML closing tag <tag>, increases $indent by 3 spaces
-     *
-     * @static
-     * @param string $tag    XML element tag name
-     * @param string $indent current indentation, string of spaces
-     * @return string XML opening tag
-     * @access private
-     */
-    function _openXMLtag($tag, &$indent)
-    {
-        $old_indent = $indent;
-        $indent = $indent . '   ';
-        return $old_indent . "<$tag>";
-    }
-
-
-    /**
-     * Returns XML closing tag </tag>, decreases $indent by 3 spaces
-     *
-     * @static
-     * @param string $tag    XML element tag name
-     * @param string $indent current indentation, string of spaces
-     * @return string XML closing tag
-     * @access private
-     */
-    function _closeXMLtag($tag, &$indent)
-    {
-        $indent = substr($indent, 0, -3);
-        return $indent . "</$tag>";
-    }
-
-
-    /**
-     * Returns string single line XML element <tag>text</tag>
-     *
-     * @static
-     * @param string $tag    XML element tag name
-     * @param string $text   element contents
-     * @param string $indent current indentation, string of spaces
-     * @return string single-line XML element
-     * @access private
-     */
-    function _lineXMLelement($tag, $text, $indent)
-    {
-        return $indent . "<$tag>$text</$tag>";
     }
 
 }
