@@ -44,15 +44,15 @@ class DB_Table_Base
      * The PEAR DB/MDB2 object that connects to the database.
      *
      * @var    object
-     * @access private
+     * @access public
      */
     var $db = null;
 
     /**
-     * The backend type, which may be 'db' or 'mdb2'
+     * The backend type, which must be 'db' or 'mdb2'
      *
      * @var    string
-     * @access private
+     * @access public
      */
     var $backend = null;
 
@@ -83,9 +83,20 @@ class DB_Table_Base
     var $sql = array();
 
     /**
-     * When calling select() and selectResult(), use this fetch mode (usually
-     * a DB/MDB2_FETCHMODE_* constant).  If null, uses whatever is set in the 
-     * $db DB/MDB2 object.
+     * Format of rows in sets returned by the select() method 
+     *
+     * This should be one of the DB/MDB2_FETCHMODE_* constant values, such as
+     * MDB2_FETCHMODE_ASSOC, MDB2_FETCHMODE_ORDERED, or MDB2_FETCHMODE_OBJECT.
+     * It determines whether select() returns represents individual rows as
+     * associative arrays with column name keys, ordered/sequential arrays, 
+     * or objects with column names mapped to properties. Use corresponding
+     * DB_FETCHMODE_* constants for use with the DB backend. It has no effect
+     * upon the return value of selectResult().
+     *
+     * If a 'fetchmode' element is set for a specific query array, the query 
+     * fetchmode will override this DB_Table or DB_Table_Database property.
+     * If no value is set for the query or the DB_Table_Base object, the value
+     * or default set in the underlying DB/MDB2 object will be used.
      *
      * @var    int
      * @access public
@@ -93,8 +104,13 @@ class DB_Table_Base
     var $fetchmode = null;
 
     /**
+     * Class of objects to use for rows returned as objects by select()
+     *
      * When fetchmode is DB/MDB2_FETCHMODE_OBJECT, use this class for each
-     * returned row. If null, uses whatever is set in the $db DB/MDB2 object.
+     * returned row in rsults of select(). May be overridden by value of 
+     * 'fetchmode_object_class'. If no class name is set in the query or 
+     * the DB_Table_Base, defaults to that set in the DB/MDB2 object, or
+     * to default of StdObject.
      *
      * @var    string
      * @access public
@@ -102,7 +118,7 @@ class DB_Table_Base
     var $fetchmode_object_class = null;
 
     /**
-     * Upper case name of class 'DB_TABLE' or 'DB_TABLE_DATABASE'.
+     * Upper case name of primary subclass, 'DB_TABLE' or 'DB_TABLE_DATABASE'
      *
      * This should be set in the constructor of the child class, and is 
      * used in the DB_Table_Base::throwError() method to determine the
@@ -151,6 +167,7 @@ class DB_Table_Base
     /**
      * Overwrites one or more error messages, e.g., to internationalize them.
      * 
+     * May be used to change messages stored in global array $GLOBALS[$class_key]
      * @param mixed $code If string, the error message with code $code will be
      *                    overwritten by $message. If array, each key is a code
      *                    and each value is a new message. 
@@ -602,6 +619,83 @@ class DB_Table_Base
         // swap modes
         $db->setFetchMode($new_mode, $new_class);
     }
+
+
+    /**
+     * Returns SQL condition equating columns to literal values.
+     *
+     * The parameter $data is an associative array in which keys are
+     * column names and values are corresponding values. The method
+     * returns an SQL string that is true if all of the values of the
+     * specified database columns are equal to the corresponding 
+     * values provided in $data. 
+     * 
+     * For example, if:
+     * <code>
+     *     $data = array( 'c1' => 'thing', 'c2' => 23, 'c3' => 0.32 )
+     * </code>
+     * then buildFilter($data) returns a string 
+     * <code>
+     *     c1 => 'thing' AND c2 => 23 AND c3 = 0.32
+     * </code>
+     * in which the values are replaced by SQL literal * values, 
+     * quoted and escaped as necessary.
+     * 
+     * Values are quoted and escaped as appropriate for each data 
+     * type and the backend RDBMS. Quoting is carried out by the
+     * DB_Table_Base::quote() method, and is based on the PHP type
+     * of the value: string values are quoted and escaped, while 
+     * integer and float numerical values are not. Boolean values
+     * in $data are represented as 0 or 1, consistent with the way 
+     * booleans are stored by DB_Table. 
+     *
+     * Null values: The treatment of null values in $data depends upon 
+     * the value of the $match parameter . If $match == 'simple', an 
+     * empty string is returned if any $value of $data with a key in 
+     * $data_key is null. If $match == 'partial', the returned SQL 
+     * expression equates only the relevant non-null values of $data 
+     * to the values of corresponding database columns. If 
+     * $match == 'full', the function returns an empty string if all 
+     * of the relevant values of data are null, and returns a 
+     * PEAR_Error if some of the selected values are null and others 
+     * are not null.
+     *
+     * @param array $data associative array, keys are column names
+     * @return string SQL expression equating values in $data to 
+     *                values of columns named by keys.
+     * @access public
+     */
+    function buildFilter($data, $match = 'simple')
+    {
+        // Check $match type value
+        if (!in_array($match, array('simple', 'partial', 'full'))) {
+            return $this->throwError(
+                            DB_TABLE_DATABASE_ERR_MATCH_TYPE);
+        }
+
+        if (count($data) == 0) {
+            return '';
+        }
+        $filter = array();
+        foreach ($data as $key => $value) {
+            if (!is_null($value)) {
+                if ($match == 'full' && isset($found_null)) {
+                    return $this->throwError(
+                              DB_TABLE_DATABASE_ERR_FULL_KEY);
+                }
+                $value = $this->quote($value);
+                $filter[] = "$key = $value";
+            } else {
+                if ($match == 'simple') {
+                    return ''; // if any value in $data is null
+                } elseif ($match == 'full') {
+                    $found_null = true;
+                }
+            }
+        }
+        return implode(' AND ', $filter);
+    }
+
 
     /**
     * Returns SQL literal string representation of a php value
