@@ -73,6 +73,7 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
          <file name="QuickForm.php" role="php" />
          <file name="Valid.php" role="php" />
          <file name="Generator.php" role="php" />
+         <file name="XML.php" role="php" />
          <dir name="Manager">
            <file name="ibase.php" role="php" />
            <file name="mysql.php" role="php" />
