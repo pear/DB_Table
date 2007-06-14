@@ -32,7 +32,7 @@ class DatabaseTest extends PHPUnit2_Framework_TestCase {
         $this->db_conn = $db_conn;
         $this->verbose = $verbose;
 
-        if ($this->db->_backend == 'mdb2') {
+        if ($this->db->backend == 'mdb2') {
             $this->fetchmode_assoc = MDB2_FETCHMODE_ASSOC;
             $this->fetchmode_order = MDB2_FETCHMODE_ORDERED;
         } else {
