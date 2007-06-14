@@ -83,15 +83,13 @@ class ModifyTest extends DatabaseTest {
         $data['PhoneID']  = 38;
         $result = $this->db->ValidForeignKeys('PersonPhone',$data);
 
-        // Check that $result is boolean true
+        // Check that $result is a PEAR_Error object
         if (PEAR::isError($result)){
             print "\n" . $result->getMessage();
-            $this->assertTrue(false);
-        } 
-        if (!is_bool($result)) {
+            $this->assertTrue(true);
+        } else {
             $this->assertTrue(false);
         }
-        $this->assertTrue(!$result);
     }
 
     function testValidForeignKeys4()
@@ -111,15 +109,13 @@ class ModifyTest extends DatabaseTest {
         $data['ZipCode']  = '55345';
         $result = $this->db->ValidForeignKeys('Address',$data);
 
-        // Check that $result is boolean false
+        // Check that $result is a PEAR_Error object
         if (PEAR::isError($result)){
             print "\n" . $result->getMessage();
-            $this->assertTrue(false);
-        } 
-        if (!is_bool($result)) {
+            $this->assertTrue(true);
+        } else {
             $this->assertTrue(false);
         }
-        $this->assertTrue(!$result);
     }
 
     function testInsert1()
@@ -247,7 +243,7 @@ class ModifyTest extends DatabaseTest {
         $assoc = array();
         $assoc['PersonID'] = 17;
         $assoc['PhoneID']  = 28; // Beyond range available in Phone
-        $result = $this->db->insert('PersonPhone',$assoc);
+        $result = $this->db->insert('PersonPhone', $assoc);
         if (PEAR::isError($result)){
             if ($this->verbose > 0) {
                 print "\n" . $result->getMessage();
