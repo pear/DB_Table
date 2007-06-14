@@ -1,3 +1,4 @@
+
 PHPUnit 2.3.6 by Sebastian Bergmann.
 
 
@@ -10,7 +11,7 @@ PHPUnit 2.3.6 by Sebastian Bergmann.
             <name>PersonID</name>
             <type>integer</type>
             <notnull>1</notnull>
-            <autoinc>1</autoinc>
+            <autoincrement>1</autoincrement>
          </field>
          <field>
             <name>FirstName</name>
@@ -55,7 +56,7 @@ PHPUnit 2.3.6 by Sebastian Bergmann.
             <name>AddressID</name>
             <type>integer</type>
             <notnull>1</notnull>
-            <autoinc>1</autoinc>
+            <autoincrement>1</autoincrement>
          </field>
          <field>
             <name>Building</name>
@@ -127,7 +128,7 @@ PHPUnit 2.3.6 by Sebastian Bergmann.
             <name>PhoneID</name>
             <type>integer</type>
             <notnull>1</notnull>
-            <autoinc>1</autoinc>
+            <autoincrement>1</autoincrement>
          </field>
          <field>
             <name>PhoneNumber</name>
@@ -261,6 +262,6 @@ PHPUnit 2.3.6 by Sebastian Bergmann.
 </database>.
 >Test round-trip toXML() -> fromXML.
 
-Time: 0.33286809921265
+Time: 0.37030982971191
 
 OK (2 tests)
