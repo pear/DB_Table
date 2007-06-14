@@ -3131,7 +3131,7 @@ class DB_Table_Database extends DB_Table_Base
                 if (isset($field->default)) {
                     $def['default'] = $field->default;
                 }
-                if (isset($field->autoinc)) {
+                if (isset($field->autoincrement)) {
                     if (is_null($table_obj->auto_inc_col)) {
                         $table_obj->auto_inc_col = $col_name;
                     } else {
