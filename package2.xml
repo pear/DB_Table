@@ -60,7 +60,7 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
 - Added buildFilter() method to the DB_Table_Base class. This a simplified version of the DB_Table_Database::buildFilter() method of previous 1.5.0RC* releases. (BC break with 1.5.0RC1 and 1.5.0RC2)
 - Added a private DB_Table_Database::_buildForeignKeyFilter() for more specialized uses of the old buildFilter() method, which are used internally to construct queries.
 - Changed return value of DB_Table_Database::validForeignKey on failure from boolean false to PEAR_Error. Changed related error codes.
-- Changed <autoinc> element of XML output to <autoincrement> for consistency with MDB2 XML schema. 
+- Changed 'autoinc' element of XML output to 'autoincrement' for consistency with MDB2 XML schema. 
 - Simplified unit tests for DB_Table_Database by adding a parent DatabaseTest unit test class.
  </notes>
  <contents>
