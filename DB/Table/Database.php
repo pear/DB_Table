@@ -2898,28 +2898,7 @@ class DB_Table_Database extends DB_Table_Base
 
         // Simple case: Build filter from $data array alone
         if (is_null($data_key) && is_null($filt_key)) {
-            if (count($data) == 0) {
-                return '';
-            }
-            $filter = array();
-            foreach ($data as $key => $value) {
-                if (!is_null($value)) {
-                    if ($match == 'full' && isset($found_null)) {
-                        return $this->throwError(
-                                  DB_TABLE_DATABASE_ERR_FULL_KEY);
-                    }
-                    $value = $this->quote($value);
-                    $filter[] = "$key = $value";
-                } else {
-                    if ($match == 'simple') {
-                        return ''; // if any value in $data is null
-                    } elseif ($match == 'full') {
-                        $found_null = true;
-                    }
-                }
-
-            }
-            return implode(' AND ', $filter);
+            return $this->buildFilter($data, $match);
         }
 
         // Defaults for $data_key and $filt_key:
@@ -2984,34 +2963,34 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
-#    /**
-#    * Returns SQL literal string representation of a php value
-#    *
-#    * If $value is: 
-#    *    - a string, return the string enquoted and escaped
-#    *    - a number, return cast of number to string, without quotes
-#    *    - a boolean, return '1' for true and '0' for false
-#    *    - null, return the string 'NULL'
-#    * 
-#    * @param  mixed  $value 
-#    * @return string representation of value as an SQL literal
-#    * 
-#    * @see DB_Common::quoteSmart()
-#    * @see MDB2::quote()
-#    * @access public
-#    */
-#    function quote($value)
-#    {
-#        if (is_bool($value)) {
-#           return $value ? '1' : '0';
-#        } 
-#        if ($this->backend == 'mdb2') {
-#            $value = $this->db->quote($value);
-#        } else {
-#            $value = $this->db->quoteSmart($value);
-#        }
-#        return (string) $value;
-#    }
+    /**
+    * Returns SQL literal string representation of a php value
+    *
+    * If $value is: 
+    *    - a string, return the string enquoted and escaped
+    *    - a number, return cast of number to string, without quotes
+    *    - a boolean, return '1' for true and '0' for false
+    *    - null, return the string 'NULL'
+    * 
+    * @param  mixed  $value 
+    * @return string representation of value as an SQL literal
+    * 
+    * @see DB_Common::quoteSmart()
+    * @see MDB2::quote()
+    * @access public
+    */
+    function quote($value)
+    {
+        if (is_bool($value)) {
+           return $value ? '1' : '0';
+        } 
+        if ($this->backend == 'mdb2') {
+            $value = $this->db->quote($value);
+        } else {
+            $value = $this->db->quoteSmart($value);
+        }
+        return (string) $value;
+    }
     
     /**
      * Serializes all table references and sets $db = null, $backend = null
