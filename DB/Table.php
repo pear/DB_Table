@@ -2205,7 +2205,7 @@ class DB_Table extends DB_Table_Base
                $s[] = DB_Table_XML::lineElement('set default', $default, $indent);
             }
             if ($this->auto_inc_col == $name) {
-               $s[] = DB_Table_XML::lineElement('autoinc', '1', $indent);
+               $s[] = DB_Table_XML::lineElement('autoincrement', '1', $indent);
             }
             $s[] = DB_Table_XML::closeTag('field', $indent);
         }
