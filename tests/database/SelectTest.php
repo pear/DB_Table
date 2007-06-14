@@ -133,6 +133,37 @@ class SelectTest extends DatabaseTest
         $this->assertEquals(count($result), 10);
     }
 
+    function testSelect4() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testSelect4";
+        }
+        $db =& $this->db;
+        $result = $db->select(1);
+        if (PEAR::isError($result)){
+           print "\n" . $result->getMessage();
+           $this->assertTrue(true);
+        } else {
+           $this->assertTrue(false);
+        }
+    }
+
+    function testSelect5() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testSelect5";
+        }
+        $db =& $this->db;
+        $result = $db->select('not_a_key');
+        if (PEAR::isError($result)){
+           print "\n" . $result->getMessage();
+           $this->assertTrue(true);
+        } else {
+           $this->assertTrue(false);
+        }
+    }
+
+
     function testSelectResult1()
     {
         print "\n" . ">testSelectResult1";
@@ -220,6 +251,37 @@ class SelectTest extends DatabaseTest
         }
         $this->assertEquals($i,10);
     }
+
+    function testSelectResult3() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testSelectResult3";
+        }
+        $db =& $this->db;
+        $result = $db->selectResult(1);
+        if (PEAR::isError($result)){
+           print "\n" . $result->getMessage();
+           $this->assertTrue(true);
+        } else {
+           $this->assertTrue(false);
+        }
+    }
+
+    function testSelectResult4() 
+    {
+        if ($this->verbose > -1) {
+            print "\n" . ">testSelectResult4";
+        }
+        $db =& $this->db;
+        $result = $db->selectResult('not_a_key');
+        if (PEAR::isError($result)){
+           print "\n" . $result->getMessage();
+           $this->assertTrue(true);
+        } else {
+           $this->assertTrue(false);
+        }
+    }
+
 
     function testSelectCount1()
     {
