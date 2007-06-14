@@ -626,9 +626,9 @@ class DB_Table_Base
      *
      * The parameter $data is an associative array in which keys are
      * column names and values are corresponding values. The method
-     * returns an SQL string that is true if all of the values of the
-     * specified database columns are equal to the corresponding 
-     * values provided in $data. 
+     * returns an SQL string that is true if the value of every 
+     * specified database columns is equal to the corresponding 
+     * value in $data. 
      * 
      * For example, if:
      * <code>
@@ -638,12 +638,12 @@ class DB_Table_Base
      * <code>
      *     c1 => 'thing' AND c2 => 23 AND c3 = 0.32
      * </code>
-     * in which the values are replaced by SQL literal * values, 
+     * in which string values are replaced by SQL literal values, 
      * quoted and escaped as necessary.
      * 
      * Values are quoted and escaped as appropriate for each data 
-     * type and the backend RDBMS. Quoting is carried out by the
-     * DB_Table_Base::quote() method, and is based on the PHP type
+     * type and the backend RDBMS, using the MDB2::quote() or
+     * DB::smartQuote() method. The behavior depends on the PHP type
      * of the value: string values are quoted and escaped, while 
      * integer and float numerical values are not. Boolean values
      * in $data are represented as 0 or 1, consistent with the way 
@@ -683,7 +683,15 @@ class DB_Table_Base
                     return $this->throwError(
                               DB_TABLE_DATABASE_ERR_FULL_KEY);
                 }
-                $value = $this->quote($value);
+                if (is_bool($value)) {
+                   $value = $value ? '1' : '0';
+                } else {
+                    if ($this->backend == 'mdb2') {
+                        $value = $this->db->quote($value);
+                    } else {
+                        $value = $this->db->quoteSmart($value);
+                    }
+                }
                 $filter[] = "$key = $value";
             } else {
                 if ($match == 'simple') {
@@ -694,36 +702,6 @@ class DB_Table_Base
             }
         }
         return implode(' AND ', $filter);
-    }
-
-
-    /**
-    * Returns SQL literal string representation of a php value
-    *
-    * If $value is: 
-    *    - a string, return the string enquoted and escaped
-    *    - a number, return cast of number to string, without quotes
-    *    - a boolean, return '1' for true and '0' for false
-    *    - null, return the string 'NULL'
-    * 
-    * @param  mixed  $value 
-    * @return string representation of value as an SQL literal
-    * 
-    * @see DB_Common::quoteSmart()
-    * @see MDB2::quote()
-    * @access public
-    */
-    function quote($value)
-    {
-        if (is_bool($value)) {
-           return $value ? '1' : '0';
-        } 
-        if ($this->backend == 'mdb2') {
-            $value = $this->db->quote($value);
-        } else {
-            $value = $this->db->quoteSmart($value);
-        }
-        return (string) $value;
     }
 
     // }}}
