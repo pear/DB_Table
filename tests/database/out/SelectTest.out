@@ -222,6 +222,12 @@ WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
 SELANDER,MICHAEL,9529331534,5978,CHASEWOOD PKWY,MINNETONKA,55343
 CHAPMAN,SHERRY,9529350387,10721,SMETANA RD,MINNETONKA,55343
 .
+>testSelect4
+DB_TABLE_DATABASE Error - 
+Query is neither an array nor a string.
+>testSelect5
+DB_TABLE_DATABASE Error - 
+Query string is not a key of $sql property array. Key is not_a_key.
 >testSelectResult1
 
 Query:
@@ -274,6 +280,12 @@ WESTVEER,ANTHONY,9529499236,14409,GRENIER RD,MINNETONKA,55345
 WHITMORE,JEFFREY,9529745079,5037,NORMAN DR,MINNETONKA,55345
 WHITMORE,MACHEL,9529745279,5037,NORMAN DR,MINNETONKA,55345
 .
+>testSelectResult3
+DB_TABLE_DATABASE Error - 
+Query is neither an array nor a string.
+>testSelectResult4
+DB_TABLE_DATABASE Error - 
+Query string is not a key of $sql property array. Key is not_a_key.
 >testSelectCount1
 
 Query:
@@ -308,6 +320,6 @@ WHERE ( PersonPhone.PhoneID = Phone.PhoneID
 Count = 8
 .
 
-Time: 35.061257839203
+Time: 61.179705142975
 
-OK (7 tests)
+OK (11 tests)
