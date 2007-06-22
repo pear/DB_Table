@@ -1,6 +1,6 @@
 <?php
 
-/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+// vim: set et ts=4 sw=4 fdm=marker:
 
 /**
  * DB_Table_Database relational database abstraction class
@@ -218,6 +218,7 @@ define('DB_TABLE_DATABASE_ERR_PHP_VERSION', -239);
 define('DB_TABLE_DATABASE_ERR_XML_PARSE', -240);
 
 // }}}
+// {{{ Includes
 
 /**
  * DB_Table_Base base class
@@ -233,6 +234,9 @@ require_once 'DB/Table.php';
  * The PEAR class for errors
  */
 require_once 'PEAR.php';
+
+// }}}
+// {{{ Error messages
 
 /** 
  * US-English default error messages. If you want to internationalize, you can
@@ -352,6 +356,7 @@ foreach ($GLOBALS['_DB_TABLE_DATABASE']['default_error'] as $code => $message) {
     }
 }
 
+// }}}
 // {{{ DB_Table_Database
 
 /**
@@ -507,36 +512,6 @@ class DB_Table_Database extends DB_Table_Base
     var $_link = array();
 
     /**
-     * If the column keys in associative array return sets are fixed case
-     * (all upper or lower case) this property should be set true. 
-     *
-     * The column keys in rows of associative array return sets may either 
-     * preserve capitalization of the column names or they may be fixed case,
-     * depending on the options set in the backend (DB/MDB2) and on phptype.
-     * If these column names are returned with a fixed case (either upper 
-     * or lower), $fix_case must be set true in order for php emulation of
-     * ON DELETE and ON UPDATE actions to work correctly. Otherwise, the
-     * $fix_case property should be false (the default).
-     *
-     * The choice between mixed or fixed case column keys may be made by using
-     * using the setFixCase() method, which resets both the behavior of the
-     * backend and the $fix_case property. It may also be changed by using the 
-     * setOption() method of the DB or MDB2 backend object to directly set the 
-     * DB_PORTABILITY_LOWERCASE or MDB2_PORTABILITY_FIX_CASE bits of the 
-     * DB/MDB2 'portability' option.
-     *
-     * By default, DB returns mixed case and MDB2 returns lower case. 
-     * 
-     * @see DB_Table_Database::setFixCase()
-     * @see DB::setOption()
-     * @see MDB2::setOption()
-     *
-     * @var    boolean
-     * @access public
-     */
-    var $fix_case = false;
-
-    /**
      * Take on_update actions if $_act_on_update is true
      *
      * By default, on_update actions are enabled ($_act_on_update = true)
@@ -566,8 +541,40 @@ class DB_Table_Database extends DB_Table_Base
      */
     var $_check_fkey = false;
 
+    /**
+     * If the column keys in associative array return sets are fixed case
+     * (all upper or lower case) this property should be set true. 
+     *
+     * The column keys in rows of associative array return sets may either 
+     * preserve capitalization of the column names or they may be fixed case,
+     * depending on the options set in the backend (DB/MDB2) and on phptype.
+     * If these column names are returned with a fixed case (either upper 
+     * or lower), $_fix_case must be set true in order for php emulation of
+     * ON DELETE and ON UPDATE actions to work correctly. Otherwise, the
+     * $_fix_case property should be false (the default).
+     *
+     * The choice between mixed or fixed case column keys may be made by using
+     * using the setFixCase() method, which resets both the behavior of the
+     * backend and the $_fix_case property. It may also be changed by using the 
+     * setOption() method of the DB or MDB2 backend object to directly set the 
+     * DB_PORTABILITY_LOWERCASE or MDB2_PORTABILITY_FIX_CASE bits of the 
+     * DB/MDB2 'portability' option.
+     *
+     * By default, DB returns mixed case and MDB2 returns lower case. 
+     * 
+     * @see DB_Table_Database::setFixCase()
+     * @see DB::setOption()
+     * @see MDB2::setOption()
+     *
+     * @var    boolean
+     * @access private
+     */
+    var $_fix_case = false;
+
     // }}}
     // {{{ Methods
+
+    // {{{ function DB_Table_Database(&$db, $name)
 
     /**
      * Constructor
@@ -605,20 +612,23 @@ class DB_Table_Database extends DB_Table_Base
         $this->setFixCase(false);
     }
 
+    // }}}
+    // {{{ function setDBconnection(&$db)
 
     /**
      * Set DB/MDB2 connection instance for database and all tables
      *
      * Assign a reference to the DB/MDB2 object $db to $this->db, set
-     * $this->backend to 'db' or 'mdb2' accordingly, and set the same pair
-     * of values for the $db and $backend properties of every DB_Table
-     * object in the database.
+     * $this->backend to 'db' or 'mdb2', and set the same pair of 
+     * values for the $db and $backend properties of every DB_Table
+     * object in the database.  
      *
-     * Returns true on success, and PEAR error on failure. Returns error code
-     * DB_TABLE_DATABASE_ERR_DB_OBJECT if $db is not a DB or MDB2 object.
+     * @param  object  &$db DB/MDB2 connection object
+     * @return boolean True on success (PEAR_Error on failure)
      *
-     * @param  object &$db DB/MDB2 connection object
-     * @return boolean true on success (PEAR_Error on failure)
+     * @throws PEAR_Error if 
+     *     $db is not a DB or MDB2 object(DB_TABLE_DATABASE_ERR_DB_OBJECT)
+     *
      * @access public
      */
     function setDBconnection(&$db)
@@ -644,10 +654,13 @@ class DB_Table_Database extends DB_Table_Base
         return true;
     }
 
+    // }}}
+    // {{{ function setActOnDelete($flag = true)
+
     /**
-     * Turns on (or off) automatic php emulation of on delete actions
+     * Turns on (or off) automatic php emulation of SQL ON DELETE actions
      *
-     * @param  bool $flag True to turn on action, false to turn off
+     * @param  bool $flag True to enable action, false to disable
      * @return void
      * @access public
      */
@@ -660,10 +673,13 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
     
+    // }}}
+    // {{{ function setActOnUpdate($flag = true)
+
     /**
-     * Turns on (or off) automatic php emulation of on update actions
+     * Turns on (or off) automatic php emulation of ON UPDATE actions
      *
-     * @param  bool $flag True to turn on action, false to turn off
+     * @param  bool $flag True to enable action, false to disable
      * @return void
      * @access public
      */
@@ -676,10 +692,13 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
     
+    // }}}
+    // {{{ function setCheckFKey($flag = true)
+
     /**
      * Turns on (or off) validation of foreign key values on insert and update
      *
-     * @param  bool $flag True to turn on checking, false to turn off
+     * @param  bool $flag True to enable foreign key validation, false to disable
      * @return void
      * @access public
      */
@@ -692,11 +711,20 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function setFixCase($flag = false) 
+
     /**
      * Sets backend option such that column keys in associative array return
      * sets are converted to fixed case, if true, or mixed case, if false.
      * 
-     * Sets the DB/MDB2 'portability' option, and sets $this->fix_case = $flag.
+     * Sets the DB/MDB2 'portability' option, and sets $this->_fix_case = $flag.
+     * Because it sets an option in the underlying DB/MDB2 connection object, 
+     * this effects the behavior of all objects that share the connection.
+     * 
+     * @param  bool $flag True for fixed lower case, false for mixed
+     * @return void
+     * @access public
      */
     function setFixCase($flag = false) 
     {
@@ -714,19 +742,25 @@ class DB_Table_Database extends DB_Table_Base
             }
         } 
         $this->db->setOption('portability', $option);
-        $this->fix_case = $flag;
+        $this->_fix_case = $flag;
     }
     
+    // }}}
+    // {{{ function &getDBInstance() 
+
     /**
-     * Return reference to $this->db DB/MDB2 object
+     * Return reference to $this->db DB/MDB2 object wrapped by $this
      *
-     * @return object reference to DB/MDB2 object
+     * @return object Reference to DB/MDB2 object
      * @access public
      */
     function &getDBInstance() 
     {
         return $this->db;
     }
+
+    // }}}
+    // {{{ function getTable($name = null) 
 
     /**
      * Returns all or part of $_table property array
@@ -735,16 +769,18 @@ class DB_Table_Database extends DB_Table_Base
      * If $name is a table name, return $this->_table[$name] DB_Table object
      * reference
      *
-     * Returns PEAR_Error with the following DB_TABLE_DATABASE_ERR* codes
-     * if:
-     *    - $name is not a string ( _TBL_NOT_STRING )
-     *    - $name is not valid table name ( _NO_TBL )
-     * 
      * The $_table property is an associative array in which keys are table
      * name strings and values are references to DB_Table objects. Each of 
      * the referenced objects represents one table in the database.
      *
-     * @return mixed $_table property, one element of $_table, or Error
+     * @param  string $name Name of table
+     * @return mixed  $_table property, or one element of $_table 
+     *                (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if:
+     *    - $name is not a string ( DB_TABLE_DATABASE_ERR_TBL_NOT_STRING )
+     *    - $name is not valid table name ( DB_TABLE_DATABASE_ERR_NO_TBL )
+     * 
      * @access public
      */
     function getTable($name = null) 
@@ -766,24 +802,29 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function getPrimaryKey($name = null) 
+
     /**
      * Returns all or part of the $_primary_key property array
      *
-     * If $name is null, return the $this->_primary_key array
+     * If $name is null, return the $this->_primary_key property array
      * If $name is a table name, return $this->_primary_key[$name]
      *
-     * Returns PEAR_Error with the following DB_TABLE_DATABASE_* error
-     * codes if:
-     *    - $name is not a string ( _TBL_NOT_STRING )
-     *    - $name is not valid table name ( _NO_TBL )
-     * 
      * The $_primary_key property is an associative array in which each key
      * a table name, and each value is the primary key of that table. Each
      * primary key value may be a column name string, a sequential array of 
      * column name strings (for a multi-column key), or null (if no primary
      * key has been declared).
      *
-     * @return mixed $primary_key array or $this->_primary_key[$name]
+     * @param  string $name Name of table
+     * @return mixed  $this->primary_key array or $this->_primary_key[$name]
+     *                (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if:
+     *    - $name is not a string ( DB_TABLE_DATABASE_ERR_TBL_NOT_STRING )
+     *    - $name is not valid table name ( DB_TABLE_DATABASE_ERR_NO_TBL )
+     * 
      * @access public
      */
     function getPrimaryKey($name = null) 
@@ -805,16 +846,14 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function getTableSubclass($name = null) 
+
     /**
      * Returns all or part of the $_table_subclass property array
      *
-     * If $name is null, return the $this->_table_subclass array
+     * If $name is null, return the $this->_table_subclass property array
      * If $name is a table name, return $this->_table_subclass[$name]
-     *
-     * Returns PEAR_Error with the following DB_TABLE_DATABASE_* error
-     * codes if:
-     *    - $name is not a string ( _TBL_NOT_STRING )
-     *    - $name is not valid table name ( _NO_TBL )
      *
      * The $_table_subclass property is an associative array in which each key
      * is a table name string, and each value is the name of the corresponding 
@@ -827,17 +866,23 @@ class DB_Table_Database extends DB_Table_Base
      * converts all class names to lower case. In PHP 5, it preserves the 
      * capitalization of the name used in the class definition. 
      *
-     * In the __wakeup() method, for each table $table_name for which
-     * $subclass = $this->_table_subclass[$table_name] is not null, but
-     * class $subclass is not defined, the method attempts to include a
-     * file named "$subclass.php" in directory $this->table_subclass_path. 
-     * For autoloading to work properly, the base name of each subclass 
-     * definition file (excluding the .php extension) should thus be a
-     * lower case version of the class name in PHP 4 or identical to the 
-     * class name in PHP 5. 
+     * For autoloading of class definitions to work properly in the 
+     * __wakeup() method, the base name of each subclass definition
+     * file (excluding the .php extension) should thus be a identical
+     * to the class name in PHP 5, and a lower case version of the 
+     * class name in PHP 4 or 
      * 
-     * @return mixed $_table_subclass array or $this->_table_subclass[$name]
+     * @param  string $name Name of table
+     * @return mixed  $_table_subclass array or $this->_table_subclass[$name]
+     *                (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if:
+     *    - $name is not a string ( DB_TABLE_DATABASE_TBL_NOT_STRING )
+     *    - $name is not valid table name ( DB_TABLE_DATABASE_NO_TBL )
+     *
      * @access public
+     * 
+     @ @see DB_Table_Database::__wakeup()
      */
     function getTableSubclass($name = null) 
     {
@@ -858,25 +903,28 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function getCol($column_name = null) 
+
     /**
      * Returns all or part of the $_col property array
      *
      * If $column_name is null, return $_col property array
      * If $column_name is valid, return $_col[$column_name] subarray
      *
-     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
-     * codes if:
-     *    - $column_name is not a string ( _COL_NOT_STRING )
-     *    - $column_name is not valid column name ( _NO_COL )
-     *
      * The $_col property is an associative array in which each key is the
      * name of a column in the database, and each value is a numerical array 
      * containing the names of all tables that contain a column with that 
      * name.
      *
-     * @var    array
      * @param string $column_name a column name string
      * @return mixed $this->_col property array or $this->_col[$column_name]
+     *               (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if:
+     *    - $column_name is not a string (DB_TABLE_DATABASE_ERR_COL_NOT_STRING)
+     *    - $column_name is not valid column name (DB_TABLE_DATABASE_NO_COL)
+     *
      * @access public
      */
     function getCol($column_name = null) 
@@ -898,16 +946,14 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function getForeignCol($column_name = null) 
+
     /**
      * Returns all or part of the $_foreign_col property array
      *
      * If $column_name is null, return $this->_foreign_col property array
      * If $column_name is valid, return $this->_foreign_col[$column_name] 
-     *
-     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
-     * codes if:
-     *    - $column_name is not a string ( _COL_NOT_STRING )
-     *    - $column_name is not valid foreign column name ( _NO_FOREIGN_COL )
      *
      * The $_foreign_col property is an associative array in which each 
      * key is the name string of a foreign key column, and each value is a
@@ -918,6 +964,11 @@ class DB_Table_Database extends DB_Table_Base
      * foreign key for references to two or more different referenced tables
      * tables, the name $ftable will also appear multiple times in the array 
      * $this->_foreign_col[$column].
+     *
+     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
+     * codes if:
+     *    - $column_name is not a string ( _COL_NOT_STRING )
+     *    - $column_name is not valid foreign column name ( _NO_FOREIGN_COL )
      *
      * @param  string column name string for foreign key column
      * @return array  $_foreign_col property array
@@ -942,6 +993,9 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function getRef($table1 = null, $table2 = null) 
+
     /**
      * Returns all or part of the $_ref two-dimensional property array
      *
@@ -953,11 +1007,6 @@ class DB_Table_Database extends DB_Table_Base
      * if $table1 and $table2 are both valid table names, but there is no 
      * reference from $table1 to $table2.
      * 
-     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
-     * codes if:
-     *    - $table1 or $table2 is not a string ( _TBL_NOT_STRING )
-     *    - $table1 or $table2 is not a valid table name ( _NO_TBL )
-     *
      * The $_ref property is a two-dimensional associative array in which
      * the keys are pairs of table names, each value is an array containing 
      * information about referenced and referencing keys, and referentially
@@ -979,10 +1028,14 @@ class DB_Table_Database extends DB_Table_Base
      * be taken. See addRef() for further details about allowed values of
      * these action strings. 
      *
-     * @var    array
      * @param  string $table1 name of referencing table
      * @param  string $table2 name of referenced table
      * @return mixed $ref property array, sub-array, or value
+     * 
+     * @throws a PEAR_Error if:
+     *    - $table1 or $table2 is not a string (.._DATABASE_ERR_TBL_NOT_STRING)
+     *    - $table1 or $table2 is not a table name (.._DATABASE_ERR_NO_TBL)
+     *
      * @access public
      */
     function getRef($table1 = null, $table2 = null) 
@@ -1031,16 +1084,14 @@ class DB_Table_Database extends DB_Table_Base
 
     }
 
+    // }}}
+    // {{{ function getRefTo($table_name = null)
+
     /**
      * Returns all or part of the $_ref_to property array
      *
      * Returns $this->_ref_to property array if $table_name is null.
      * Returns $this->_ref_to[$table_name] if $table_name is not null.
-     *
-     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
-     * codes if:
-     *    - $table_name is not a string ( _TBL_NOT_STRING )
-     *    - $table_name is not a valid table name ( _NO_TBL )
      *
      * The $_ref_to property is an associative array in which each key
      * is the name of a referenced table, and each value is a sequential
@@ -1049,9 +1100,15 @@ class DB_Table_Database extends DB_Table_Base
      * $_ref_to[$rtable] = array($ftable1, $ftable2,...), where
      * $ftable1, $ftable2, ... are the names of tables that reference 
      * the table named $rtable.
-     * 
+     *
      * @param string $table_name name of table
-     * @return mixed $_ref_to property array or subarray
+     * @return mixed $_ref_to property array or subarray 
+     *               (PEAR_Error on failure)
+     * 
+     * @throws PEAR_Error if:
+     *    - $table_name is not a string ( .._DATABASE_ERR_TBL_NOT_STRING )
+     *    - $table_name is not a table name ( .._DATABASE_ERR_NO_TBL )
+     *
      * @access public
      */
     function getRefTo($table_name = null)
@@ -1079,6 +1136,9 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function getLink($table1 = null, $table2 = null) 
+
     /**
      * Returns all or part of the $link two-dimensional property array
      *
@@ -1090,11 +1150,6 @@ class DB_Table_Database extends DB_Table_Base
      * if $table1 and $table2 are both valid table names but there is no 
      * link between them.
      * 
-     * Returns a PEAR_Error with the following DB_TABLE_DATABASE_* error
-     * codes if $table1 or $table2 is not null and:
-     *    - $table1 or $table2 is not a string ( _TBL_NOT_STRING )
-     *    - $table1 or $table2 is not a valid table name ( _NO_TBL )
-     *
      * The $_link property is a two-dimensional associative array with 
      * elements of the form $this->_link[$table1][$table2] = array($link1, ...), 
      * in which the value is an array containing the names of all tables 
@@ -1120,10 +1175,14 @@ class DB_Table_Database extends DB_Table_Base
      * all possible linking tables can be identified and added to the 
      * $_link array at once by the addAllLinks() method.
      *
-     * @var    array
      * @param string $table1 name of linked table
      * @param string $table2 name of linked table
      * @return mixed $_link property array, sub-array, or value
+     *
+     * @throws PEAR_Error:
+     *    - $table1 or $table2 is not a string (..DATABASE_ERR_TBL_NOT_STRING)
+     *    - $table1 or $table2 is not a table name (..DATABASE_ERR_NO_TBL)
+     *
      * @access public
      */
     function getLink($table1 = null, $table2 = null) 
@@ -1171,8 +1230,11 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function setTableSubclassPath($path) 
+
     /**
-     * Sets the path to a the directory containing DB_Table subclass definitions.
+     * Sets path to a directory containing DB_Table subclass definitions.
      *
      * This method sets the $_table_subclass_path string property. The value of
      * this property is the path to the directory containing DB_Table subclass 
@@ -1180,8 +1242,8 @@ class DB_Table_Database extends DB_Table_Base
      *  
      * This path may be used by the __wakeup(), if necessary, in an attempt to 
      * autoload class definitions when unserializing a DB_Table_Database object 
-     * and its child DB_Table objects. If a DB_Table subclass named $subclass_name
-     * has not been defined when it is needed, within DB_Table_Database::__wakeup(), 
+     * and its child DB_Table objects. If a DB_Table subclass $subclass_name
+     * has not been defined when it is needed in DB_Table_Database::__wakeup(), 
      * to unserialize an instance of this class, the __wakeup() method attempts
      * to include a class definition file from this directory, as follows:
      * <code>
@@ -1194,10 +1256,16 @@ class DB_Table_Database extends DB_Table_Base
      * @param string $path path to directory containing class definitions
      * @return void
      * @access public
+     *
+     * @see DB_Table_Database::getTableSubclass()
      */
-    function setTableSubclassPath($path) {
+    function setTableSubclassPath($path) 
+    {
         $this->_table_subclass_path = $path; 
     }
+
+    // }}}
+    // {{{ function addTable(&$table_obj)
 
     /**
      * Adds a table to the database.
@@ -1275,6 +1343,9 @@ class DB_Table_Database extends DB_Table_Base
         return true;
     }
 
+    // }}}
+    // {{{ function deleteTable($table) 
+
     /**
      * Deletes a table from $this database object.
      *
@@ -1341,6 +1412,9 @@ class DB_Table_Database extends DB_Table_Base
         unset($this->_table[$table]);
         unset($this->_primary_key[$table]);
     }
+
+    // }}}
+    // {{{ function addRef($ftable, $fkey, $rtable, [$rkey], [$on_delete], [$on_update])
 
     /**
      * Adds a foreign key reference to the database.
@@ -1541,6 +1615,8 @@ class DB_Table_Database extends DB_Table_Base
         return true;
     }
 
+    // }}}
+    // {{{ function deleteRef($ftable, $rtable) 
  
     /**
      * Deletes one reference from database model
@@ -1617,6 +1693,9 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function setOnDelete($ftable, $rtable, $action)
+ 
     /**
      * Modifies the on delete action for one foreign key reference.
      *
@@ -1655,6 +1734,9 @@ class DB_Table_Database extends DB_Table_Base
         return true;
     }
 
+    // }}}
+    // {{{ function setOnUpdate($ftable, $rtable, $action)
+ 
     /**
      * Modifies on update action for one foreign key reference.
      *
@@ -1684,6 +1766,9 @@ class DB_Table_Database extends DB_Table_Base
         return true;
     }
 
+    // }}}
+    // {{{ function addLink($table1, $table2, $link)
+ 
     /**
      * Identifies a linking/association table that links two others
      *
@@ -1762,6 +1847,9 @@ class DB_Table_Database extends DB_Table_Base
         $this->_link[$table2][$table1][] = $link;
     }
 
+    // }}}
+    // {{{ function addAllLink()
+ 
     /**
      * Adds all possible linking tables to the $_link property array
      *
@@ -1804,6 +1892,9 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function deleteLink($table1, $table2, $link = null)
+ 
     /**
      * Removes a link between two tables from the $_link property
      *
@@ -1856,6 +1947,9 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function validCol($col, $from = null)
+ 
     /**
      * Validates and (if necessary) disambiguates a column name.
      *
@@ -1888,8 +1982,8 @@ class DB_Table_Database extends DB_Table_Base
      * @param  string $col  column name, optionally qualified by a table name
      * @param  array  $from array of tables from which $col should be chosen,
      *                      if possible.
-     * @return array  array($table, $column), or PEAR_Error 
-                      $column is a string, $table is a string or array
+     * @return array  array($table, $column), or PEAR_Error on failure
+     *                $column is a string, $table is a string or array
      * @access public
      */
     function validCol($col, $from = null)
@@ -1943,6 +2037,8 @@ class DB_Table_Database extends DB_Table_Base
         return array($table, $column);
     }
  
+    // }}}
+    // {{{ function createTables($flag = 'safe')
 
     /**
      * Creates all the tables in a database in a RDBMS
@@ -1961,10 +2057,10 @@ class DB_Table_Database extends DB_Table_Base
      *                    - 'drop' to drop and recreate any existing table 
                              with the same name
      *
-     * @see DB_Table::create()
-     *
      * @return boolean true on sucess (PEAR_Error on failure of any table)
      * @access public
+     *
+     * @see DB_Table::create()
      */
     function createTables($flag = 'safe')
     {
@@ -1977,25 +2073,31 @@ class DB_Table_Database extends DB_Table_Base
         return true;
     }
 
+    // }}}
+    // {{{ function validForeignKeys($table_name, $data)
+
     /**
      * Check validity of any foreign key values in associative array $data
      * containing values to be inserted or updated in table $table_name.
      *
      * Returns true if each foreign key in $data matches a row in the
      * referenced table, or if there are no foreign key columns in $data.  
-     * Returns false if any foreign key column in associative array $data
-     * (which may contain a full or partial row of $table_name), does not 
-     * match the the value of the referenced column in any row of the 
+     * Returns a PEAR_Error if any foreign key column in associative array 
+     * $data (which may contain a full or partial row of $table_name), does 
+     * not match the the value of the referenced column in any row of the 
      * referenced table.
-     *
-     * Returns any PEAR error thrown by the select method, which is called 
-     * to implement the required query, or by the buildFilter method. 
      *
      * @param $table_name name of the referencing table containing $data
      * @param @data       associative array containing all or part of a row
      *                    of data of $table_name, with column name keys.
-     * @return bool true if all foreign keys are valid, false otherwise.
-     *              PEAR_Error if an error is thrown by a required query
+     * @return bool true if all foreign keys are valid, returns PEAR_Error
+     *              if foreign keys are invalid or if an error is thrown 
+     *              by a required query
+     * 
+     * @throws PEAR error if:
+     *    - Error thrown by _buildFKeyFilter method (bubbles up)
+     *    - Error thrown by select method for required query (bubbles up)
+     *
      * @access public
      */
     function validForeignKeys($table_name, $data)
@@ -2036,10 +2138,16 @@ class DB_Table_Database extends DB_Table_Base
         return true;
     }
 
+    // }}}
+    // {{{ function insert($table_name, $data)
+
     /**
      * Inserts a single table row 
      *
      * Wrapper for insert method of the corresponding DB_Table object.
+     *
+     * Data will be validated before insertion using validForeignKey(),
+     * if foreign key validation in enabled.
      *
      * @param string $table_name Name of table into which to insert data
      * @param array $data Associative array, in which each key is a column
@@ -2073,6 +2181,9 @@ class DB_Table_Database extends DB_Table_Base
 
     }
 
+    // }}}
+    // {{{ function autoValidInsert($flag = true)
+
     /**
      * Turns on or off automatic validation of inserted data for all tables
      *
@@ -2087,12 +2198,19 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function update($table_name, $data, $where)
+
     /**
      * Updates all row(s) of table that match a custom where clause.
      *
-     * Data can be validated before insertion using validUpdate().
-     * Implements any required 'on_update' actions on referencing
-     * tables that reference columns of updated rows
+     * Wrapper for insert method of the corresponding DB_Table object.
+     * 
+     * Data will be validated before insertion using validForeignKey(),
+     * if foreign key validation in enabled.
+     *
+     * Implements any required ON UPDATE actions on tables that 
+     * reference updated columns, if on update actions are enabled.
      *
      * @param string $table_name name of table to update
      * @param array  $data  associative array in which keys are names of
@@ -2125,6 +2243,9 @@ class DB_Table_Database extends DB_Table_Base
 
     }
 
+    // }}}
+    // {{{ function autoValidUpdate($flag = true)
+
     /**
      * Turns on (or off) automatic validation of updated data for all tables.
      *
@@ -2139,6 +2260,25 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function onUpdateAction(&$table_obj, $data, $where)
+
+    /**
+     * Implements any ON UPDATE actions triggered by updating of rows of
+     * $table_obj that match logical condition $where.
+     *
+     * This method is called by the DB_Table::update() method if the table
+     * has a parent DB_Table_Database object, and if ON UPDATE actions are
+     * enabled in the database object. It is called indirectly by the
+     * DB_Table_Database::delete() method, which is simply a wrapper for
+     * the DB_Table method. 
+     *
+     * @param  object &$table_obj Reference to a DB_Table object
+     * @param  array  $data  Data to updated, column name keys, data values
+     * @param  string $where SQL logical condition for updated rows
+     * @return boolean true on success (PEAR_Error on failure)
+     * @access public
+     */
     function onUpdateAction(&$table_obj, $data, $where)
     {
         $table_name = $table_obj->table;
@@ -2253,7 +2393,7 @@ class DB_Table_Database extends DB_Table_Base
                     foreach ($update_rows as $update_row) {
 
                         // If necessary, restore case of column names
-                        if ($this->fix_case) {
+                        if ($this->_fix_case) {
                             $cols = array_keys($table_obj->col);
                             $update_row = $this->_replaceKeys($update_row, $cols);
                         }
@@ -2301,6 +2441,8 @@ class DB_Table_Database extends DB_Table_Base
 
     }
 
+    // }}}
+    // {{{ function autoRecast($flag = true)
 
     /**
      * Turns on (or off) automatic recasting of insert and update data
@@ -2318,6 +2460,9 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function autoInc($flag = true)
+
     /**
      * Turns on (or off) php implementation of auto-incrementing on insertion
      * for all tables
@@ -2333,11 +2478,16 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function delete($table_name, $where)
+
     /**
      * Deletes all row(s) of table that match a custom where clause.
      *
-     * Implements any required 'on_delete' action on tables that
-     * reference the table from which rows are deleted.
+     * Wrapper for insert method of the corresponding DB_Table object.
+     *
+     * Implements any required ON DELETE action on tables that reference
+     * deleted rows, if on delete actions are enabled.
      *
      * @param string $table_name name of table from which to delete
      * @param string $where      SQL WHERE clause that limits the set
@@ -2368,6 +2518,24 @@ class DB_Table_Database extends DB_Table_Base
 
     }
 
+    // }}}
+    // {{{ function onDeleteAction(&$table_obj, $where)
+
+    /**
+     * Implements ON DELETE actions triggered by deletion of rows of
+     * $table_obj that match logical condition $where.
+     *
+     * This method is called by the DB_Table::delete() method if the table
+     * has a parent DB_Table_Database object, and if ON DELETE actions are
+     * enabled in the database object. It is called indirectly by the
+     * DB_Table_Database::delete() method, which is simply a wrapper for
+     * the DB_Table method. 
+     *
+     * @param  object &$table_obj Reference to a DB_Table object
+     * @param  string $where SQL logical condition for deleted rows
+     * @return boolean true on success (PEAR_Error on failure)
+     * @access public
+     */
     function onDeleteAction(&$table_obj, $where)
     {
         $table_name = $table_obj->table;
@@ -2430,7 +2598,7 @@ class DB_Table_Database extends DB_Table_Base
                 foreach ($delete_rows as $delete_row) {
 
                     // If necessary, restore case of $delete_row column names
-                    if ($this->fix_case) {
+                    if ($this->_fix_case) {
                         $cols = array_keys($table_obj->col);
                         $delete_row = $this->_replaceKeys($delete_row, $cols);
                     }
@@ -2485,22 +2653,29 @@ class DB_Table_Database extends DB_Table_Base
             } // end foreach ($this->_ref_to[...] as $ftable_name)
         } // end if 
 
+        // Normal completion
+        return true; 
+
     }
 
+    // }}}
+    // {{{ function _replaceKeys($data, $keys) 
 
     /**
-     * Returns array in which keys of $data are replaced by values of $keys.
+     * Returns array in which keys of associative array $data are replaced 
+     * by values of sequential array $keys.
      *
-     * This function is used by the insert() and update() methods to restore
-     * the case of column names in associative arrays that are returned from 
-     * an automatically generated query "SELECT * FROM $table WHERE ...", when
-     * these column name keys are returned with a fixed case. In this usage, 
-     * $keys is a sequential array of the names of all columns in $table. 
+     * This function is used by the onDeleteAction() and onUpdateAction() 
+     * methods to restore the case of column names in associative arrays 
+     * that are returned from an automatically generated query "SELECT * 
+     * FROM $table WHERE ...", when these column name keys are returned 
+     * with a fixed case. In this usage, $keys is a sequential array of 
+     * the names of all columns in $table. 
      *
      * @param  array $data associative array
      * @param  array $key  numerical array of replacement key names
-     * @return array associative array in which keys of $data have been replaced
-     *               by the values of array $keys.
+     * @return array associative array in which keys of $data have been 
+     *               replaced by the values of array $keys.
      * @access private
      */
     function _replaceKeys($data, $keys) 
@@ -2514,6 +2689,9 @@ class DB_Table_Database extends DB_Table_Base
         }
         return $new_data;
     }
+
+    // }}}
+    // {{{ function autoJoin($cols = null, $tables = null, $filter = null)
 
     /**
      * Builds a select command involving joined tables from 
@@ -2797,16 +2975,14 @@ class DB_Table_Database extends DB_Table_Base
         return $query;
     }
 
+    // }}}
+    // {{{ function _buildFKeyFilter($data, $data_key = null, $filt_key = null, $match = 'simple')
 
     /**
      * Returns WHERE clause equating values of $data array to database column 
      * values
      *
-     * Usage: In the simplest usage of this method, which is obtained when 
-     * both $data_key and $filt_key are null or absent, the method returns an 
-     * SQL logical expression that equates the values of $data to the values
-     * of database columns whose names are given by the keys of $data. In 
-     * the general case, function is designed to return an SQL logical 
+     * Usage: The function is designed to return an SQL logical 
      * expression that equates the values of a set of foreign key columns in
      * associative array $data, which is a row to be inserted or updated in
      * one table, to the values of the corresponding columns of a referenced 
@@ -2829,20 +3005,8 @@ class DB_Table_Database extends DB_Table_Base
      * whose keys are specified by $data_key, to the values of database 
      * columns whose names are specified in $filt_key. 
      *
-     * Simple case: If parameters $data_key and $filt_key are null, and
-     * <code>
-     *     $data = array( 'c1' => $v1, 'c2' => $v2, 'c3' => $v3)
-     * </code>
-     * then buildFilter($data) returns a string 
-     * <code>
-     *     "c1 => $val1 AND c2 => $val2 AND c3 = $v3"
-     * </code>
-     * in which the values $v1, $v2, $v3 are replaced by SQL literal values,
-     * quoted and escaped as appropriate for each data type and the backend
-     * RDBMS. 
-     *
-     * General case: Buildfilter returns a SQL logical exprssion that equates
-     * the values of $data whose keys are given in $data_key with the values
+     * General case: _buildFKeyFilter returns a SQL logical expression that 
+     * equates the values of $data whose keys are given in $data_key with the 
      * values of database columns with names given in $filt_key. For example,
      * if
      * <code>
@@ -2855,12 +3019,25 @@ class DB_Table_Database extends DB_Table_Base
      *    "c2 = $v2 AND c5 = $v5 AND c7 = $v7" 
      * </code>
      * in which the values $v2, $v5, $v7 are replaced by properly quoted 
-     * SQL literal values. If, in the above example, $data_key = 'k5' and 
-     * $filt_key = 'c5', then the function will return
+     * SQL literal values. If, in the above example, $data_key = 'k5' 
+     * and $filt_key = 'c5', then the function will return
      * <code>
      *    "c5 = $v5" 
      * </code>
      * where (again) $v5 is replaced by an SQL literal. 
+     *
+     * Simple case: If parameters $data_key and $filt_key are null, the 
+     * behavior is the same as that of the DB_Table_Base::buildFilter() method. 
+     * For example, if
+     * <code>
+     *     $data = array( 'c1' => $v1, 'c2' => $v2, 'c3' => $v3)
+     * </code>
+     * then _buildFKeyFilter($data) returns a string 
+     * <code>
+     *     "c1 => $val1 AND c2 => $val2 AND c3 = $v3"
+     * </code>
+     * in which the values $v1, $v2, $v3 are replaced by SQL literal values,
+     * quoted and escaped as appropriate for each data type and the backend.
      *
      * Quoting is done by the DB_Table_Database::quote() method, based on
      * the php type of the values in $array.  The treatment of null values 
@@ -2963,22 +3140,27 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function quote($value)
+
     /**
-    * Returns SQL literal string representation of a php value
-    *
-    * If $value is: 
-    *    - a string, return the string enquoted and escaped
-    *    - a number, return cast of number to string, without quotes
-    *    - a boolean, return '1' for true and '0' for false
-    *    - null, return the string 'NULL'
-    * 
-    * @param  mixed  $value 
-    * @return string representation of value as an SQL literal
-    * 
-    * @see DB_Common::quoteSmart()
-    * @see MDB2::quote()
-    * @access public
-    */
+     * Returns SQL literal string representation of a php value
+     *
+     * Calls MDB2::quote() or DB_Common::quoteSmart() to enquote and
+     * escape string values. If $value is: 
+     *    - a string, return the string enquoted and escaped
+     *    - a number, return cast of number to string, without quotes
+     *    - a boolean, return '1' for true and '0' for false
+     *    - null, return the string 'NULL'
+     * 
+     * @param  mixed  $value 
+     * @return string Representation of value as an SQL literal
+     * 
+     * @access public
+     *
+     * @see DB_Common::quoteSmart()
+     * @see MDB2::quote()
+     */
     function quote($value)
     {
         if (is_bool($value)) {
@@ -2992,6 +3174,9 @@ class DB_Table_Database extends DB_Table_Base
         return (string) $value;
     }
     
+    // }}}
+    // {{{ function __sleep()
+
     /**
      * Serializes all table references and sets $db = null, $backend = null
      *
@@ -3012,21 +3197,31 @@ class DB_Table_Database extends DB_Table_Base
         return array_keys(get_object_vars($this));
     }
 
+    // }}}
+    // {{{ function __wakeup()
+
     /**
-     * Unserializes child DB_Table objects
+     * Unserializes DB_Table_Database object and all child DB_Table objects
      *
-     * Immediately after unserialization, a DB_Table_Databse object 
-     * has null $db and $backend properties, and each of its child 
-     * DB_Table objects has null $db and $backend properties. The
-     * DB_Table_Database::setDB method should be called immediately 
-     * after unserialization to re-establish the database connection, 
-     * like so:
+     * Immediately after unserialization, a DB_Table_Database object 
+     * has null $db and $backend properties, as do all of its child 
+     * DB_Table objects. The DB_Table_Database::setDB method should 
+     * be called immediately after unserialization to re-establish 
+     * the database connection, like so:
      * <code>
      *    $db_object = unserialize($serialized_db);
      *    $db_object->setDB($conn);
      * </code>
      * where $conn is a DB/MDB2 object.  This establishes a DB/MDB2
      * connection for both the parent database and all child tables.
+     *
+     * This method unserializes all of the child DB_Table objects of
+     * a DB_Table_Database object. It must thus have access to the 
+     * definitions of the associated DB_Table subclasses. These are
+     * listed in the $_table_subclass property. If a required subclass 
+     * named $subclass is not defined, the __wakeup() method attempts 
+     * to autoload a file "$subclass.php" in the directory specified
+     * by $this->table_subclass_path. 
      *
      * @return void
      * @access public
@@ -3051,6 +3246,9 @@ class DB_Table_Database extends DB_Table_Base
         }
     }
 
+    // }}}
+    // {{{ function toXML()
+
     /**
      * Returns XML string representation of database declaration
      *
@@ -3069,6 +3267,9 @@ class DB_Table_Database extends DB_Table_Base
         return implode("\n", $s);
     }
 
+    // }}}
+    // {{{ function fromXML($xml_string, $conn)
+
     /**
      * Returns a DB_Table_Database object constructed from an XML string
      *
@@ -3079,7 +3280,12 @@ class DB_Table_Database extends DB_Table_Base
      * with PHP 4. 
      *
      * @param  string XML string representation
-     * @return object DB_Table_Database object on success, or error on failure
+     * @return object DB_Table_Database object on success (PEAR_Error on failure)
+     *
+     * @throws PEAR_Error if:
+     *    - PHP version is not >= 5.0.0 (...DATABASE_ERR_PHP_VERSION )
+     *    - Parsing by simpleXML fails (...DATABASE_ERR_XML_PARSE )
+     *
      * @access public
      */
     function fromXML($xml_string, $conn)
@@ -3238,6 +3444,8 @@ class DB_Table_Database extends DB_Table_Base
 
         return $database_obj;
     }
+
+    // }}}
 
     // }}}
 }
