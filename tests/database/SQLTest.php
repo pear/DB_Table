@@ -6,13 +6,11 @@ require_once 'DatabaseTest.php';
  */
 class SQLTest extends DatabaseTest {
 
-    var $insert = false;
+    var $insert   = false;
+    var $data_dir = 'SQLTest';
 
     function testQuoteString()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testQuoteString";
-        }
         $result = $this->conn->quote("This is not a number");
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -22,9 +20,6 @@ class SQLTest extends DatabaseTest {
 
     function testQuoteInteger()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testQuoteInteger";
-        }
         $result = $this->db->quote(256);
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -34,9 +29,6 @@ class SQLTest extends DatabaseTest {
  
     function testQuoteFloat()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testQuoteFloat";
-        }
         $result = $this->db->quote(2.56);
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -46,9 +38,6 @@ class SQLTest extends DatabaseTest {
  
     function testQuoteBooleanFalse()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testQuoteBooleanFalse";
-        }
         $result = $this->db->quote(false);
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -58,9 +47,6 @@ class SQLTest extends DatabaseTest {
  
     function testQuoteNull()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testQuoteNull";
-        }
         $result = $this->db->quote(null);
         if ($this->verbose > 0) {
             print "\n" . $result;
@@ -70,9 +56,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFilter1() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter1";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -86,9 +69,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFilter2() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFilter2";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -103,9 +83,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFKeyFilter1() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFKeyFilter1";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -120,9 +97,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFKeyFilter2() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFKeyFilter3";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -137,9 +111,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFKeyFilter4() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFKeyFilter4";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -156,9 +127,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFKeyFilter5() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFKeyFilter5";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -175,9 +143,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFKeyFilter7() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFKeyFilter7";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -214,9 +179,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFKeyFilter9() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFKeyFilter9";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -232,9 +194,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildFKeyFilter10() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildFKeyFilter10";
-        }
         $data['col1'] = 1;
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
@@ -269,9 +228,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildSQL1() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildSQL1";
-        }
         $db =& $this->db;
         $query = array(
            'select' => 'FirstName, LastName, Building, Street, City',
@@ -287,9 +243,6 @@ class SQLTest extends DatabaseTest {
        
     function testBuildSQL2() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildSQL2";
-        }
         $db =& $this->db;
         $query = array(
            'select' => 'Street, count(Building)',
@@ -306,9 +259,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildSQL3() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildSQL3";
-        }
         $db =& $this->db;
         $result = $db->buildSQL(1);
         if (PEAR::isError($result)){
@@ -321,9 +271,6 @@ class SQLTest extends DatabaseTest {
 
     function testBuildSQL4() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testBuildSQL4";
-        }
         $db =& $this->db;
         $result = $db->buildSQL('not_a_key');
         if (PEAR::isError($result)){
