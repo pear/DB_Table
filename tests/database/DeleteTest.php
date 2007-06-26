@@ -8,9 +8,6 @@ class DeleteTest extends DatabaseTest
 
     function testDeleteRef1()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testDeleteRef1";
-        }
         if ($this->verbose > 0) {
             print "\n" . "Delete reference Address => Street";
         }
@@ -78,9 +75,6 @@ class DeleteTest extends DatabaseTest
 
     function testDeleteRef2()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testDeleteRef2";
-        }
         if ($this->verbose > 0) {
             print "\n" . "Delete reference PersonAddress => Person";
         }
@@ -149,9 +143,6 @@ class DeleteTest extends DatabaseTest
 
     function testDeleteTable1()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testDeleteTable1";
-        }
         if ($this->verbose > 0) {
             print "\n" . "Delete Table Person";
         }
@@ -269,9 +260,6 @@ class DeleteTest extends DatabaseTest
 
     function testDeleteTable2()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testDeleteTable2";
-        }
         if ($this->verbose > 0) {
             print "\n" . "Delete Table PersonAddress";
         }
@@ -388,9 +376,6 @@ class DeleteTest extends DatabaseTest
 
     function testDeleteTable3()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testDeleteTable3";
-        }
         if ($this->verbose > 0) {
             print "\n" . "Delete Table Address";
         }
