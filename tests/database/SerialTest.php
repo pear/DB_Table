@@ -1,15 +1,10 @@
 <?php
-#require_once 'PHPUnit/TestCase.php';
-#require_once 'PHPUnit2/Framework/TestCase.php';
-#require_once 'DB/Table/Database.php';
 require_once 'DatabaseTest.php';
 
-#class SerialTest extends PHPUnit_TestCase {
-#class SerialTest extends PHPUnit2_Framework_TestCase {
 class SerialTest extends DatabaseTest {
 
-     var $insert = false;
-#
+     var $insert   = false;
+ 
      function setUp() 
      {
          parent::setUp();
@@ -23,7 +18,6 @@ class SerialTest extends DatabaseTest {
     function testGetTable1()
     {
         // Test get of entire $table property
-        print "\n" . ">testGetTable1";
         $db =& $this->db;
         $table = $db->getTable();
         if (PEAR::isError($table)) {
@@ -41,7 +35,6 @@ class SerialTest extends DatabaseTest {
     function testGetPrimaryKey1()
     {
         // Test get of entire $primary_key property
-        print "\n" . ">testGetPrimaryKey1";
         $db =& $this->db;
         $primary_key = $db->getPrimaryKey();
         if (PEAR::isError($primary_key)) {
@@ -63,7 +56,6 @@ class SerialTest extends DatabaseTest {
  
     function testGetRef1() 
     {
-        print "\n" . ">testGetRef1";
         $db =& $this->db;
         $ref = $db->getRef();
         if (PEAR::isError($ref)) {
@@ -85,7 +77,6 @@ class SerialTest extends DatabaseTest {
 
     function testGetRefTo1() 
     {
-        print "\n" . ">testGetRefTo1";
         $db =& $this->db;
         $ref_to = $db->getRefTo();
         if (PEAR::isError($ref_to)) {
@@ -107,7 +98,6 @@ class SerialTest extends DatabaseTest {
 
     function testGetLink1() 
     {
-        print "\n" . ">testGetLink1";
         $db =& $this->db;
         $link = $db->getLink();
         if (PEAR::isError($link)) {
@@ -130,7 +120,6 @@ class SerialTest extends DatabaseTest {
     function testGetCol1() 
     {
         // Test get of entire column property
-        print "\n" . ">testGetCol1";
         $db =& $this->db;
         $col = $db->getCol();
         /*
@@ -144,7 +133,6 @@ class SerialTest extends DatabaseTest {
     function testGetForeignCol1() 
     {
         // Test get of entire column property
-        print "\n" . ">testGetForeignCol1";
         $db =& $this->db;
         $foreign_col = $db->getForeignCol();
         $this->assertEquals($foreign_col, $this->foreign_col);
