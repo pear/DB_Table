@@ -8,9 +8,6 @@ class GetTest extends DatabaseTest {
     function testGetTable1()
     {
         // Test get of entire $table property"
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetTable1";
-        }
         $db =& $this->db;
         $table = $db->getTable();
         if (PEAR::isError($table)) {
@@ -28,9 +25,6 @@ class GetTest extends DatabaseTest {
     function testGetTable2()
     {
         // Test get of entire $table['Person'] property
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetTable2";
-        }
         $db =& $this->db;
         $table = $db->getTable('Person');
         if (PEAR::isError($table)) {
@@ -48,9 +42,6 @@ class GetTest extends DatabaseTest {
     function testGetTable3()
     {
         // Test get of invalid table name
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetTable3";
-        }
         $db =& $this->db;
         $table = $db->getTable('Thwack');
         if (PEAR::isError($table)) {
@@ -67,9 +58,6 @@ class GetTest extends DatabaseTest {
     function testGetPrimaryKey1()
     {
         // Test get of entire $primary_key property
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetPrimaryKey1";
-        }
         $db =& $this->db;
         $primary_key = $db->getPrimaryKey();
         if (PEAR::isError($primary_key)) {
@@ -92,9 +80,6 @@ class GetTest extends DatabaseTest {
     function testGetPrimaryKey2()
     {
         // Test get of $primary_key['Person'] 
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetPrimaryKey2";
-        }
         $db =& $this->db;
         $primary_key = $db->getPrimaryKey('Person');
         if (PEAR::isError($primary_key)) {
@@ -117,9 +102,6 @@ class GetTest extends DatabaseTest {
     function testGetPrimaryKey3()
     {
         // Test get of $primary_key with invalid Table name
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetPrimaryKey3";
-        }
         $db =& $this->db;
         $primary_key = $db->getPrimaryKey('Thwack');
         if (PEAR::isError($primary_key)) {
@@ -136,9 +118,6 @@ class GetTest extends DatabaseTest {
     function testTableSubclass1()
     {
         // Test get of entire $table_subclass property
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetTableSubclass1";
-        }
         $db =& $this->db;
         $table_subclass = $db->getTableSubclass();
         if (PEAR::isError($table_subclass)) {
@@ -160,9 +139,6 @@ class GetTest extends DatabaseTest {
 
     function testGetRef1() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetRef1";
-        }
         $db =& $this->db;
         $ref = $db->getRef();
         if (PEAR::isError($ref)) {
@@ -185,9 +161,6 @@ class GetTest extends DatabaseTest {
     function testGetRef2() 
     {
         // Test get of $ref['PersonAddress'], which should be an array
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetRef2";
-        }
         $db =& $this->db;
         $ref = $db->getRef('PersonAddress');
         if (PEAR::isError($ref)) {
@@ -210,9 +183,6 @@ class GetTest extends DatabaseTest {
     function testGetRef3() 
     {
         // Test get of $ref['Person'], which should return null
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetRef3";
-        }
         $db =& $this->db;
         $ref = $db->getRef('Person');
         if (PEAR::isError($ref)) {
@@ -227,9 +197,6 @@ class GetTest extends DatabaseTest {
     function testGetRef4() 
     {
         // Test get of $ref['PersonAddress']['Person'], which should be an array
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetRef4";
-        }
         $db =& $this->db;
         $ref = $db->getRef('PersonAddress', 'Person');
         if (PEAR::isError($ref)) {
@@ -251,9 +218,6 @@ class GetTest extends DatabaseTest {
 
     function testGetRefTo1() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetRefTo1";
-        }
         $db =& $this->db;
         $ref_to = $db->getRefTo();
         if (PEAR::isError($ref_to)) {
@@ -276,9 +240,6 @@ class GetTest extends DatabaseTest {
     function testGetRefTo2() 
     {
         // Test get of $ref_to['Person'], which should be an array
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetRefTo2";
-        }
         $db =& $this->db;
         $ref_to = $db->getRefTo('Person');
         if (PEAR::isError($ref_to)) {
@@ -301,9 +262,6 @@ class GetTest extends DatabaseTest {
     function testGetRefTo3() 
     {
         // Test get of $ref_to['PersonAddress'], which should return null
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetRefTo3";
-        }
         $db =& $this->db;
         $ref_to = $db->getRefTo('PersonAddress');
         if (PEAR::isError($ref_to)) {
@@ -317,9 +275,6 @@ class GetTest extends DatabaseTest {
 
     function testGetLink1() 
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetLink1";
-        }
         $db =& $this->db;
         $link = $db->getLink();
         if (PEAR::isError($link)) {
@@ -342,9 +297,6 @@ class GetTest extends DatabaseTest {
     function testGetLink2() 
     {
         // Test get of $link['Person'], which should be an array
-        if ($this->verbose > -1) {
-            print "\n" . '>testGetLink2';
-        }
         $db =& $this->db;
         $link = $db->getLink('Person');
         if (PEAR::isError($link)) {
@@ -367,9 +319,6 @@ class GetTest extends DatabaseTest {
     function testGetLink3() 
     {
         // Test get of $link['PersonAddress'], which should return null
-        if ($this->verbose > -1) {
-            print "\n" . '>testGetLink3';
-        }
         $db =& $this->db;
         $link = $db->getLink('PersonAddress');
         if (PEAR::isError($link)) {
@@ -384,9 +333,6 @@ class GetTest extends DatabaseTest {
     function testGetLink4() 
     {
         // Test get of $link['Person']['Address'], which should be an array
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetLink4";
-        }
         $db =& $this->db;
         $link = $db->getLink('Person', 'Address');
         if (PEAR::isError($link)) {
@@ -409,9 +355,6 @@ class GetTest extends DatabaseTest {
     function testGetCol1() 
     {
         // Test get of entire column property
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetCol1";
-        }
         $db =& $this->db;
         $col = $db->getCol();
         $this->assertEquals($col, $this->col);
@@ -420,9 +363,6 @@ class GetTest extends DatabaseTest {
     function testGetCol2() 
     {
         // Test get of col['Building']
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetCol2";
-        }
         $db =& $this->db;
         $col = $db->getCol('Building');
         $this->assertEquals($col, $this->col['Building']);
@@ -431,9 +371,6 @@ class GetTest extends DatabaseTest {
     function testGetForeignCol1() 
     {
         // Test get of entire column property
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetForeignCol1";
-        }
         $db =& $this->db;
         $foreign_col = $db->getForeignCol();
         $this->assertEquals($foreign_col, $this->foreign_col);
@@ -442,9 +379,6 @@ class GetTest extends DatabaseTest {
     function testGetForeignCol2() 
     {
         // Test get of entire column property
-        if ($this->verbose > -1) {
-            print "\n" . ">testGetForeignCol2";
-        }
         $db =& $this->db;
         $foreign_col = $db->getForeignCol('PersonID');
         $this->assertEquals($foreign_col, $this->foreign_col['PersonID']);
@@ -453,9 +387,6 @@ class GetTest extends DatabaseTest {
     function testValidCol1()
     {
         // Test validCol('Building')
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol1";
-        }
         $db =& $this->db;
         $name = implode('.', $db->validCol('Building'));
         $this->assertEquals('Address.Building', $name);
@@ -464,9 +395,6 @@ class GetTest extends DatabaseTest {
     function testValidCol1b()
     {
         // Test validCol('Building')
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol1b";
-        }
         $db =& $this->db;
         $from = array('Address');
         $name = implode('.', $db->validCol('City', $from));
@@ -475,9 +403,6 @@ class GetTest extends DatabaseTest {
 
     function testValidCol2()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol2";
-        }
         $db =& $this->db;
         $name = implode('.', $db->validCol('PersonID'));
         $this->assertEquals('Person.PersonID', $name);
@@ -485,9 +410,6 @@ class GetTest extends DatabaseTest {
 
     function testValidCol2b()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol2b";
-        }
         $db =& $this->db;
         $from = array('PersonPhone');
         $name = implode('.', $db->validCol('PersonID', $from));
@@ -496,9 +418,6 @@ class GetTest extends DatabaseTest {
 
     function testValidCol3()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol3";
-        }
         $db =& $this->db;
         $name = implode('.', $db->validCol('PersonID2'));
         $this->assertEquals('PersonAddress.PersonID2', $name);
@@ -506,9 +425,6 @@ class GetTest extends DatabaseTest {
 
     function testValidCol4()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol4";
-        }
         $db =& $this->db;
         $name = implode('.', $db->validCol('Person.FirstName'));
         $this->assertEquals('Person.FirstName', $name);
@@ -517,9 +433,6 @@ class GetTest extends DatabaseTest {
     function testValidCol5()
     {
         // validCol('Thwack.Building')
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol5";
-        }
         $db =& $this->db;
         $result = $db->validCol('Person.Thingy');
         $success = false;
@@ -535,9 +448,6 @@ class GetTest extends DatabaseTest {
     function testValidCol6()
     {
         // validCol('Thwack.Building')
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol6";
-        }
         $db =& $this->db;
         $result = $db->validCol('Thwack.Building');
         $success = false;
@@ -552,9 +462,6 @@ class GetTest extends DatabaseTest {
 
     function testValidCol7()
     {
-        if ($this->verbose > -1) {
-            print "\n" . ">testValidCol7";
-        }
         $db =& $this->db;
         $result = $db->validCol('Street');
         if (PEAR::isError($result)) {
