@@ -1,20 +1,20 @@
 <?php
 #require_once 'PHPUnit/TestCase.php';
-require_once 'PHPUnit2/Framework/TestCase.php';
 require_once 'DB/Table/Database.php';
+require_once '../DataTestCase.php';
 
-#class DatbaseBaseTest extends PHPUnit_TestCase {
-class DatabaseTest extends PHPUnit2_Framework_TestCase {
+class DatabaseTest extends DataTestCase {
 
     var $insert  = true;
 
-    var $name    = null;
+    var $db_name = null;
     var $conn    = null;
     var $db      = null;
     var $db_conn = null;
-    var $verbose = null;
     var $fetchmode_assoc = null;
     var $fetchmode_order = null;
+
+    var $verbose = 2;
 
     function setUp() 
     {
@@ -26,11 +26,10 @@ class DatabaseTest extends PHPUnit2_Framework_TestCase {
         }
         $db->setTableSubclassPath('db1');
 
-        $this->name    = $db_name;
+        $this->db_name = $db_name;
         $this->conn    =& $conn;
         $this->db      =& $db;
         $this->db_conn = $db_conn;
-        $this->verbose = $verbose;
 
         if ($this->db->backend == 'mdb2') {
             $this->fetchmode_assoc = MDB2_FETCHMODE_ASSOC;
@@ -51,9 +50,17 @@ class DatabaseTest extends PHPUnit2_Framework_TestCase {
                 $this->$table_name = $array;
             }
         } 
+
+        // Print announcement of test method name
+        if ($this->verbose > -1) {
+            print "\n>" . $this->getName();
+        }
+
     }
 
     function tearDown() {
+
+        // Drop all tables from database
         if ($this->insert) {
             if (!$this->db_conn) {
                // print "\nDropping Database";
@@ -74,22 +81,6 @@ class DatabaseTest extends PHPUnit2_Framework_TestCase {
         }
     }
 
-    function print_result($result, $name) {
-        if ($this->verbose > 1) {
-            if ($name) {
-                print "\nContents of $name";
-            }
-            foreach ($result as $row) {
-                $s = array();
-                foreach ($row as $key => $value){
-                    $s[] = "$value";
-                }
-                print "\n" . implode(', ',$s);
-            }
-        }
-    }
-
 }
 
 ?>
-
