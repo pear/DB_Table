@@ -601,7 +601,7 @@ class DB_Table_Generator
             }
             if (isset($t['notnull'])) {
                 if ($t['notnull']) {
-                   $col['required'] = true;
+                   $col['require'] = true;
                 }
             }
             if (isset($t['autoincrement'])) {
@@ -610,14 +610,14 @@ class DB_Table_Generator
             if (isset($t['flags'])){ 
                 $flags = $t['flags'];
                 if (preg_match('/not[ _]null/i',$flags)) {
-                    $col['required'] = true;
+                    $col['require'] = true;
                 }
                 if (preg_match("/(auto_increment|nextval\()/i", $flags)) {
                     $this->auto_inc_col[$table] = $name;
                 } 
             }
-            $required = isset($col['required']) ? $col['required'] : false;
-            if ($required) {
+            $require = isset($col['require']) ? $col['require'] : false;
+            if ($require) {
                 if (isset($t['default'])) {
                     $default = $t['default'];
                     $type    = $col['type'];
