@@ -39,11 +39,11 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-06-27</date>
- <time>17:30:00</time>
+ <date>?</date>
+ <time>?</time>
  <version>
-  <release>1.5.0</release>
-  <api>1.5.0</api>
+  <release>?</release>
+  <api>?</api>
  </version>
  <stability>
    <release>stable</release>
@@ -51,17 +51,11 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
  </stability>
  <license uri="http://www.gnu.org/copyleft/lesser.html">LGPL</license>
  <notes>
-This is the first stable release that contains some signficant enhancements to DB_Table. The main changes since release 1.4.0 are:
-- A new DB_Table_Database class, which contains a model of relationships between tables. The class contains methods to simplify the construction of joins, check foreign key validity, and emulate referentially triggered ON DELETE and ON UPDATE actions. 
-- A new DB_Table_Generator class, which generates PHP code necessary for an existing database.  Generates a skeleton DB_Table subclass definition for each table in the database.  
-- A new DB_Table_Base class, as an abstract parent class for DB_Table and DB_Table_Database.
-- Added auto-increment column declarations to DB_Table
-- Select*() methods can now process query arrays passed as arguments (as well as stored queries).
-- XML support, using the MDB2 XML schema. XML Serialization and unserialization of the database model.
-- Full unit tests for DB_Table_Database.
-- Full documentation added to the PEAR manual. 
 
-The only changes since release 1.5.0RC3 are changes to the organization of the DB_Table_Database unit tests, and inclusion of a simple form of regression testing. See tests/database/README.
+- Bug #12190: missing error return in DB_Table_Manager::create() 
+  (thanks to Carsten Wiedmann for the patch)
+- Bug #12247: 'require' attribute is name 'required' in Generator
+  (thanks to Gregor Gramlich)
  </notes>
  <contents>
    <dir name="/">

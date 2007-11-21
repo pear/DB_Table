@@ -263,8 +263,17 @@ class DB_Table_Manager {
             if ($backend == 'mdb2') {
 
                 // get the declaration string
-                $column[$colname] = DB_Table_Manager::getDeclareMDB2($type,
+                $result = DB_Table_Manager::getDeclareMDB2($type,
                     $size, $scope, $require, $default, $max_scope);
+
+                // did it work?
+                if (PEAR::isError($result)) {
+                    $result->userinfo .= " ('$colname')";
+                    return $result;
+                }
+
+                // add the declaration to the array of all columns
+                $column[$colname] = $result;
 
             } else {
 
