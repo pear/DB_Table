@@ -446,7 +446,7 @@ class DB_Table_Generator
      * the DB_Table_Manager class to obtain index definitions.
      *
      * @param   $table string name of table
-     * @return  void
+     * @return  mixed  true on success, PEAR Error on failure
      * @access  public
      */
     function getTableDefinition($table) 
@@ -469,6 +469,13 @@ class DB_Table_Generator
             $this->columns[$table] = $defs;
 
         } else {
+            // Temporarily change 'portability' MDB2 option
+            $portability = $this->db->getOption('portability');
+            $this->db->setOption('portability',
+                MDB2_PORTABILITY_ALL ^ MDB2_PORTABILITY_FIX_CASE);
+
+            $this->db->loadModule('Manager');
+            $this->db->loadModule('Reverse');
 
             // Columns
             $defs =  $db->reverse->tableInfo($table);
@@ -702,9 +709,12 @@ class DB_Table_Generator
         }
 
         if ($this->backend == 'mdb2') {
-            // Restore original MDB2 idxname_format
+            // Restore original MDB2 'idxname_format' and 'portability'
             $db->setOption('idxname_format', $idxname_format);
+            $db->setOption('portability', $portability);
         }
+
+        return true;
     }
 
 // }}}
@@ -863,7 +873,7 @@ class DB_Table_Generator
      *     $generator->generateTableClassFiles();
      * </code>
      *
-     * @return void
+     * @return mixed true on success, PEAR Error on failure
      * @access public 
      */
     function generateTableClassFiles() 
@@ -892,7 +902,10 @@ class DB_Table_Generator
                 $s = array();
                 $s[] = "<?php";
                 $s[] = "require_once '{$this->extends_file}';\n";
-                $this->getTableDefinition($table);
+                $return = $this->getTableDefinition($table);
+                if (PEAR::isError($return)) {
+                    return $return;
+                }
                 $s[] = $this->buildTableClass($table) ;
                 $s[] = '?>';
                 $out = implode($s,"\n");
@@ -902,6 +915,7 @@ class DB_Table_Generator
             }
         }
 
+        return true;
     }
 
 // }}}

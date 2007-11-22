@@ -57,6 +57,8 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   (thanks to Carsten Wiedmann)
 - Bug #12247: 'require' attribute is name 'required' in Generator
   (thanks to Gregor Gramlich)
+- Bug #12497: Generator works only with DB, but not with MDB2
+  (thanks to Carsten Wiedmann for the patch)
  </notes>
  <contents>
    <dir name="/">
