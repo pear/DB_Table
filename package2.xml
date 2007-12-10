@@ -59,6 +59,10 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   (thanks to Gregor Gramlich)
 - Bug #12497: Generator works only with DB, but not with MDB2
   (thanks to Carsten Wiedmann for the patch)
+- Request #12510: various optimizations (mostly coding standards) and
+  corrections (missing error return call, change MDB2's portability mode only
+  temporarily) 
+  (thanks to Carsten Wiedmann for the patch)
  </notes>
  <contents>
    <dir name="/">
@@ -73,7 +77,9 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
          <file name="Manager.php" role="php" />
          <file name="QuickForm.php" role="php" />
          <file name="Valid.php" role="php" />
-         <file name="Generator.php" role="php" />
+         <file name="Generator.php" role="php">
+           <tasks:replace from="@package_version@" to="version" type="package-info" />
+         </file>
          <file name="XML.php" role="php" />
          <dir name="Manager">
            <file name="ibase.php" role="php" />
