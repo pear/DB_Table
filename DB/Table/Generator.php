@@ -153,7 +153,7 @@ foreach ($GLOBALS['_DB_TABLE_GENERATOR']['default_error'] as $code => $message) 
  * $database, instantiate a MDB2 or DB object named $db that connects
  * to the database of interest, and execute the following code:
  * <code>
- *     $generator = DB_Table_Generator($db, $database);
+ *     $generator = new DB_Table_Generator($db, $database);
  *     $generator->class_write_path = $class_write_path;
  *     $generator->generateTableClassFiles();
  *     $generator->generateDatabaseFile();
@@ -174,7 +174,7 @@ foreach ($GLOBALS['_DB_TABLE_GENERATOR']['default_error'] as $code => $message) 
  * calling either of these methods. Code can be generated for three
  * tables named 'table1', 'table2', and 'table3' as follows:
  * <code>
- *     $generator = DB_Table_Generator($db, $database);
+ *     $generator = new DB_Table_Generator($db, $database);
  *     $generator->class_write_path = $class_write_path;
  *     $generator->tables = array('table1', 'table2', 'table3');
  *     $generator->generateTableClassFiles();
@@ -942,7 +942,7 @@ class DB_Table_Generator
      *
      * Usage:
      * <code>
-     *     $generator = DB_Table_Generator($db, $database);
+     *     $generator = new DB_Table_Generator($db, $database);
      *     echo $generator->buildTablesClasses();
      * </code>
      *
@@ -985,7 +985,7 @@ class DB_Table_Generator
      *
      * Usage:
      * <code>
-     *     $generator = DB_Table_Generator($db, $database);
+     *     $generator = new DB_Table_Generator($db, $database);
      *     $generator->generateTableClassFiles();
      * </code>
      *
@@ -1058,7 +1058,7 @@ class DB_Table_Generator
      *
      * Usage:
      * <code>
-     *     $generator = DB_Table_Generator($db, $database);
+     *     $generator = new DB_Table_Generator($db, $database);
      *     $generator->generateTableClassFiles();
      *     $generator->generateDatabaseFile();
      * </code>
