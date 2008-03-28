@@ -615,6 +615,19 @@ class DB_Table_QuickForm {
 
             break;
 
+        case 'link':
+
+            $element =& HTML_QuickForm::createElement(
+                $col['qf_type'],
+                $elemname,
+                $col['qf_label'],
+                $col['qf_href'], // link href
+                $setval,  // link text
+                $col['qf_attrs']
+            );
+
+            break;
+
         case 'reset':
         case 'submit':
 

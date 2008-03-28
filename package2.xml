@@ -52,6 +52,11 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
  <license uri="http://opensource.org/licenses/bsd-license.php">New BSD</license>
  <notes>
 - this package is now licensed under the New BSD license
+- Request #12136: support for 'qf_type' == 'link' is now available, providing
+  access to the "link" element of HTML_QuickForm; the link href needs to be
+  specified in the 'qf_href' key, the link text needs to be specified in the
+  'qf_setvalue' key
+  (thanks to Diederick Huijbers)
 - Bug #12190: missing error return in DB_Table_Manager::create() 
   (thanks to Carsten Wiedmann for the patch)
 - Bug #12208: wrong verification of clob fields with mysql(i) backend
