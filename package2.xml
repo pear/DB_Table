@@ -39,8 +39,8 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2008-01-01</date>
- <time>12:00:00</time>
+ <date>2008-03-28</date>
+ <time>21:20:00</time>
  <version>
   <release>1.5.1</release>
   <api>1.5.1</api>
