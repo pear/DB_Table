@@ -43,7 +43,7 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
  <time>12:00:00</time>
  <version>
   <release>1.5.1</release>
-  <api>1.5.0</api>
+  <api>1.5.1</api>
  </version>
  <stability>
    <release>stable</release>
@@ -64,6 +64,9 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   corrections (missing error return call, change MDB2's portability mode only
   temporarily) 
   (thanks to Carsten Wiedmann for the patch)
+- Request #13267: constructor's $table parameter is now optional; this change
+  allows to set a fixed table name via the $table property in the DB_Table
+  subclass
  </notes>
  <contents>
    <dir name="/">

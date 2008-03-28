@@ -275,6 +275,12 @@ define('DB_TABLE_ERR_ALTER_INDEX_IMPOS', -36);
 define('DB_TABLE_ERR_AUTO_INC_COL', -37);
 
 /**
+ * Error code at instantiation time when both the $table parameter
+ * and the $table class property are missing.
+ */
+define('DB_TABLE_ERR_TABLE_NAME_MISSING', -38);
+
+/**
  * The DB_Table_Base parent class
  */
 require_once 'DB/Table/Base.php';
@@ -482,7 +488,8 @@ $GLOBALS['_DB_TABLE']['default_error'] = array(
     DB_TABLE_ERR_DECLARE_PRIM_SQLITE => 'SQLite does not support primary keys',
     DB_TABLE_ERR_ALTER_TABLE_IMPOS   => 'Alter table failed: changing the field type not possible',
     DB_TABLE_ERR_ALTER_INDEX_IMPOS   => 'Alter table failed: changing the index/constraint not possible',
-    DB_TABLE_ERR_AUTO_INC_COL        => 'Illegal auto-increment column definition'
+    DB_TABLE_ERR_AUTO_INC_COL        => 'Illegal auto-increment column definition',
+    DB_TABLE_ERR_TABLE_NAME_MISSING  => 'Table name missing in constructor and class'
 );
 
 // merge default and user-defined error messages
@@ -632,8 +639,11 @@ class DB_Table extends DB_Table_Base
      * @return object DB_Table
      * @access public
      */
-    function DB_Table(&$db, $table, $create = false)
+    function DB_Table(&$db, $table = null, $create = false)
     {
+        // Identify the class for error handling by parent class
+        $this->_primary_subclass = 'DB_TABLE';
+
         // is the first argument a DB/MDB2 object?
         $this->backend = null;
         if (is_subclass_of($db, 'db_common')) {
@@ -649,10 +659,15 @@ class DB_Table extends DB_Table_Base
         
         // set the class properties
         $this->db =& $db;
-        $this->table = $table;
-
-        // Identify the class for error handling by parent class
-        $this->_primary_subclass = 'DB_TABLE';
+        if (is_null($table)) {
+            // $table parameter not given => check $table class property
+            if (is_null($this->table)) {
+                $this->error =& DB_Table::throwError(DB_TABLE_ERR_TABLE_NAME_MISSING);
+                return;
+            }
+        } else {
+            $this->table = $table;
+        }
         
         // is the RDBMS supported?
         $phptype = $db->phptype;
