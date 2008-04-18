@@ -486,7 +486,7 @@ class DB_Table_Generator
             $this->tables = $this->db->manager->listTables();
 
             // Restore original MDB2 'portability'
-            $db->setOption('portability', $portability);
+            $this->db->setOption('portability', $portability);
         }
         if (PEAR::isError($this->tables)) {
             $error        = $this->tables;
@@ -526,16 +526,17 @@ class DB_Table_Generator
             }
         }
         */
-        $db =& $this->db;
+
         if ($this->backend == 'db') {
 
-            $defs = $db->tableInfo($table);
+            $defs = $this->db->tableInfo($table);
             if (PEAR::isError($defs)) {
                 return $defs;
             }
             $this->columns[$table] = $defs;
 
         } else {
+
             // Temporarily change 'portability' MDB2 option
             $portability = $this->db->getOption('portability');
             $this->db->setOption('portability',
@@ -545,7 +546,7 @@ class DB_Table_Generator
             $this->db->loadModule('Reverse');
 
             // Columns
-            $defs = $db->reverse->tableInfo($table);
+            $defs = $this->db->reverse->tableInfo($table);
             if (PEAR::isError($defs)) {
                 return $defs;
             }
@@ -560,8 +561,8 @@ class DB_Table_Generator
             $this->columns[$table] = $defs;
 
             // Temporarily set 'idxname_format' MDB2 option to $this->idx_format
-            $idxname_format = $db->getOption('idxname_format');
-            $db->setOption('idxname_format', $this->idxname_format);
+            $idxname_format = $this->db->getOption('idxname_format');
+            $this->db->setOption('idxname_format', $this->idxname_format);
         }
 
         // Default - no auto increment column
@@ -718,7 +719,7 @@ class DB_Table_Generator
         }
 
         // Constraints/Indexes
-        $DB_indexes = DB_Table_Manager::getIndexes($db, $table);
+        $DB_indexes = DB_Table_Manager::getIndexes($this->db, $table);
         if (PEAR::isError($DB_indexes)) {
             return $DB_indexes;
         }
@@ -778,8 +779,8 @@ class DB_Table_Generator
 
         if ($this->backend == 'mdb2') {
             // Restore original MDB2 'idxname_format' and 'portability'
-            $db->setOption('idxname_format', $idxname_format);
-            $db->setOption('portability', $portability);
+            $this->db->setOption('idxname_format', $idxname_format);
+            $this->db->setOption('portability', $portability);
         }
 
         return true;
