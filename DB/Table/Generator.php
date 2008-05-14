@@ -493,6 +493,8 @@ class DB_Table_Generator
             $this->tables = null;
             return $error;
         } else {
+            $this->tables = array_map(array($this, 'tableName'),
+                                      $this->tables);
             return true;
         }
     }
@@ -1284,6 +1286,25 @@ class DB_Table_Generator
     {
         $name = preg_replace('/[^A-Z0-9]/i', '_', ucfirst(trim($table)));
         return  $name . $this->class_suffix;
+    }
+
+    // }}}
+    // {{{ function tableName($table)
+
+    /**
+     * Returns a valid variable name from a table name
+     *
+     * Converts all non-alphanumeric characters to '_'. Override
+     * this if you want something else.
+     *
+     * @param string $table name of table
+     *
+     * @return string variable name;
+     * @access public
+     */
+    function tableName($table)
+    {
+        return preg_replace('/[^A-Z0-9]/i', '_', trim($table));
     }
 
     // }}}
