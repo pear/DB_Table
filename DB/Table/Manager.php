@@ -1600,7 +1600,12 @@ class DB_Table_Manager {
                 }
                 return $index_fields;
             }
-            $index_type = current(array_keys($index_fields));
+            // get the first key of $index_fields that has boolean true value
+            foreach ($index_fields as $index_type => $value) {
+                if ($value === true) {
+                    break;
+                }
+            }
             $indexes[$index_type][$table_idx_tmp] = array_keys($index_fields['fields']);
         }
 
