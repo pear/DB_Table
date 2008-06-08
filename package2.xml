@@ -39,10 +39,10 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2008-06-06</date>
- <time>14:30:00</time>
+ <date>2008-06-08</date>
+ <time>19:45:00</time>
  <version>
-  <release>1.5.3</release>
+  <release>1.5.4</release>
   <api>1.5.1</api>
  </version>
  <stability>
@@ -51,8 +51,7 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
  </stability>
  <license uri="http://opensource.org/licenses/bsd-license.php">New BSD</license>
  <notes>
-- Bug #14082: fixed index type detection (due to changes in MDB2 2.5.x)
-  (thanks to Gregor Gramlich for the patch)
+- Bug #14106: "PRIMARY" not allowed as index name 
  </notes>
  <contents>
    <dir name="/">

@@ -1464,7 +1464,7 @@ class DB_Table_Manager {
             $GLOBALS['_DB_TABLE']['reserved']
         );
 
-        if ($reserved) {
+        if ($reserved && !($type == 'primary' && $idxname == 'PRIMARY')) {
             return DB_Table::throwError(
                 DB_TABLE_ERR_DECLARE_IDXNAME,
                 "('$idxname')"
