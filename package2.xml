@@ -39,10 +39,10 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2008-06-08</date>
- <time>19:45:00</time>
+ <date>2008-06-17</date>
+ <time>15:00:00</time>
  <version>
-  <release>1.5.4</release>
+  <release>1.5.5</release>
   <api>1.5.1</api>
  </version>
  <stability>
@@ -51,7 +51,7 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
  </stability>
  <license uri="http://opensource.org/licenses/bsd-license.php">New BSD</license>
  <notes>
-- Bug #14106: "PRIMARY" not allowed as index name 
+- fix for installation problems on some Linux installations, no code changes
  </notes>
  <contents>
    <dir name="/">
