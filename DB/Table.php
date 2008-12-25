@@ -502,6 +502,11 @@ foreach ($GLOBALS['_DB_TABLE']['default_error'] as $code => $message) {
     }
 }
 
+// set default value for length check switch
+if (!isset($GLOBALS['_DB_TABLE']['disable_length_check'])) {
+    $GLOBALS['_DB_TABLE']['disable_length_check'] = false;
+}
+
 /**
  * DB_Table is a database API and data type SQL abstraction class.
  * 
@@ -1404,7 +1409,9 @@ class DB_Table extends DB_Table_Base
         // name, so the max length here is less 4 chars. we have to
         // check here because the sequence will be created automatically
         // by PEAR DB/MDB2, which will not check for length on its own.
-        if (strlen($seq_name) > 26) {
+        if (   $GLOBALS['_DB_TABLE']['disable_length_check'] === false
+            && strlen($seq_name) > 26
+           ) {
             return DB_Table::throwError(
                 DB_TABLE_ERR_SEQ_STRLEN,
                 " ('$seq_name')"

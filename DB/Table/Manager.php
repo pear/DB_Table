@@ -1205,7 +1205,9 @@ class DB_Table_Manager {
     function _validateTableName($tablename)
     {
         // is the table name too long?
-        if (strlen($tablename) > 30) {
+        if (   $GLOBALS['_DB_TABLE']['disable_length_check'] === false
+            && strlen($tablename) > 30
+           ) {
             return DB_Table::throwError(
                 DB_TABLE_ERR_TABLE_STRLEN,
                 " ('$tablename')"
@@ -1245,7 +1247,9 @@ class DB_Table_Manager {
         }
  
         // column name must be no longer than 30 chars
-        if (strlen($colname) > 30) {
+        if (   $GLOBALS['_DB_TABLE']['disable_length_check'] === false
+            && strlen($colname) > 30
+           ) {
             return DB_Table::throwError(
                 DB_TABLE_ERR_DECLARE_STRLEN,
                 "('$colname')"
@@ -1516,7 +1520,9 @@ class DB_Table_Manager {
             
         // now check the length; must be under 30 chars to
         // soothe Oracle.
-        if (strlen($newIdxName) > 30) {
+        if (   $GLOBALS['_DB_TABLE']['disable_length_check'] === false
+            && strlen($newIdxName) > 30
+           ) {
             return DB_Table::throwError(
                 DB_TABLE_ERR_IDX_STRLEN,
                 "'$idxname' ('$newIdxName')"

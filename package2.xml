@@ -39,11 +39,11 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
   <email>wiesemann@php.net</email>
   <active>yes</active>
  </lead>
- <date>2008-06-17</date>
- <time>15:00:00</time>
+ <date>2008-12-25</date>
+ <time>21:00:00</time>
  <version>
-  <release>1.5.5</release>
-  <api>1.5.1</api>
+  <release>1.5.6</release>
+  <api>1.5.2</api>
  </version>
  <stability>
    <release>stable</release>
@@ -51,7 +51,11 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
  </stability>
  <license uri="http://opensource.org/licenses/bsd-license.php">New BSD</license>
  <notes>
-- fix for installation problems on some Linux installations, no code changes
+- Feature Request #14262: due to Oracle's limitations, table/column/index
+  names were restricted to a maximum length of 30 characters; by setting
+  $GLOBALS['_DB_TABLE']['disable_length_check'] to (boolean) true, this
+  check can now be disabled (attention: your code will not be compatible
+  with Oracle anymore if you're using longer names)
  </notes>
  <contents>
    <dir name="/">
