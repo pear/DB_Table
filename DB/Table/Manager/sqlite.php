@@ -5,13 +5,13 @@
 /**
  * Index, constraint and alter methods for DB_Table usage with
  * PEAR::DB as backend.
- * 
+ *
  * The code in this class was adopted from the MDB2 PEAR package.
- * 
+ *
  * PHP versions 4 and 5
  *
  * LICENSE:
- * 
+ *
  * Copyright (c) 1997-2007, Lorenzo Alberton <l.alberton@quipo.it>
  *                          Lukas Smith <smith@pooteeweet.org>
  *                          Paul M. Jones <pmjones@php.net>
@@ -26,9 +26,9 @@
  *    * Redistributions of source code must retain the above copyright
  *      notice, this list of conditions and the following disclaimer.
  *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the 
+ *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * The names of the authors may not be used to endorse or promote products 
+ *    * The names of the authors may not be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
@@ -61,9 +61,9 @@ require_once 'DB/Table.php';
 /**
  * Index, constraint and alter methods for DB_Table usage with
  * PEAR::DB as backend.
- * 
+ *
  * The code in this class was adopted from the MDB2 PEAR package.
- * 
+ *
  * @category Database
  * @package  DB_Table
  * @author   Lorenzo Alberton <l.alberton@quipo.it>
@@ -75,15 +75,15 @@ require_once 'DB/Table.php';
 class DB_Table_Manager_sqlite {
 
     /**
-    * 
+    *
     * The PEAR DB object that connects to the database.
-    * 
+    *
     * @access private
-    * 
+    *
     * @var object
-    * 
+    *
     */
-    
+
     var $_db = null;
 
 
@@ -167,7 +167,7 @@ class DB_Table_Manager_sqlite {
         $start_pos = strpos($sql, '(');
         $end_pos = strrpos($sql, ')');
         $column_names = substr($sql, $start_pos+1, $end_pos-$start_pos-1);
-        $column_names = split(',', $column_names);
+        $column_names = explode(',', $column_names);
 
         $definition = array();
         $count = count($column_names);
@@ -207,7 +207,7 @@ class DB_Table_Manager_sqlite {
         $start_pos = strpos($sql, '(');
         $end_pos = strrpos($sql, ')');
         $column_names = substr($sql, $start_pos+1, $end_pos-$start_pos-1);
-        $column_names = split(',', $column_names);
+        $column_names = explode(',', $column_names);
 
         $definition = array();
         $definition['unique'] = true;
@@ -225,7 +225,7 @@ class DB_Table_Manager_sqlite {
         return $definition;
     }
 
-    
+
     /**
      * drop existing index
      *
