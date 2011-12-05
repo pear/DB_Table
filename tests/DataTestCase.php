@@ -1,6 +1,5 @@
 <?php
-#require_once 'PHPUnit/TestCase.php';
-require_once 'PHPUnit2/Framework/TestCase.php';
+require_once 'PHPUnit/Framework/TestCase.php';
 
 /**
  * Abstract class of for TestCase objects that can do regression tests.
@@ -10,12 +9,12 @@ require_once 'PHPUnit2/Framework/TestCase.php';
  * file in 'write mode', and then comparing the stored values to those
  * obtained for in later regression tests, in 'read mode'.
  *
- * The public addData() method is used to submit a PHP variable for 
- * regression testing. In write mode, the addData() method stores the value 
- * of the variable during the test, and then exports all of the registered 
- * variables in a single test method to a data file at the end of the test.  
- * In read mode, the addData() calls the assertEquals() method to compare 
- * the current value to a value of that variable that was stored in the 
+ * The public addData() method is used to submit a PHP variable for
+ * regression testing. In write mode, the addData() method stores the value
+ * of the variable during the test, and then exports all of the registered
+ * variables in a single test method to a data file at the end of the test.
+ * In read mode, the addData() calls the assertEquals() method to compare
+ * the current value to a value of that variable that was stored in the
  * data file.
  *
  * One data file is created for each test method that calls the addData()
@@ -24,22 +23,21 @@ require_once 'PHPUnit2/Framework/TestCase.php';
  * the corresponding test method, plus a '.php' extension. In write mode,
  * the file associated with a test method is created and written after
  * the test itself returns, but before the tearDown() method is called.
- * In read mode, the data file (if it exists) is imported after the setUp() 
+ * In read mode, the data file (if it exists) is imported after the setUp()
  * method is called, but before the test method is run.
  */
-#class DataTestCase extends PHPUnit_TestCase {
-class DataTestCase extends PHPUnit2_Framework_TestCase {
+class DataTestCase extends PHPUnit_Framework_TestCase {
 
     /**
-     * Path to data files for all tests in this TestCase class. 
+     * Path to data files for all tests in this TestCase class.
      *
      * This path must be set in the TestCase class definition. If no
-     * regression testing is needed for any method in the class, leave 
-     * this null, and no data files will be created or imported. 
+     * regression testing is needed for any method in the class, leave
+     * this null, and no data files will be created or imported.
      *
      * @var string $data_dir
      */
-    var $data_dir  = null; 
+    var $data_dir  = null;
 
     /**
      * Data mode: Set to 'r' for read mode (default) or 'w' for write mode.
@@ -52,14 +50,14 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
      * @var string $data_dir
      * @access public
      */
-    var $data_mode = 'r'; 
+    var $data_mode = 'r';
 
     /**
      * File handle for the data file for a single test
      *
      * @var handle $data_file
      */
-    var $data_file = null; 
+    var $data_file = null;
 
     /**
      * Level of 'verbosity' of report printed to standard output
@@ -78,14 +76,14 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
      * Returns the path to the data file for this test
      *
      * The directory is given by $this->data_dir, and the base filename is
-     * the name of the test method, $this->getName(), with a '.php' extension. 
+     * the name of the test method, $this->getName(), with a '.php' extension.
      *
      * Returns null if $this->data_dir is null
      *
-     * @return string Path to data file for a single test 
+     * @return string Path to data file for a single test
      * @access public
      */
-    function dataFilePath() 
+    function dataFilePath()
     {
         if ($this->data_dir) {
             return $this->data_dir . '/' . $this->getName() . '.php';
@@ -97,10 +95,10 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
     /**
      * Registers a PHP variable $data for regression testa
      *
-     * Write mode: If $this->data_mode == 'w', add $data to the $this->data 
+     * Write mode: If $this->data_mode == 'w', add $data to the $this->data
      * array, which contains variables to be exported to the data file
      *
-     * Read mode: If $this->data_mode == 'r', compare $data to the expected 
+     * Read mode: If $this->data_mode == 'r', compare $data to the expected
      * value of the same variable, which is obtained from the data file
      *
      * In either mode, $data is also printed if $this->verbose > 1
@@ -110,7 +108,7 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
      * @return void
      * @access public
      */
-    function addData($data, $name) 
+    function addData($data, $name)
     {
         if ($this->data_mode == 'w') {
             $this->data[$name] = $data;
@@ -133,8 +131,8 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
     /**
      * Write data file for this test method. Used only in write mode.
      *
-     * If $this->data_mode = 'w', this method is used to export all of 
-     * the the data values in the $data property array to the data file. 
+     * If $this->data_mode = 'w', this method is used to export all of
+     * the the data values in the $data property array to the data file.
      * The method is called from the runBare() method after the actual
      * actual test is complete, before calling the tearDown() method.
      *
@@ -143,10 +141,10 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
      * @return void
      * @access public
      */
-    function writeDataFile() 
+    function writeDataFile()
     {
 
-        // If no data has been stored, return without writing file 
+        // If no data has been stored, return without writing file
         if (!$this->data) {
             return;
         }
@@ -183,12 +181,12 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
 
     /**
      * Write one line of $text to the data file
-     * 
+     *
      * @param string $text Text line to be written
      * @return void
      * @access public
      */
-    function writeLine($text = '') 
+    function writeLine($text = '')
     {
         if ($this->data_file) {
             fwrite($this->data_file, "\n" . $text);
@@ -229,12 +227,12 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
      * @return void
      * @access public
      */
-    function assertNotError($result) 
+    function assertNotError($result)
     {
         if (PEAR::isError($result)){
             print "\n" . $result->getMessage();
             $this->assertTrue(false);
-        } 
+        }
     }
 
     /**
@@ -246,7 +244,7 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
      * @return void
      * @access public
      */
-    function assertIsError($result, $msg = null) 
+    function assertIsError($result, $msg = null)
     {
         if (PEAR::isError($result)){
             if ($this->verbose > 0) {
@@ -266,7 +264,7 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
      *
      * @access public
      */
-    public function runBare() 
+    public function runBare()
     {
         $catchedException = NULL;
 
@@ -307,5 +305,3 @@ class DataTestCase extends PHPUnit2_Framework_TestCase {
     }
 
 }
-
-?>

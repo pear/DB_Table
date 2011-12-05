@@ -1,7 +1,6 @@
 <?php
-#require_once 'PHPUnit/TestCase.php';
 require_once 'DB/Table/Database.php';
-require_once '../DataTestCase.php';
+require_once dirname(__FILE__) . '/../DataTestCase.php';
 
 class DatabaseTest extends DataTestCase {
 
@@ -16,7 +15,7 @@ class DatabaseTest extends DataTestCase {
 
     var $verbose = 2;
 
-    function setUp() 
+    function setUp()
     {
         // Create DB_Table_Database object $db and insert data
         if ($this->insert) {
@@ -49,7 +48,7 @@ class DatabaseTest extends DataTestCase {
             foreach ($table_arrays as $table_name => $array) {
                 $this->$table_name = $array;
             }
-        } 
+        }
 
         // Print announcement of test method name
         if ($this->verbose > -1) {
