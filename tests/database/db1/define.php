@@ -7,7 +7,7 @@
 require_once 'DB/Table/Database.php';
 
 // Create DB/MDB2 connnection
-require 'config.php';
+require dirname(dirname(dirname(__FILE__))) . '/config.php';
 
 // Construct DB_Table objects
 
@@ -57,7 +57,7 @@ $PersonPhone->idx['PersonID'] = array('cols' => 'PersonID', 'type' => 'normal');
 $PersonPhone->idx['PhoneID'] = array('cols' => 'PhoneID', 'type' => 'normal');
 */
 
-require_once 'db1/PersonPhone_Table.php';
+require_once dirname(__FILE__) . '/PersonPhone_Table.php';
 $PersonPhone = new PersonPhone_Table($conn, 'PersonPhone');
 
 $Street = new DB_Table($conn, 'Street');

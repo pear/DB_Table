@@ -1,5 +1,6 @@
 <?php
-require_once 'PHPUnit/Framework/TestCase.php';
+require_once 'PHPUnit/Autoload.php';
+require_once dirname(__FILE__) . '/config.php';
 
 /**
  * Abstract class of for TestCase objects that can do regression tests.
@@ -62,6 +63,8 @@ class DataTestCase extends PHPUnit_Framework_TestCase {
     /**
      * Level of 'verbosity' of report printed to standard output
      *
+     * Set via the $verbose variable in config.php.
+     *
      * Verbosity levels:
      *   - $verbose = -1 No output except '.' for sucessful tests
      *   - $verbose =  0 Print name of each test method
@@ -70,7 +73,7 @@ class DataTestCase extends PHPUnit_Framework_TestCase {
      *
      * @var integer $verbose
      */
-    var $verbose   = 0;
+    var $verbose;
 
     /**
      * Returns the path to the data file for this test

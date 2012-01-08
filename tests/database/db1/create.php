@@ -1,7 +1,7 @@
 <?php
 
-require 'db1/define.php';
-#require 'db1/DataFile.php';
+require dirname(__FILE__) . '/define.php';
+#require dirname(__FILE__) . '/DataFile.php';
 
 if (!$db_conn) {  
     // Create database (MySQL specific code)

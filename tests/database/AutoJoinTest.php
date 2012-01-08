@@ -1,14 +1,9 @@
 <?php
-#require_once 'PHPUnit/TestCase.php';
-#require_once 'PHPUnit2/Framework/TestCase.php';
-#require_once 'DB/Table/Database.php';
-require_once 'DatabaseTest.php';
+require_once dirname(__FILE__) . '/DatabaseTest.php';
 
 /**
  * Tests _quote(), buildFilter() and buildSQL string processing methods
  */
-#class AutoJoinTest extends PHPUnit_TestCase {
-#class AutoJoinTest extends PHPUnit2_Framework_TestCase {
 class AutoJoinTest extends DatabaseTest {
 
     var $insert = false;

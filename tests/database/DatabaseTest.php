@@ -13,15 +13,15 @@ class DatabaseTest extends DataTestCase {
     var $fetchmode_assoc = null;
     var $fetchmode_order = null;
 
-    var $verbose = 2;
-
     function setUp()
     {
+        $this->verbose = $GLOBALS['verbose'];
+
         // Create DB_Table_Database object $db and insert data
         if ($this->insert) {
-            require 'db1/insert.php';
+            require dirname(__FILE__) . '/db1/insert.php';
         } else {
-            require 'db1/define.php';
+            require dirname(__FILE__) . '/db1/define.php';
         }
         $db->setTableSubclassPath('db1');
 

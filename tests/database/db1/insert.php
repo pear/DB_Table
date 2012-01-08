@@ -1,6 +1,6 @@
 <?php
-require 'db1/create.php';
-require 'db1/data.php';
+require dirname(__FILE__) . '/create.php';
+require dirname(__FILE__) . '/data.php';
 
 $PersonID  = 0;
 $AddressID = 0;

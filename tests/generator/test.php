@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require dirname(dirname(__FILE__)) . '/config.php';
 
 // Set default database (MySQL specific code)
 if (!$db_conn) {

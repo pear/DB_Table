@@ -1,5 +1,5 @@
 <?php
-require_once 'DatabaseTest.php';
+require_once dirname(__FILE__) . '/DatabaseTest.php';
 
 class SerialTest extends DatabaseTest {
 
