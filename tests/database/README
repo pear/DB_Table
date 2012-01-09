@@ -1,20 +1,14 @@
+Short instructions
+------------------
 
-This directory contains unit tests for the DB_Table_Database class, 
-which use the PHPUnit2 framework (for PHP 5) or PHPUnit (for PHP 4). 
-All of the Unit test classes extent a base class DatabaseClass, 
-which contains setUp() and teardown() methods for a test database.  
-DatabaseClass extends an abstract class DataTestClass (defined in
-the DB_Table/tests directory above), which is a more generic class 
-for TestCase objects that can do regression testing of variable 
-values. 
+  1) Set the environment variables appropriate for your DBMS authentication
+     method.  See tests/config.php for more information.
 
-As distributed, the tests are set up to use PHPUnit2, but can be 
-converted to the PHP 4 PHPUnit package by changing two lines in the 
-tests/DataTestClass.php file - the require_once line for the test 
-framework, and the class definition line, which includes the name 
-of the generic unit test class that is being extended. In both 
-cases, the lines required for PHP 4 PHPUnit framework are commented 
-out in the distributed file. 
+  2) Run 'phpunit -d error_reporting=22527 tests' from the command line
+     from the root directory of this checkout.
+
+Other information
+-----------------
 
 The data files used in regression tests for each TestCase class are
 stored in directories, such that the name of each directory is the
@@ -24,35 +18,3 @@ only for methods and classes that use regression tests.
 
 Examples of successful outputs of each test case are given in the
 /tests/database/out directory.
-
-Short instructions
-------------------
-
-To run PHPUnit2 unit tests for DB_Table_Database:
-
-    1) Install PHPUnit2 or PHPUnit. If using the PHP 4 PHPUnit class
-    modify DatabaseClass as described above.
-
-    2) Copy the DB_Table/tests/config.php-dist file to
-    DB_Table/tests/databse/config.php in this directory, and edit the
-    the parts of the DSN in DB_Table/tests/database/config.php file to 
-    allow connection to your RDBMS server. This file may be configured
-    to test with either DB or MDB2 backend. If using a database other
-    than MySQL, some other changes in this file and to the setup and
-    teardown methods of the DatabaseTest class may be required (see
-    below). 
-
-    3) Create an empty database named (by default) 'TestDB1'
-
-    4) cd into the DB_Table/tests/database directory (this directory).
-    For each file named TestName_Test.php in this directory, issue 
-    the command "phpunit TestName" from the command line.
-
-config.php file
----------------
-The tests will repeatedly create and drop all of the tables of a database 
-named $db_name.  In the distributed version, this database is named 
-'Test_DB1' by default. The setUp() and tearDown() methods create and
-drop new tables for each test instance, but not the database itself.
-An empty database with named $db_name must be created before the tests 
-are run.
