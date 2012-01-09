@@ -16,6 +16,7 @@ class DatabaseTest extends DataTestCase {
     function setUp()
     {
         $this->verbose = $GLOBALS['verbose'];
+        $this->name = $GLOBALS['db_name'];
 
         // Create DB_Table_Database object $db and insert data
         if ($this->insert) {
@@ -63,7 +64,7 @@ class DatabaseTest extends DataTestCase {
         if ($this->insert) {
             if (!$this->db_conn) {
                // print "\nDropping Database";
-               $this->conn->query("DROP DATABASE {$this->name}");
+//               $this->conn->query("DROP DATABASE {$this->name}");
             } else {
                $tables = $this->db->getTable();
                foreach ($tables as $table) {

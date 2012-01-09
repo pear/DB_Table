@@ -25,13 +25,11 @@ class AutoJoinTest extends DatabaseTest {
         $cols[] = 'City';
         $report = $db->autoJoin($cols);
         if (PEAR::isError($report)) {
-            print "\n" . $report->getMessage();
-            $this->assertTrue(false);
+            $this->fail($report->getUserInfo());
         }
         $result = $db->buildSQL($report, "City = 'MINNETONKA'");
         if (PEAR::isError($result)) {
-            print "\n" . $result->getMessage();
-            $this->assertTrue(false);
+            $this->fail($result->getUserInfo());
         } else {
             $expect = <<<EOT
 SELECT Street.Street, Person.FirstName, Person.LastName, Phone.PhoneNumber, Address.Building, Street.City
@@ -49,7 +47,7 @@ EOT;
                 print "\n" . $result;
             }
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
 
@@ -69,13 +67,11 @@ EOT;
         $tables[] = 'PersonPhone'; 
         $report = $db->autoJoin($cols, $tables);
         if (PEAR::isError($report)) {
-            print "\n" . $report->getMessage();
-            $this->assertTrue(false);
+            $this->fail($report->getUserInfo());
         }
         $result = $db->buildSQL($report);
         if (PEAR::isError($result)) {
-            print "\n" . $result->getMessage();
-            $this->assertTrue(false);
+            $this->fail($result->getUserInfo());
         } else {
             $expect = <<<EOT
 SELECT PersonPhone.PersonID, Person.FirstName, Person.LastName
@@ -86,7 +82,7 @@ EOT;
                 print "\n" . $result;
             }
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testJoin3() 
@@ -107,14 +103,11 @@ EOT;
         $cols[] = 'ZipCode';
         $report = $this->db->autoJoin($cols);
         if (PEAR::isError($report)) {
-            print "\n" . $report->getMessage();
-            $this->assertTrue(false);
-            return;
+            $this->fail($report->getUserInfo());
         }
         $result = $db->buildSQL($report, "Street.City = 'MINNETONKA'");
         if (PEAR::isError($result)) {
-            print "\n" . $result->getMessage();
-            $this->assertTrue(false);
+            $this->fail($result->getUserInfo());
         } else {
             $expect = <<<EOT
 SELECT Person.LastName, Person.FirstName, Phone.PhoneNumber, Address.Building, Street.Street, Street.City, Address.ZipCode
@@ -132,7 +125,7 @@ EOT;
                 print "\n" . $result;
             }
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
 
     }
 

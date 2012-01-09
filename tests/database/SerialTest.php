@@ -19,123 +19,60 @@ class SerialTest extends DatabaseTest {
     {
         // Test get of entire $table property
         $db =& $this->db;
-        $table = $db->getTable();
-        if (PEAR::isError($table)) {
-            $success = false;
-            print $table->getMessage();
-        } else {
-            $success = is_array($table);
-            if (!$success) {
-                print "Table is not an array in testGetTable1";
-            }
-        }
-        $this->assertTrue($success);
+        $result = $db->getTable();
+        $this->assertNotError($result);
+        $this->assertInternalType('array', $result);
     }
  
     function testGetPrimaryKey1()
     {
         // Test get of entire $primary_key property
         $db =& $this->db;
-        $primary_key = $db->getPrimaryKey();
-        if (PEAR::isError($primary_key)) {
-            $success = false;
-            print $primary_key->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($primary_key);
-            if (!$success) {
-                print "PrimaryKey is not an array in testGetPrimaryKey1";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($primary_key, $this->primary_key);
-            }
-        }
+        $result = $db->getPrimaryKey();
+        $this->assertNotError($result);
+        $this->assertEquals($this->primary_key, $result);
     }
  
     function testGetRef1() 
     {
         $db =& $this->db;
-        $ref = $db->getRef();
-        if (PEAR::isError($ref)) {
-            $success = false;
-            print $ref->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($ref);
-            if (!$success) {
-                print "\nRef is not an array in testGetRef1";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($ref, $this->ref);
-            }
-        }
+        $result = $db->getRef();
+        $this->assertNotError($result);
+        $this->assertEquals($this->ref, $result);
     }
 
     function testGetRefTo1() 
     {
         $db =& $this->db;
-        $ref_to = $db->getRefTo();
-        if (PEAR::isError($ref_to)) {
-            $success = false;
-            print $ref_to->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($ref_to);
-            if (!$success) {
-                print "\n" . "RefTo is not an array in testGetRefTo1";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($ref_to, $this->ref_to);
-            }
-        }
+        $result = $db->getRefTo();
+        $this->assertNotError($result);
+        $this->assertEquals($this->ref_to, $result);
     }
 
     function testGetLink1() 
     {
         $db =& $this->db;
-        $link = $db->getLink();
-        if (PEAR::isError($link)) {
-            $success = false;
-            print $link->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($link);
-            if (!$success) {
-                print "\n" . 'Link is not an array in testGetLink1';
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($link, $this->link);
-            }
-        }
+        $result = $db->getLink();
+        $this->assertNotError($result);
+        $this->assertEquals($this->link, $result);
     }
 
     function testGetCol1() 
     {
         // Test get of entire column property
         $db =& $this->db;
-        $col = $db->getCol();
-        /*
-        foreach ($col as $column => $tables) {
-            print "\n" . "$column" . implode(', ', $tables);
-        }
-        */
-        $this->assertEquals($col, $this->col);
+        $result = $db->getCol();
+        $this->assertNotError($result);
+        $this->assertEquals($this->col, $result);
     }
 
     function testGetForeignCol1() 
     {
         // Test get of entire column property
         $db =& $this->db;
-        $foreign_col = $db->getForeignCol();
-        $this->assertEquals($foreign_col, $this->foreign_col);
+        $result = $db->getForeignCol();
+        $this->assertNotError($result);
+        $this->assertEquals($this->foreign_col, $result);
     }
 
 }

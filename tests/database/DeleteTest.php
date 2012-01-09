@@ -14,18 +14,10 @@ class DeleteTest extends DatabaseTest
         $db =& $this->db;
 
         $result = $db->deleteRef('Address', 'Street');
-        if (PEAR::isError($result)) {
-            print $result->getMessage();
-            $this->assertTrue(false);
-            return;
-        }
+        $this->assertNotError($result);
          
         $ref = $db->getRef();
-        if (PEAR::isError($ref)) {
-            print $ref->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref);
         if ($this->verbose > 0) {
             print "\n\nRef:";
             foreach ($ref as $ftable => $references) {
@@ -36,11 +28,7 @@ class DeleteTest extends DatabaseTest
         }
             
         $ref_to = $db->getRefTo();
-        if (PEAR::isError($ref_to)) {
-            print $ref_to->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref_to);
         if ($this->verbose > 0) {
             print "\n\nRefTo:";
             foreach ($ref_to as $rtable => $references) {
@@ -53,11 +41,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $link = $db->getLink();
-        if (PEAR::isError($link)) {
-            print $link->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($link);
         if ($this->verbose > 0) {
             print "\n\nLink:";
             foreach ($link as $table1 => $list) {
@@ -81,18 +65,10 @@ class DeleteTest extends DatabaseTest
         $db =& $this->db;
 
         $result = $db->deleteRef('PersonAddress', 'Person');
-        if (PEAR::isError($result)) {
-            print $result->getMessage();
-            $this->assertTrue(false);
-            return;
-        }
+        $this->assertNotError($result);
  
         $ref = $db->getRef();
-        if (PEAR::isError($ref)) {
-            print $ref->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref);
         if ($this->verbose > 0) {
             print "\n\nRef:";
             foreach ($ref as $ftable => $references) {
@@ -103,11 +79,7 @@ class DeleteTest extends DatabaseTest
         }
             
         $ref_to = $db->getRefTo();
-        if (PEAR::isError($ref_to)) {
-            print $ref_to->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref_to);
         if ($this->verbose > 0) {
             print "\n\nRefTo:";
             foreach ($ref_to as $rtable => $references) {
@@ -120,11 +92,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $link = $db->getLink();
-        if (PEAR::isError($link)) {
-            print $link->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($link);
         if ($this->verbose > 0) {
             print "\n\nLink:";
             foreach ($link as $table1 => $list) {
@@ -149,31 +117,21 @@ class DeleteTest extends DatabaseTest
         $db =& $this->db;
 
         $result = $db->deleteTable('Person');
-        if (PEAR::isError($result)) {
-            print $result->getMessage();
-            $this->assertTrue(false);
-            return;
-        }
+        $this->assertNotError($result);
 
         $table = $db->getTable();
-        if (PEAR::isError($table)) {
-            print $table->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
-        print "\n\nTable: ";
-        $s = array();
-        foreach ($table as $name => $def) {
-            $s[] = $name;
+        $this->assertNotError($table);
+        if ($this->verbose > 0) {
+            print "\n\nTable: ";
+            $s = array();
+            foreach ($table as $name => $def) {
+                $s[] = $name;
+            }
+            print implode(', ', $s);
         }
-        print implode(', ', $s);
 
         $col = $db->getCol();
-        if (PEAR::isError($col)) {
-            print $col->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($col);
         if ($this->verbose > 0) {
             print "\n\nCol:";
             foreach ($col as $column => $tables) {
@@ -186,11 +144,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $foreign_col = $db->getForeignCol();
-        if (PEAR::isError($foreign_col)) {
-            print $col->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($foreign_col);
         if ($this->verbose > 0) {
             print "\n\nForeignCol:";
             foreach ($foreign_col as $column => $tables) {
@@ -204,11 +158,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $ref = $db->getRef();
-        if (PEAR::isError($ref)) {
-            print $ref->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref);
         if ($this->verbose > 0) {
             print "\n\nRef:";
             foreach ($ref as $ftable => $references) {
@@ -219,11 +169,7 @@ class DeleteTest extends DatabaseTest
         }
             
         $ref_to = $db->getRefTo();
-        if (PEAR::isError($ref_to)) {
-            print $ref_to->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref_to);
         if ($this->verbose > 0) {
             print "\n\nRefTo:";
             foreach ($ref_to as $rtable => $references) {
@@ -237,11 +183,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $link = $db->getLink();
-        if (PEAR::isError($link)) {
-            print $link->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($link);
         if ($this->verbose > 0) {
             print "\n\nLink:";
             foreach ($link as $table1 => $list) {
@@ -266,31 +208,21 @@ class DeleteTest extends DatabaseTest
         $db =& $this->db;
 
         $result = $db->deleteTable('PersonAddress');
-        if (PEAR::isError($result)) {
-            print $result->getMessage();
-            $this->assertTrue(false);
-            return;
-        }
+        $this->assertNotError($result);
          
         $table = $db->getTable();
-        if (PEAR::isError($table)) {
-            print $table->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
-        print "\n\nTable: ";
-        $s = array();
-        foreach ($table as $name => $def) {
-            $s[] = $name;
+        $this->assertNotError($table);
+        if ($this->verbose > 0) {
+            print "\n\nTable: ";
+            $s = array();
+            foreach ($table as $name => $def) {
+                $s[] = $name;
+            }
+            print implode(', ', $s);
         }
-        print implode(', ', $s);
 
         $col = $db->getCol();
-        if (PEAR::isError($col)) {
-            print $col->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($col);
         if ($this->verbose > 0) {
             print "\n\nCol:";
             foreach ($col as $column => $tables) {
@@ -303,11 +235,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $foreign_col = $db->getForeignCol();
-        if (PEAR::isError($foreign_col)) {
-            print $col->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($foreign_col);
         if ($this->verbose > 0) {
             print "\n\nForeignCol:";
             foreach ($foreign_col as $column => $tables) {
@@ -321,11 +249,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $ref = $db->getRef();
-        if (PEAR::isError($ref)) {
-            print $ref->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref);
         if ($this->verbose > 0) {
             print "\n\nRef:";
             foreach ($ref as $ftable => $references) {
@@ -336,11 +260,7 @@ class DeleteTest extends DatabaseTest
         }
             
         $ref_to = $db->getRefTo();
-        if (PEAR::isError($ref_to)) {
-            print $ref_to->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref_to);
         if ($this->verbose > 0) {
             print "\n\nRefTo:";
             foreach ($ref_to as $rtable => $references) {
@@ -354,11 +274,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $link = $db->getLink();
-        if (PEAR::isError($link)) {
-            print $link->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($link);
         if ($this->verbose > 0) {
             print "\n\nLink:";
             foreach ($link as $table1 => $list) {
@@ -382,31 +298,21 @@ class DeleteTest extends DatabaseTest
         $db =& $this->db;
 
         $result = $db->deleteTable('Address');
-        if (PEAR::isError($result)) {
-            print $result->getMessage();
-            $this->assertTrue(false);
-            return;
-        }
-         
+        $this->assertNotError($result);
+ 
         $table = $db->getTable();
-        if (PEAR::isError($table)) {
-            print $table->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
-        print "\n\nTable: ";
-        $s = array();
-        foreach ($table as $name => $def) {
-            $s[] = $name;
+        $this->assertNotError($table);
+        if ($this->verbose > 0) {
+            print "\n\nTable: ";
+            $s = array();
+            foreach ($table as $name => $def) {
+                $s[] = $name;
+            }
+            print implode(', ', $s);
         }
-        print implode(', ', $s);
 
         $col = $db->getCol();
-        if (PEAR::isError($col)) {
-            print $col->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($col);
         if ($this->verbose > 0) {
             print "\n\nCol:";
             foreach ($col as $column => $tables) {
@@ -419,11 +325,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $foreign_col = $db->getForeignCol();
-        if (PEAR::isError($foreign_col)) {
-            print $col->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($foreign_col);
         if ($this->verbose > 0) {
             print "\n\nForeignCol:";
             foreach ($foreign_col as $column => $tables) {
@@ -437,11 +339,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $ref = $db->getRef();
-        if (PEAR::isError($ref)) {
-            print $ref->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref);
         if ($this->verbose > 0) {
             print "\n\nRef:";
             foreach ($ref as $ftable => $references) {
@@ -452,11 +350,7 @@ class DeleteTest extends DatabaseTest
         }
             
         $ref_to = $db->getRefTo();
-        if (PEAR::isError($ref_to)) {
-            print $ref_to->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($ref_to);
         if ($this->verbose > 0) {
             print "\n\nRefTo:";
             foreach ($ref_to as $rtable => $references) {
@@ -470,11 +364,7 @@ class DeleteTest extends DatabaseTest
         }
 
         $link = $db->getLink();
-        if (PEAR::isError($link)) {
-            print $link->getMessage();
-            $this->assertTrue(false);
-            return;
-        } 
+        $this->assertNotError($link);
         if ($this->verbose > 0) {
             print "\n\nLink:";
             foreach ($link as $table1 => $list) {

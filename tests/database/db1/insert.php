@@ -21,7 +21,9 @@ foreach ($data as $data_row) {
     // Insert into $DataFile
     $result = $DataFile->insert($data_row);
     if (PEAR::isError($result)){
-        print $result->getMessage()."\n";
+        if ($verbose > -1) {
+            print $result->getMessage()."\n";
+        }
     }
 
     // Create and insert Person record
@@ -38,7 +40,9 @@ foreach ($data as $data_row) {
     $person_row['PersonID'] = $PersonID;
     $person[] = $person_row;
     if (PEAR::isError($result)){
-        print $result->getMessage()."\n";
+        if ($verbose > -1) {
+            print $result->getMessage()."\n";
+        }
     } else {
 
         // Create and insert Street record
@@ -71,7 +75,9 @@ foreach ($data as $data_row) {
         $address_row['AddressID'] = $AddressID;
         $address[] = $address_row;
         if (PEAR::isError($result)){
-            print $result->getMessage()."\n";
+            if ($verbose > -1) {
+                print $result->getMessage()."\n";
+            }
         } else {
             $assoc = array();
             $assoc['PersonID2'] = $PersonID;
@@ -79,7 +85,9 @@ foreach ($data as $data_row) {
             $result = $db->insert('PersonAddress', $assoc);
             $person_address[] = $assoc;
             if (PEAR::isError($result)){
-                print $result->getMessage()."\n";
+                if ($verbose > -1) {
+                    print $result->getMessage()."\n";
+                }
             }
         }
 
@@ -98,7 +106,9 @@ foreach ($data as $data_row) {
             $phone_row['PhoneId'] = $PhoneID;
             $phone[] = $phone_row;
             if (PEAR::isError($result)){
-                print $result->getMessage()."\n";
+                if ($verbose > -1) {
+                    print $result->getMessage()."\n";
+                }
             } else {
                 // Insert PersonPhone Row
                 $assoc = array();
@@ -107,7 +117,9 @@ foreach ($data as $data_row) {
                 $result = $db->insert('PersonPhone', $assoc);
                 $person_phone[] = $assoc;
                 if (PEAR::isError($result)){
-                    print $result->getMessage()."\n";
+                    if ($verbose > -1) {
+                        print $result->getMessage()."\n";
+                    }
                 }
             }
         }

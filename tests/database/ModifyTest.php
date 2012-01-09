@@ -7,6 +7,19 @@ require_once dirname(__FILE__) . '/DatabaseTest.php';
  *
  * Also uses setOnDelete() and setOnUpdate() to modify
  * referentially triggered actions
+ *
+ * --- Person ---
+ *   PersonID: 15
+ *  FirstName: JENNIFER
+ * MiddleName: JEAN
+ *   LastName: MACKENTHUN
+ * NameSuffix: NULL
+ * --- PersonPhone ---
+ *   PersonID: 15  (default 75)
+ *    PhoneID: 13
+ * --- PersonAddress ---
+ *  PersonID2: 15  (default 50)
+ *  AddressID: 15
  */
 class ModifyTest extends DatabaseTest {
 
@@ -91,33 +104,16 @@ class ModifyTest extends DatabaseTest {
         $data['PhoneID']  =  2;
         $result = $this->db->insert('PersonPhone', $data);
         $this->assertNotError($result);
-        $expect = true;
-        $this->assertEquals($result, $expect);
+        $this->assertTrue($result);
 
         // Inspect PersonPhone
-        $report = array('select' => '*',
+        $report = array('select' => implode(', ', array_keys($data)),
                         'from' => 'PersonPhone',
+                        'where' => 'PersonID = 18 and PhoneID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-
-        // Check number of items
-        $this->assertEquals(count($result), count($this->PersonPhone)+1);
-
-        // Search for added row
-        $data['PersonID'] = '18';
-        $data['PhoneID']  = '2';
-        $found = false;
-        foreach ($result as $row) {
-            if ($row == $data) {
-                $found = true;
-            }
-        }
-        if (!$found) {
-            print "\nError during search for missing row - not found";
-            var_export($result);
-        }
-        $this->assertTrue($found);
+        $this->assertEquals($data, $result[0]);
     }
 
     function testInsert2()
@@ -134,36 +130,16 @@ class ModifyTest extends DatabaseTest {
         $data['ZipCode']  = '55345';
         $result = $this->db->insert('Address', $data);
         $this->assertNotError($result);
-        $this->assertEquals($result, true);
+        $this->assertTrue($result);
 
         // Inspect Address 
-        $report = array('select' => '*',
+        $report = array('select' => implode(', ', array_keys($data)),
                         'from' => 'Address',
+                        'where' => "Building = '1357'",
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-
-        // Check number of items
-        $this->assertEquals(count($result), count($this->Address)+1);
-
-        // Search for added row
-        $found = false;
-        $newID = (string) count($this->Address)+1;
-        foreach ($result as $row) {
-            if ($row['AddressID'] == $newID) {
-                $found = true;
-                foreach ($data as $key => $value) {
-                    if ($row[$key] != $value) {
-                        $this->assertTrue(false);
-                        return;
-                    }
-                }
-            }
-        }
-        if (!$found) {
-            print 'New row not found in testInsert';
-        }
-        $this->assertTrue($found);
+        $this->assertEquals($data, $result[0]);
     }
 
     function testInsertForeignKeyCheck1()
@@ -210,42 +186,20 @@ class ModifyTest extends DatabaseTest {
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
+                        'where' => $where,
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-
-        // Check number of items
-        $this->assertEquals(count($result), count($this->PersonPhone)-1);
-
-        // Check that no PersonID == '15' exists
-        foreach ($result as $row) {
-            if ($row['PersonID'] == '15') {
-                $this->assertTrue(false);
-                return;
-            }
-        }
-
-        // Inspect PersonPhone
-        $this->addData($result, 'PersonPhone');
+        $this->assertEquals(array(), $result, 'Should have had no result.');
 
         // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
+                        'where' => 'PersonID2 = 15',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-
-        // Check number of items
-        $this->assertEquals(count($result),count($this->PersonAddress)-1);
-
-        // Check that no row with PersonID2 == 15 still exists
-        foreach ($result as $row) {
-            if ($row['PersonID2'] == '15') {
-                $this->assertTrue(false);
-                return;
-            }
-        }
-        $this->addData($result, 'PersonAddress');
+        $this->assertEquals(array(), $result, 'Should have had no result.');
     }
        
     function testDeleteCascade2()
@@ -253,35 +207,35 @@ class ModifyTest extends DatabaseTest {
         if ($this->verbose > 0) {
             print "\n" . "Cascading delete with multi-column referenced key from Street";
         }
+
         $where  = "Street = 'NORMAN DR'";
         $result = $this->db->delete('Street', $where);
         $this->assertNotError($result);
 
-        // Inspect Street 
+        // Inspect Street
         $report = array('select' => '*',
                         'from'   => 'Street',
+                        'where'  => $where,
                         'fetchmode' => $this->fetchmode_assoc );
         $count = $this->db->selectCount($report);
-        $this->assertEquals($count, '16');
-        if ($this->verbose > 1) {
-            print "\n" . "$count rows remaining in Street"; 
-        }
+        $result = $this->db->select($report);
+        $this->assertEquals(array(), $result, 'Should have had no result.');
 
         // Inspect Address 
-        $report = array('select' => 'AddressID, Building, Street, City',
+        $report = array('select' => '*',
                         'from'   => 'Address',
+                        'where'  => 'AddressID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->assertEquals(count($result),count($this->Address)-2);
-        $this->addData($result, 'Address');
+        $this->assertEquals(array(), $result, 'Should have had no result.');
 
         // Inspect PersonAddress 
-        $report = array('select' => 'PersonID2, AddressID',
+        $report = array('select' => '*',
                         'from'   => 'PersonAddress',
+                        'where'  => 'AddressID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->assertEquals(count($result),count($this->PersonAddress)-2);
-        $this->addData($result, 'PersonAddress');
+        $this->assertEquals(array(), $result, 'Should have had no result.');
     }
 
     function testDeleteNullify1()
@@ -298,38 +252,31 @@ class ModifyTest extends DatabaseTest {
         $result = $this->db->delete('Person', $where);
         $this->assertNotError($result);
 
+        // Inspect Person
+        $report = array('select' => '*',
+                        'from'   => 'Person',
+                        'where'  => $where,
+                        'fetchmode' => $this->fetchmode_assoc );
+        $result = $this->db->select($report);
+        $this->assertEquals(array(), $result, 'Should have had no result.');
+
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
+                        'where' => 'PhoneID = 13',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-        $this->assertEquals(count($result),count($this->PersonPhone));
-        foreach ($result as $row) {
-            if ($row['PhoneID'] == '13') {
-                $this->assertEquals($row['PersonID'],null);
-            }
-        }
-        $this->addData($result, 'PersonPhone');
+        $this->assertNull($result[0]['PersonID']);
 
         // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
+                        'where' => 'AddressID = 15',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-
-        // Check number of rows in PersonAddress
-        $this->assertEquals(count($result), count($this->PersonAddress)-1);
-
-        // Check for rows with PersonID2 == '15'
-        foreach ($result as $row) {
-            if ($row['PersonID2'] == '15') {
-                $this->assertTrue(false);
-                return;
-            }
-        }
-        $this->addData($result, 'PersonAddress');
+        $this->assertEquals(array(), $result, 'Should have had no result.');
     }
         
     function testDeleteNullify2()
@@ -348,26 +295,18 @@ class ModifyTest extends DatabaseTest {
         // Inspect Street
         $report = array('select' => '*',
                         'from'   => 'Street',
+                        'where'  => $where,
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->assertNotError($result);
-        $this->assertEquals(count($result), count($this->Street)-1);
-        $this->addData($result, 'Street');
+        $this->assertEquals(array(), $result, 'Should have had no result.');
 
-        // Inspect Address
-        $report = array('select' => 'AddressID, Building, Street, City',
+        // Inspect Address 
+        $report = array('select' => '*',
                         'from'   => 'Address',
+                        'where'  => 'AddressID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->assertNotError($result);
-        $this->addData($result, 'Address');
-
-        // Inspect PersonAddress
-        $report = array('select' => 'PersonID2, AddressID',
-                        'from'   => 'PersonAddress',
-                        'fetchmode' => $this->fetchmode_assoc );
-        $result = $this->db->select($report);
-        $this->addData($result, 'PersonAddress');
+        $this->assertNull($result[0]['Street']);
     }
 
     function testDeleteDefault1()
@@ -384,19 +323,31 @@ class ModifyTest extends DatabaseTest {
         $result = $this->db->delete('Person', $where);
         $this->assertNotError($result);
 
+        // Inspect Person
+        $report = array('select' => '*',
+                        'from'   => 'Person',
+                        'where'  => $where,
+                        'fetchmode' => $this->fetchmode_assoc );
+        $result = $this->db->select($report);
+        $this->assertEquals(array(), $result, 'Should have had no result.');
+
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
+                        'where' => 'PhoneID = 13',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->addData($result, 'PersonPhone');
+        $this->assertNotError($result);
+        $this->assertEquals(75, $result[0]['PersonID']);
 
         // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
+                        'where' => 'AddressID = 15',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->addData($result, 'PersonAddress');
+        $this->assertNotError($result);
+        $this->assertEquals(array(), $result, 'Should have had no result.');
     }
 
     function testDeleteDefault2()
@@ -415,25 +366,18 @@ class ModifyTest extends DatabaseTest {
         // Inspect Street
         $report = array('select' => '*',
                         'from'   => 'Street',
-                        'fetchmode' => $this->fetchmode_assoc );
-        $count = $this->db->selectCount($report);
-        print "\n" . "$count rows remaining in Street"; 
-
-        // Inspect Address
-        $report = array('select' => 'AddressID, Building, Street, City',
-                        'from'   => 'Address',
+                        'where'  => $where,
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->addData($result, 
-               "Address (ID, Building, Street, City):");
+        $this->assertEquals(array(), $result, 'Should have had no result.');
 
-        // Inspect PersonAddress
+        // Inspect Address 
         $report = array('select' => '*',
-                        'from'   => 'PersonAddress',
+                        'from'   => 'Address',
+                        'where'  => 'AddressID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->addData($result, 'PersonAddress');
-
+        $this->assertEquals('AnyStreet', $result[0]['Street']);
     }
 
     function testDeleteRestrict1()
@@ -448,7 +392,7 @@ class ModifyTest extends DatabaseTest {
 
         $where  = 'PersonID = 15';
         $result = $this->db->delete('Person', $where);
-        $this->assertIsError($result, 'Success of restricted delete');
+        $this->assertIsError($result, 'Restricted delete should have failed');
     }
 
     function testDeleteRestrict2()
@@ -462,7 +406,7 @@ class ModifyTest extends DatabaseTest {
 
         $where  = "Street = 'NORMAN DR'";
         $result = $this->db->delete('Street', $where);
-        $this->assertIsError($result, 'Success of restricted delete');
+        $this->assertIsError($result, 'Restricted delete should have failed');
     }
 
     function testUpdate()
@@ -470,17 +414,12 @@ class ModifyTest extends DatabaseTest {
         if ($this->verbose > 0) {
             print "\n" . "Allowed update of integer foreign key of PersonPhone";
         }
+
         $assoc = array();
         $assoc['PhoneID'] = 9;
         $where = 'PhoneID = 18';
         $result = $this->db->update('PersonPhone', $assoc, $where);
         $this->assertNotError($result);
-        $report = array('select' => '*',
-                        'from' => 'PersonPhone',
-                        'fetchmode' => $this->fetchmode_assoc );
-        $result = $this->db->select($report);
-        $this->assertNotError($result);
-        $this->addData($result, 'PersonPhone');
     }
 
     function testUpdateForeignKeyCheck()
@@ -488,11 +427,12 @@ class ModifyTest extends DatabaseTest {
         if ($this->verbose > 0) {
             print "\n" . "Attempt update with invalid integer foreign key";
         }
+
         $assoc = array();
         $assoc['PhoneID'] = 28;  // beyond range of valid values 
         $where = 'PhoneID = 18';
         $result = $this->db->update('PersonPhone', $assoc, $where);
-        $this->assertIsError($result, 'Success of update with invalid FKey');
+        $this->assertIsError($result, 'Invalid FK update should have failed');
     }
 
     function testUpdateCascade1()
@@ -500,22 +440,37 @@ class ModifyTest extends DatabaseTest {
         if ($this->verbose > 0) {
             print "\n" . "Cascading update of integer primary key of Person";
         }
-        $where = 'PersonID = 13';
+
+        $where = 'PersonID = 15';
         $assoc = array('PersonID' => 38);
         $result = $this->db->update('Person', $assoc, $where);
         $this->assertNotError($result);
+
+        // Inspect Person
+        $report = array('select' => '*',
+                        'from'   => 'Person',
+                        'where'  => 'PersonID = 38',
+                        'fetchmode' => $this->fetchmode_assoc );
+        $result = $this->db->select($report);
+        $this->assertEquals('MACKENTHUN', $result[0]['LastName']);
+
+        // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
+                        'where' => 'PhoneID = 13',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-        $this->addData($result, 'PersonPhone');
+        $this->assertEquals(38, $result[0]['PersonID']);
+
+        // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
+                        'where' => 'AddressID = 15',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-        $this->addData($result, 'PersonAddress');
+        $this->assertEquals(38, $result[0]['PersonID2']);
     }
 
     function testUpdateCascade2()
@@ -523,15 +478,19 @@ class ModifyTest extends DatabaseTest {
         if ($this->verbose > 0) {
             print "\n" ."Cascading update of multi-column referenced key from Street";
         }
+
         $where = "Street = 'NORMAN DR'";
         $data  = array('Street' => 'NOX BOULEVARD', 'City' => 'ANYTOWN');
         $result = $this->db->update('Street', $data, $where);
         $this->assertNotError($result);
-        $report = array('select' => 'AddressID, Building, Street, City',
+
+        // Inspect Address 
+        $report = array('select' => '*',
                         'from'   => 'Address',
+                        'where'  => 'AddressID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->addData($result, 'Address(ID, Building, Street, City)');
+        $this->assertEquals('NOX BOULEVARD', $result[0]['Street']);
     }
 
     function testUpdateNullify1()
@@ -539,28 +498,40 @@ class ModifyTest extends DatabaseTest {
         if ($this->verbose > 0) {
             print "\n" . "Nullifying update of integer primary key of Person";
         }
+
         $this->db->setOnDelete('PersonPhone', 'Person', 'set null');
         $this->db->SetOnUpdate('PersonPhone', 'Person', 'set null');
 
-        $where = 'PersonID = 13';
+        $where = 'PersonID = 15';
         $assoc = array('PersonID' => 38);
         $result = $this->db->update('Person', $assoc, $where);
         $this->assertNotError($result);
 
+        // Inspect Person
+        $report = array('select' => '*',
+                        'from'   => 'Person',
+                        'where'  => 'PersonID = 38',
+                        'fetchmode' => $this->fetchmode_assoc );
+        $result = $this->db->select($report);
+        $this->assertEquals('MACKENTHUN', $result[0]['LastName']);
+
         // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
+                        'where' => 'PhoneID = 13',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-        $this->addData($result, 'PersonPhone');
+        $this->assertNull($result[0]['PersonID']);
+
         // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
+                        'where' => 'AddressID = 15',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-        $this->addData($result, 'PersonAddress');
+        $this->assertEquals(38, $result[0]['PersonID2']);
     }
 
     function testUpdateNullify2()
@@ -577,13 +548,13 @@ class ModifyTest extends DatabaseTest {
         $result = $this->db->update('Street', $data, $where);
         $this->assertNotError($result);
 
-        $report = array('select' => 'AddressID, Building, Street, City',
+        // Inspect Address 
+        $report = array('select' => '*',
                         'from'   => 'Address',
+                        'where'  => 'AddressID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
-        $this->assertNotError($result);
-        $this->addData($result, 
-               'Address (ID, Building, Street, City)');
+        $this->assertNull($result[0]['Street']);
     }
 
     function testUpdateDefault1()
@@ -595,24 +566,36 @@ class ModifyTest extends DatabaseTest {
         $this->db->setOnDelete('PersonPhone', 'Person', 'set default');
         $this->db->SetOnUpdate('PersonPhone', 'Person', 'set default');
 
-        $where = 'PersonID = 13';
+        $where  = 'PersonID = 15';
         $assoc = array('PersonID' => 38);
         $result = $this->db->update('Person', $assoc, $where);
         $this->assertNotError($result);
 
+        // Inspect Person
+        $report = array('select' => '*',
+                        'from'   => 'Person',
+                        'where'  => 'PersonID = 38',
+                        'fetchmode' => $this->fetchmode_assoc );
+        $result = $this->db->select($report);
+        $this->assertEquals('MACKENTHUN', $result[0]['LastName']);
+
+        // Inspect PersonPhone
         $report = array('select' => '*',
                         'from' => 'PersonPhone',
+                        'where' => 'PhoneID = 13',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-        $this->addData($result, 'PersonPhone');
+        $this->assertEquals(75, $result[0]['PersonID']);
 
+        // Inspect PersonAddress
         $report = array('select' => '*',
                         'from' => 'PersonAddress',
+                        'where' => 'AddressID = 15',
                         'fetchmode' => $this->fetchmode_assoc );
         $result = $this->db->select($report);
         $this->assertNotError($result);
-        $this->addData($result, 'PersonAddress');
+        $this->assertEquals(38, $result[0]['PersonID2']);
     }
 
     function testUpdateDefault2()
@@ -620,6 +603,7 @@ class ModifyTest extends DatabaseTest {
         if ($this->verbose > 0) {
             print "\n" ."Nullifying update of multi-column referenced key from Street";
         }
+
         $this->db->setOnDelete('Address', 'Street', 'set default');
         $this->db->SetOnUpdate('Address', 'Street', 'set default');
 
@@ -627,14 +611,14 @@ class ModifyTest extends DatabaseTest {
         $data  = array('Street' => 'NOX BOULEVARD', 'City' => 'ANYTOWN');
         $result = $this->db->update('Street', $data, $where);
         $this->assertNotError($result);
-        $report = array('select' => 
-                        'AddressID, Building, Street, City, StateAbb',
+
+        // Inspect Address 
+        $report = array('select' => '*',
                         'from'   => 'Address',
+                        'where'  => 'AddressID = 2',
                         'fetchmode' => $this->fetchmode_assoc );
-        $this->assertNotError($result);
         $result = $this->db->select($report);
-        $this->addData($result, 
-               'Address(ID, Building, Street, City, StateAbb)');
+        $this->assertEquals('AnyStreet', $result[0]['Street']);
     }
 
     function testUpdateRestrict1()
@@ -648,7 +632,7 @@ class ModifyTest extends DatabaseTest {
         $where = 'PersonID = 13';
         $assoc = array('PersonID' => 38);
         $result = $this->db->update('Person', $assoc, $where);
-        $this->assertIsError($result, 'Success of restricted update');
+        $this->assertIsError($result, 'Restricted update should have failed');
     }
 
     function testUpdateRestrict2()
@@ -662,7 +646,7 @@ class ModifyTest extends DatabaseTest {
         $where = "Street = 'NORMAN DR'";
         $data  = array('Street' => 'NOX BOULEVARD', 'City' => 'ANYTOWN');
         $result = $this->db->update('Street', $data, $where);
-        $this->assertIsError($result, 'Success of restricted update');
+        $this->assertIsError($result, 'Restricted update should have failed');
     }
 
 }

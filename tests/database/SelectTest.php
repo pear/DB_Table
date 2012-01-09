@@ -24,7 +24,7 @@ class SelectTest extends DatabaseTest
                 print "\n\nQuery:\n" . $this->db->buildSQL($sql) . "\n";
             } 
             $this->assertEquals($n_table, $n_result);
-            $this->addData($result, $table_name);
+            // $this->addData($result, $table_name);
         } // end loop over tables
         
     }
@@ -50,8 +50,8 @@ class SelectTest extends DatabaseTest
             print "\n\nQuery:\n" . 
                   $this->db->buildSQL($report, $filter) . "\n";
         }
-        $this->assertEquals(count($result), 10);
-        $this->addData($result, 'Result');
+        $this->assertEquals(10, count($result));
+        // $this->addData($result, 'Result');
     }
 
     function testSelect3()
@@ -78,8 +78,8 @@ class SelectTest extends DatabaseTest
                                    "Street.City = 'MINNETONKA'",
                                    'FirstName') . "\n";
         }
-        $this->assertEquals(count($result), 10);
-        $this->addData($result, 'Result');
+        $this->assertEquals(10, count($result));
+        // $this->addData($result, 'Result');
     }
 
     function testSelect4() 
@@ -124,8 +124,8 @@ class SelectTest extends DatabaseTest
             $data[] = $row;
             $i = $i + 1;
         }
-        $this->assertEquals($i, 10);
-        $this->addData($data, 'Result');
+        $this->assertEquals(10, $i);
+        // $this->addData($data, 'Result');
     }
 
     function testSelectResult2()
@@ -161,8 +161,8 @@ class SelectTest extends DatabaseTest
         }
 
         // Test number of rows and contents of result set
-        $this->assertEquals($i,10);
-        $this->addData($data, 'Result');
+        $this->assertEquals(10, $i);
+        // $this->addData($data, 'Result');
     }
 
     function testSelectResult3() 
@@ -202,7 +202,7 @@ class SelectTest extends DatabaseTest
                   . "\n";
             print "\nCount = $result\n";
         }
-        $this->assertEquals($result, '10');
+        $this->assertEquals('10', $result);
     }
 
     function testSelectCount2()
@@ -227,7 +227,7 @@ class SelectTest extends DatabaseTest
                              "Street.City = 'EDEN PRAIRIE'") . "\n";
             print "\nCount = $result\n";
         }
-        $this->assertEquals($result, '8');
+        $this->assertEquals('8', $result);
     }
 
 }

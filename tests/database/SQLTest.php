@@ -12,46 +12,55 @@ class SQLTest extends DatabaseTest {
     function testQuoteString()
     {
         $result = $this->conn->quote("This is not a number");
+        $this->assertNotError($result);
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, "'This is not a number'");
+        $this->assertEquals("'This is not a number'", $result);
     } 
 
     function testQuoteInteger()
     {
         $result = $this->db->quote(256);
+        $this->assertNotError($result);
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, "256");
+        $this->assertEquals("256", $result);
     }
  
     function testQuoteFloat()
     {
         $result = $this->db->quote(2.56);
+        $this->assertNotError($result);
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, "2.56");
+        if ($this->db->backend == 'mdb2') {
+            $this->assertEquals("2.56", $result);
+        } else {
+            $this->assertEquals("'2.56'", $result);
+        }
     }
  
     function testQuoteBooleanFalse()
     {
         $result = $this->db->quote(false);
+        $this->assertNotError($result);
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, "0");
+        $this->assertEquals("0", $result);
     }
  
     function testQuoteNull()
     {
         $result = $this->db->quote(null);
+        $this->assertNotError($result);
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, "NULL");
+        $this->assertEquals("NULL", $result);
     }
 
     function testBuildFilter1() 
@@ -60,11 +69,12 @@ class SQLTest extends DatabaseTest {
         $data['col2'] = false;
         $data['col3'] = 'anyold string';
         $result = $this->db->buildFilter($data);
+        $this->assertNotError($result);
         $expect = "col1 = 1 AND col2 = 0 AND col3 = 'anyold string'";
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFilter2() 
@@ -74,11 +84,12 @@ class SQLTest extends DatabaseTest {
         $data['col3'] = 'anyold string';
         $data['col4'] = null;
         $result = $this->db->buildFilter($data);
+        $this->assertNotError($result);
         $expect = '';
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFKeyFilter1() 
@@ -88,11 +99,12 @@ class SQLTest extends DatabaseTest {
         $data['col3'] = 'anyold string';
         $data_key = 'col3';
         $result = $this->db->_buildFKeyFilter($data, $data_key);
+        $this->assertNotError($result);
         $expect = "col3 = 'anyold string'";
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFKeyFilter2() 
@@ -102,11 +114,12 @@ class SQLTest extends DatabaseTest {
         $data['col3'] = 'anyold string';
         $data_key = array('col1', 'col3');
         $result = $this->db->_buildFKeyFilter($data, $data_key);
+        $this->assertNotError($result);
         $expect = "col1 = 1 AND col3 = 'anyold string'";
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFKeyFilter4() 
@@ -118,11 +131,12 @@ class SQLTest extends DatabaseTest {
         $data_key = 'col3';
         $filt_key = 'COL3';
         $result = $this->db->_buildFKeyFilter($data, $data_key, $filt_key);
+        $this->assertNotError($result);
         $expect = "COL3 = 'anyold string'";
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFKeyFilter5() 
@@ -134,11 +148,12 @@ class SQLTest extends DatabaseTest {
         $data_key = array('col1', 'col3');
         $filt_key = array('COL1', 'COL3');
         $result = $this->db->_buildFKeyFilter($data, $data_key, $filt_key);
+        $this->assertNotError($result);
         $expect = "COL1 = 1 AND COL3 = 'anyold string'";
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFKeyFilter7() 
@@ -148,11 +163,12 @@ class SQLTest extends DatabaseTest {
         $data['col3'] = 'anyold string';
         $data['col4'] = null;
         $result = $this->db->_buildFKeyFilter($data, null, null, 'partial');
+        $this->assertNotError($result);
         $expect = "col1 = 1 AND col2 = 0 AND col3 = 'anyold string'";
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     /*
@@ -166,6 +182,7 @@ class SQLTest extends DatabaseTest {
         $data['col3'] = 'anyold string';
         $data['col4'] = null;
         $result = $this->db->_buildFKeyFilter($data, null, null, 'full');
+        $this->assertNotError($result);
         if (PEAR::isError($result)) {
             $this->assertTrue(true);
         } else {
@@ -185,11 +202,12 @@ class SQLTest extends DatabaseTest {
         $data['col4'] = null;
         $data_key = 'col4';
         $result = $this->db->_buildFKeyFilter($data, $data_key);
+        $this->assertNotError($result);
         $expect = '';
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFKeyFilter10() 
@@ -200,11 +218,12 @@ class SQLTest extends DatabaseTest {
         $data['col4'] = null;
         $data_key = array('col2', 'col4');
         $result = $this->db->_buildFKeyFilter($data, $data_key);
+        $this->assertNotError($result);
         $expect = '';
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildFKeyFilter11() 
@@ -219,11 +238,12 @@ class SQLTest extends DatabaseTest {
         $data_key = array('col1', 'col4');
         $filt_key = array('COL1', 'COL4');
         $result = $this->db->_buildFKeyFilter($data, $data_key, $filt_key);
+        $this->assertNotError($result);
         $expect = '';
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
-        $this->assertEquals($result, $expect);
+        $this->assertEquals($expect, $result);
     }
 
     function testBuildSQL1() 
@@ -235,6 +255,7 @@ class SQLTest extends DatabaseTest {
            'where'  => 'Person.PersonID = Address.PersonID2');
         $db->sql['test2'] = $query;
         $result = $db->buildSQL($query, "City = 'MINNETONKA'", 'City');
+        $this->assertNotError($result);
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
@@ -251,6 +272,7 @@ class SQLTest extends DatabaseTest {
            'having' => "City = 'MINNETONKA'",
            'order'  => 'Street' );
         $result = $db->buildSQL($query);
+        $this->assertNotError($result);
         if ($this->verbose > 0) {
             print "\n" . $result;
         }
@@ -261,24 +283,14 @@ class SQLTest extends DatabaseTest {
     {
         $db =& $this->db;
         $result = $db->buildSQL(1);
-        if (PEAR::isError($result)){
-           print "\n" . $result->getMessage();
-           $this->assertTrue(true);
-        } else {
-           $this->assertTrue(false);
-        }
+        $this->assertIsError($result);
     }
 
     function testBuildSQL4() 
     {
         $db =& $this->db;
         $result = $db->buildSQL('not_a_key');
-        if (PEAR::isError($result)){
-           print "\n" . $result->getMessage();
-           $this->assertTrue(true);
-        } else {
-           $this->assertTrue(false);
-        }
+        $this->assertIsError($result);
     }
 
 }

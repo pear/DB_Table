@@ -120,8 +120,7 @@ class DataTestCase extends PHPUnit_Framework_TestCase {
             if (isset($this->expect[$name])) {
                 $this->assertEquals($this->expect[$name], $data);
             } else {
-                print "\n Failure: No expected value for variable '$name'";
-                $this->assertTrue(false);
+                $this->fail("Failure: No expected value for variable '$name'");
             }
         }
         if ($this->verbose > 1) {
@@ -233,8 +232,7 @@ class DataTestCase extends PHPUnit_Framework_TestCase {
     function assertNotError($result)
     {
         if (PEAR::isError($result)){
-            print "\n" . $result->getMessage();
-            $this->assertTrue(false);
+            $this->fail($result->getMessage());
         }
     }
 
@@ -255,10 +253,7 @@ class DataTestCase extends PHPUnit_Framework_TestCase {
             }
             $this->assertTrue(true);
         } else {
-            if ($msg) {
-                print "\n Failure: " . $msg;
-            }
-            $this->assertTrue(false);
+            $this->assertFail($msg);
         }
     }
 

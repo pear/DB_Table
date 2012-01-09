@@ -10,16 +10,8 @@ class GetTest extends DatabaseTest {
         // Test get of entire $table property"
         $db =& $this->db;
         $table = $db->getTable();
-        if (PEAR::isError($table)) {
-            $success = false;
-            print $table->getMessage();
-        } else {
-            $success = is_array($table);
-            if (!$success) {
-                print "Table is not an array in testGetTable1";
-            }
-        }
-        $this->assertTrue($success);
+        $this->assertNotError($table);
+        $this->assertInternalType('array', $table);
     }
  
     function testGetTable2()
@@ -27,16 +19,8 @@ class GetTest extends DatabaseTest {
         // Test get of entire $table['Person'] property
         $db =& $this->db;
         $table = $db->getTable('Person');
-        if (PEAR::isError($table)) {
-            $success = false;
-            print $table->getMessage();
-        } else {
-            $success = is_a($table, 'DB_Table');
-            if (!$success) {
-                print "Table is not a DB_Table object in testGetTable2";
-            }
-        }
-        $this->assertTrue($success);
+        $this->assertNotError($table);
+        $this->assertInstanceOf('DB_Table', $table);
     }
  
     function testGetTable3()
@@ -44,15 +28,7 @@ class GetTest extends DatabaseTest {
         // Test get of invalid table name
         $db =& $this->db;
         $table = $db->getTable('Thwack');
-        if (PEAR::isError($table)) {
-            $success = true;
-            if ($this->verbose > 0) {
-                print "\n".$table->getMessage();
-            }
-        } else {
-            $success = false;
-        }
-        $this->assertTrue($success);
+        $this->assertIsError($table);
     }
  
     function testGetPrimaryKey1()
@@ -60,21 +36,8 @@ class GetTest extends DatabaseTest {
         // Test get of entire $primary_key property
         $db =& $this->db;
         $primary_key = $db->getPrimaryKey();
-        if (PEAR::isError($primary_key)) {
-            $success = false;
-            print "\n" . $primary_key->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($primary_key);
-            if (!$success) {
-                print "\nPrimaryKey is not an array in testGetPrimaryKey1";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($primary_key, $this->primary_key);
-            }
-        }
+        $this->assertNotError($primary_key);
+        $this->assertEquals($this->primary_key, $primary_key);
     }
  
     function testGetPrimaryKey2()
@@ -82,21 +45,8 @@ class GetTest extends DatabaseTest {
         // Test get of $primary_key['Person'] 
         $db =& $this->db;
         $primary_key = $db->getPrimaryKey('Person');
-        if (PEAR::isError($primary_key)) {
-            $success = false;
-            print $primary_key->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_string($primary_key);
-            if (!$success) {
-                print "PrimaryKey['Person'] is not a string in testGetPrimaryKey2";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($primary_key, $this->primary_key['Person']);
-            }
-        }
+        $this->assertNotError($primary_key);
+        $this->assertEquals($this->primary_key['Person'], $primary_key);
     }
  
     function testGetPrimaryKey3()
@@ -104,15 +54,7 @@ class GetTest extends DatabaseTest {
         // Test get of $primary_key with invalid Table name
         $db =& $this->db;
         $primary_key = $db->getPrimaryKey('Thwack');
-        if (PEAR::isError($primary_key)) {
-            $success = true;
-            if ($this->verbose > 0) {
-                print "\n" . $primary_key->getMessage();
-            }
-        } else {
-            $success = false;
-        }
-        $this->assertTrue($success);
+        $this->assertIsError($primary_key);
    }
 
     function testTableSubclass1()
@@ -120,42 +62,16 @@ class GetTest extends DatabaseTest {
         // Test get of entire $table_subclass property
         $db =& $this->db;
         $table_subclass = $db->getTableSubclass();
-        if (PEAR::isError($table_subclass)) {
-            $success = false;
-            print "\n" . $table_subclass->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($table_subclass);
-            if (!$success) {
-                print "\nTableSubclass is not an array in testGetTableSubclass1";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($table_subclass, $this->table_subclass);
-            }
-        }
+        $this->assertNotError($table_subclass);
+        $this->assertEquals($this->table_subclass, $table_subclass);
     }
 
     function testGetRef1() 
     {
         $db =& $this->db;
         $ref = $db->getRef();
-        if (PEAR::isError($ref)) {
-            $success = false;
-            print $ref->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($ref);
-            if (!$success) {
-                print "\nRef is not an array in testGetRef1";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($ref, $this->ref);
-            }
-        }
+        $this->assertNotError($ref);
+        $this->assertEquals($this->ref, $ref);
     }
 
     function testGetRef2() 
@@ -163,21 +79,8 @@ class GetTest extends DatabaseTest {
         // Test get of $ref['PersonAddress'], which should be an array
         $db =& $this->db;
         $ref = $db->getRef('PersonAddress');
-        if (PEAR::isError($ref)) {
-            $success = false;
-            print $ref->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($ref);
-            if (!$success) {
-                print "\nRef is not an array in testGetRef2";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($ref, $this->ref['PersonAddress']);
-            }
-        }
+        $this->assertNotError($ref);
+        $this->assertEquals($this->ref['PersonAddress'], $ref);
     }
 
     function testGetRef3() 
@@ -185,13 +88,8 @@ class GetTest extends DatabaseTest {
         // Test get of $ref['Person'], which should return null
         $db =& $this->db;
         $ref = $db->getRef('Person');
-        if (PEAR::isError($ref)) {
-            $success = false;
-            print "\n" . $ref->getMessage() . '- in GetRef3';
-        } else {
-            $success = is_null($ref);
-        }
-        $this->assertTrue($success);
+        $this->assertNotError($ref);
+        $this->assertNull($ref);
     }
 
     function testGetRef4() 
@@ -199,42 +97,16 @@ class GetTest extends DatabaseTest {
         // Test get of $ref['PersonAddress']['Person'], which should be an array
         $db =& $this->db;
         $ref = $db->getRef('PersonAddress', 'Person');
-        if (PEAR::isError($ref)) {
-            $success = false;
-            print "\n" . $ref->getMessage() . " - in testGetRef4";
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($ref);
-            if (!$success) {
-                print "\n" . "Ref is not an array in testGetRef4";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($ref, $this->ref['PersonAddress']['Person']);
-            }
-        }
+        $this->assertNotError($ref);
+        $this->assertEquals($this->ref['PersonAddress']['Person'], $ref);
     }
 
     function testGetRefTo1() 
     {
         $db =& $this->db;
         $ref_to = $db->getRefTo();
-        if (PEAR::isError($ref_to)) {
-            $success = false;
-            print $ref_to->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($ref_to);
-            if (!$success) {
-                print "\n" . "RefTo is not an array in testGetRefTo1";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($ref_to, $this->ref_to);
-            }
-        }
+        $this->assertNotError($ref_to);
+        $this->assertEquals($this->ref_to, $ref_to);
     }
 
     function testGetRefTo2() 
@@ -242,21 +114,8 @@ class GetTest extends DatabaseTest {
         // Test get of $ref_to['Person'], which should be an array
         $db =& $this->db;
         $ref_to = $db->getRefTo('Person');
-        if (PEAR::isError($ref_to)) {
-            $success = false;
-            print $ref_to->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($ref_to);
-            if (!$success) {
-                print "\n" . "RefTo is not an array in testGetRefTo2";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($ref_to, $this->ref_to['Person']);
-            }
-        }
+        $this->assertNotError($ref_to);
+        $this->assertEquals($this->ref_to['Person'], $ref_to);
     }
 
     function testGetRefTo3() 
@@ -264,34 +123,16 @@ class GetTest extends DatabaseTest {
         // Test get of $ref_to['PersonAddress'], which should return null
         $db =& $this->db;
         $ref_to = $db->getRefTo('PersonAddress');
-        if (PEAR::isError($ref_to)) {
-            $success = false;
-            print "\n" . $ref_to->getMessage()."- in GetRefTo3";
-        } else {
-            $success = is_null($ref_to);
-        }
-        $this->assertTrue($success);
+        $this->assertNotError($ref_to);
+        $this->assertNull($ref_to);
     }
 
     function testGetLink1() 
     {
         $db =& $this->db;
         $link = $db->getLink();
-        if (PEAR::isError($link)) {
-            $success = false;
-            print $link->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($link);
-            if (!$success) {
-                print "\n" . 'Link is not an array in testGetLink1';
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($link, $this->link);
-            }
-        }
+        $this->assertNotError($link);
+        $this->assertEquals($this->link, $link);
     }
 
     function testGetLink2() 
@@ -299,21 +140,8 @@ class GetTest extends DatabaseTest {
         // Test get of $link['Person'], which should be an array
         $db =& $this->db;
         $link = $db->getLink('Person');
-        if (PEAR::isError($link)) {
-            $success = false;
-            print $link->getMessage();
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($link);
-            if (!$success) {
-                print "\n" . "Link is not an array in testGetLink2";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($link, $this->link['Person']);
-            }
-        }
+        $this->assertNotError($link);
+        $this->assertEquals($this->link['Person'], $link);
     }
 
     function testGetLink3() 
@@ -321,13 +149,8 @@ class GetTest extends DatabaseTest {
         // Test get of $link['PersonAddress'], which should return null
         $db =& $this->db;
         $link = $db->getLink('PersonAddress');
-        if (PEAR::isError($link)) {
-            $success = false;
-            print "\n" . $link->getMessage()."- in GetLink3";
-        } else {
-            $success = is_null($link);
-        }
-        $this->assertTrue($success);
+        $this->assertNotError($link);
+        $this->assertNull($link);
     }
 
     function testGetLink4() 
@@ -335,21 +158,8 @@ class GetTest extends DatabaseTest {
         // Test get of $link['Person']['Address'], which should be an array
         $db =& $this->db;
         $link = $db->getLink('Person', 'Address');
-        if (PEAR::isError($link)) {
-            $success = false;
-            print "\n" . $link->getMessage() . " - in testGetLink4";
-            $this->assertTrue($success);
-            return;
-        } else {
-            $success = is_array($link);
-            if (!$success) {
-                print "\n" . "Link is not an array in testGetLink4";
-                $this->assertTrue($success);
-                return;
-            } else {
-                $this->assertEquals($link, $this->link['Person']['Address']);
-            }
-        }
+        $this->assertNotError($link);
+        $this->assertEquals($this->link['Person']['Address'], $link);
     }
 
     function testGetCol1() 
@@ -357,7 +167,8 @@ class GetTest extends DatabaseTest {
         // Test get of entire column property
         $db =& $this->db;
         $col = $db->getCol();
-        $this->assertEquals($col, $this->col);
+        $this->assertNotError($col);
+        $this->assertEquals($this->col, $col);
     }
 
     function testGetCol2() 
@@ -365,7 +176,8 @@ class GetTest extends DatabaseTest {
         // Test get of col['Building']
         $db =& $this->db;
         $col = $db->getCol('Building');
-        $this->assertEquals($col, $this->col['Building']);
+        $this->assertNotError($col);
+        $this->assertEquals($this->col['Building'], $col);
     }
 
     function testGetForeignCol1() 
@@ -373,7 +185,8 @@ class GetTest extends DatabaseTest {
         // Test get of entire column property
         $db =& $this->db;
         $foreign_col = $db->getForeignCol();
-        $this->assertEquals($foreign_col, $this->foreign_col);
+        $this->assertNotError($foreign_col);
+        $this->assertEquals($this->foreign_col, $foreign_col);
     }
 
     function testGetForeignCol2() 
@@ -381,7 +194,8 @@ class GetTest extends DatabaseTest {
         // Test get of entire column property
         $db =& $this->db;
         $foreign_col = $db->getForeignCol('PersonID');
-        $this->assertEquals($foreign_col, $this->foreign_col['PersonID']);
+        $this->assertNotError($foreign_col);
+        $this->assertEquals($this->foreign_col['PersonID'], $foreign_col);
     }
 
     function testValidCol1()
@@ -389,6 +203,7 @@ class GetTest extends DatabaseTest {
         // Test validCol('Building')
         $db =& $this->db;
         $name = implode('.', $db->validCol('Building'));
+        $this->assertNotError($name);
         $this->assertEquals('Address.Building', $name);
     }
 
@@ -397,14 +212,18 @@ class GetTest extends DatabaseTest {
         // Test validCol('Building')
         $db =& $this->db;
         $from = array('Address');
-        $name = implode('.', $db->validCol('City', $from));
+        $col = $db->validCol('City', $from);
+        $this->assertNotError($col);
+        $name = implode('.', $col);
         $this->assertEquals('Address.City', $name);
     }
 
     function testValidCol2()
     {
         $db =& $this->db;
-        $name = implode('.', $db->validCol('PersonID'));
+        $col = $db->validCol('PersonID');
+        $this->assertNotError($col);
+        $name = implode('.', $col);
         $this->assertEquals('Person.PersonID', $name);
     }
 
@@ -412,21 +231,27 @@ class GetTest extends DatabaseTest {
     {
         $db =& $this->db;
         $from = array('PersonPhone');
-        $name = implode('.', $db->validCol('PersonID', $from));
+        $col = $db->validCol('PersonID', $from);
+        $this->assertNotError($col);
+        $name = implode('.', $col);
         $this->assertEquals('PersonPhone.PersonID', $name);
     }
 
     function testValidCol3()
     {
         $db =& $this->db;
-        $name = implode('.', $db->validCol('PersonID2'));
+        $col = $db->validCol('PersonID2');
+        $this->assertNotError($col);
+        $name = implode('.', $col);
         $this->assertEquals('PersonAddress.PersonID2', $name);
     }
 
     function testValidCol4()
     {
         $db =& $this->db;
-        $name = implode('.', $db->validCol('Person.FirstName'));
+        $col = $db->validCol('Person.FirstName');
+        $this->assertNotError($col);
+        $name = implode('.', $col);
         $this->assertEquals('Person.FirstName', $name);
     }
 
@@ -435,14 +260,7 @@ class GetTest extends DatabaseTest {
         // validCol('Thwack.Building')
         $db =& $this->db;
         $result = $db->validCol('Person.Thingy');
-        $success = false;
-        if (PEAR::isError($result)) {
-            $success = true;
-            if ($this->verbose > 0) {
-                print "\n" . $result->getMessage();
-            }
-        }
-        $this->assertTrue($success);
+        $this->assertIsError($result, 'Was expecting error on bad column');
     }
 
     function testValidCol6()
@@ -450,24 +268,15 @@ class GetTest extends DatabaseTest {
         // validCol('Thwack.Building')
         $db =& $this->db;
         $result = $db->validCol('Thwack.Building');
-        $success = false;
-        if (PEAR::isError($result)) {
-            $success = true;
-            if ($this->verbose > 0) {
-                print "\n" . $result->getMessage();
-            }
-        }
-        $this->assertTrue($success);
+        // TODO: is this right?  From notes above, seems like want to pass.
+        $this->assertIsError($result, 'Was expecting error on bad column');
     }
 
     function testValidCol7()
     {
         $db =& $this->db;
         $result = $db->validCol('Street');
-        if (PEAR::isError($result)) {
-            print "\n" . $result->getMessage();
-            $this->assertTrue(false);
-        }
+        $this->assertNotError($result);
         $name = implode('.', $result);
         $this->assertEquals('Street.Street', $name);
     }
