@@ -66,7 +66,7 @@ $backend  = 'DB'; // 'DB' or 'MDB2', capitalized
 // Set db_conn true to connect directly to an existing database
 // Set false to connect to RDBMS and then create the database.
 // Set false for MySQL
-$db_conn = false;
+$db_conn = true;
 
 // Verbosity of unit test output
 // (-1 for silent, 0 for method names, 1 for some data, 2 for more)
@@ -90,6 +90,6 @@ if ($backend == 'DB') {
         print "\n" . $conn->getMessage();
         die;
     }
+} else {
+    die("Invalid \$backend setting\n");
 }
-
-?>
