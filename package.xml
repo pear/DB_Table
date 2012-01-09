@@ -126,7 +126,7 @@ The DB_Table_Generator class auto-generates the php code necessary to create an 
      <dir name="tests">
        <file name="bogotest.php" role="test" />
        <file name="setup.ini-dist" role="test" />
-       <file name="config.php-dist" role="test" />
+       <file name="config.php" role="test" />
        <file name="DataTestCase.php" role="test" />
        <dir name="generator">
          <file name="test.php" role="test" />
