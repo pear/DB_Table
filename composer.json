@@ -1,0 +1,41 @@
+{
+    "authors": [
+        {
+            "email": "pmjones@php.net",
+            "name": "Paul M. Jones",
+            "role": "Lead"
+        },
+        {
+            "email": "morse@php.net",
+            "name": "David Morse",
+            "role": "Lead"
+        },
+        {
+            "email": "wiesemann@php.net",
+            "name": "Mark Wiesemann",
+            "role": "Lead"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "DB_Table": "./"
+        }
+    },
+    "description": "More info available on: http://pear.php.net/package/DB_Table",
+    "include-path": [
+        "./"
+    ],
+    "license": "New BSD",
+    "name": "pear/db_table",
+    "support": {
+        "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=DB_Table",
+        "source": "https://github.com/pear/DB_Table"
+    },
+    "type": "library",
+    "require": {
+        "pear/pear_exception": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
